@@ -1,0 +1,78 @@
+﻿@page
+@model YourNamespace.Pages.Setting.FlagsSettingTableUpdatedModel
+
+<table id="PharmacyFlagTable" class="table table-striped table-bordered" dir="rtl" lang="ar">
+    <thead>
+        <tr>
+            <th>م</th>
+            <th>اسم الخاصية</th>
+            <th>نوعها</th>
+            <th>مطلوب إدخالها؟</th>
+            <th>القيمة</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model?.PharmacyFlagDetailList != null && Model.PharmacyFlagDetailList.Any())
+        {
+            @for (int i = 0; i < Model.PharmacyFlagDetailList.Count; i++)
+            {
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>
+                        <div class="form-group">
+                            <label class="col-form-label" asp-for="PharmacyFlagDetailList[i].FlagDetailName"></label>
+                            <input class="form-control" asp-for="PharmacyFlagDetailList[i].FlagDetailName" autocomplete="off" />
+                            <span class="text-danger" asp-validation-for="PharmacyFlagDetailList[i].FlagDetailName" style="display: flex;"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <label class="col-form-label" asp-for="PharmacyFlagDetailList[i].FlagTypeId"></label>
+                            <select class="form-control" asp-for="PharmacyFlagDetailList[i].FlagTypeId">
+                                <option value="">--نوع الخاصية--</option>
+                                <option value="1">نص</option>
+                                <option value="2">رقم</option>
+                                <option value="3">تاريخ</option>
+                                <option value="4">نعم أم لا</option>
+                            </select>
+                            <span class="text-danger" asp-validation-for="PharmacyFlagDetailList[i].FlagTypeId" style="display: flex;"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <label class="col-form-label" asp-for="PharmacyFlagDetailList[i].IsRequired"></label>
+                            <select class="form-control" asp-for="PharmacyFlagDetailList[i].IsRequired">
+                                <option value="True">نعم</option>
+                                <option value="False">لا</option>
+                            </select>
+                            <span class="text-danger" asp-validation-for="PharmacyFlagDetailList[i].IsRequired" style="display: flex;"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <label class="col-form-label" asp-for="PharmacyFlagDetailList[i].FlagValue"></label>
+                            <input class="form-control" asp-for="PharmacyFlagDetailList[i].FlagValue" autocomplete="off" />
+                            <span class="text-danger" asp-validation-for="PharmacyFlagDetailList[i].FlagValue" style="display: flex;"></span>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">لا توجد بيانات لعرضها</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    doSelect2();
+
+    function doSelect2() {
+        console.log("Select2 initialized");
+        // Add your Select2 initialization logic here
+    }
+</script>
