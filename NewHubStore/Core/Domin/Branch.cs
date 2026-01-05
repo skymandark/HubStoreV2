@@ -49,5 +49,8 @@ namespace Core.Domin
         public virtual ICollection<Order> OrdersFrom { get; set; }
         public virtual ICollection<Order> OrdersTo { get; set; }
         public virtual ICollection<OpeningBalance> OpeningBalances { get; set; }
+        public virtual ICollection<TransferOrderHeader> TransferOrderHeadersFrom { get; set; }
+        public virtual ICollection<TransferOrderHeader> TransferOrderHeadersTo { get; set; }
+        public virtual ICollection<DirectReceiptHeader> DirectReceiptHeaders { get; set; }
     }
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BWHv7bA0Gtg=",
+  "dgSpecHash": "Q2eJT9v9jhM=",
   "success": true,
-  "projectFilePath": "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\Core\\Core.csproj",
+  "projectFilePath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\Core\\Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\8.0.14\\microsoft.aspnetcore.cryptography.internal.8.0.14.nupkg.sha512",
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\8.0.14\\microsoft.aspnetcore.cryptography.keyderivation.8.0.14.nupkg.sha512",
@@ -22,8 +22,9 @@
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
-    "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.20\\microsoft.netcore.app.ref.8.0.20.nupkg.sha512",
+    "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.net.sdk.compilers.toolset\\9.0.305\\microsoft.net.sdk.compilers.toolset.9.0.305.nupkg.sha512",
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.20\\microsoft.windowsdesktop.app.ref.8.0.20.nupkg.sha512",
+    "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.20\\microsoft.netcore.app.ref.8.0.20.nupkg.sha512",
     "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.20\\microsoft.aspnetcore.app.ref.8.0.20.nupkg.sha512"
   ],
   "logs": []

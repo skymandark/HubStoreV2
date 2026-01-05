@@ -70,6 +70,9 @@ namespace Core.Domin
         public virtual ICollection<OpeningBalance> OpeningBalances { get; set; }
         public virtual ICollection<MovementLine> MovementLines { get; set; }
         public virtual ICollection<OrderLine> OrderLines { get; set; }
+        public virtual ICollection<TransferOrderDetail> TransferOrderDetails { get; set; }
+        public virtual ICollection<DirectReceiptDetail> DirectReceiptDetails { get; set; }
+        public virtual ICollection<SupplierInvoiceDetail> SupplierInvoiceDetails { get; set; }
         public int AverageCost { get; set; }
         public int Cost { get; set; }
         public int UnitPrice { get; set; }

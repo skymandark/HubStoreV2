@@ -48,5 +48,7 @@ namespace Core.Domin
 
         public virtual ICollection<Movement> Movements { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<DirectReceiptHeader> DirectReceiptHeaders { get; set; }
+        public virtual ICollection<SupplierInvoiceHeader> SupplierInvoiceHeaders { get; set; }
     }
 }

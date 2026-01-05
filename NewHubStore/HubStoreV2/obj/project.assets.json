@@ -4974,11 +4974,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\HubStoreV2\\HubStoreV2.csproj",
+      "projectUniqueName": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\HubStoreV2\\HubStoreV2.csproj",
       "projectName": "HubStoreV2",
-      "projectPath": "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\HubStoreV2\\HubStoreV2.csproj",
+      "projectPath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\HubStoreV2\\HubStoreV2.csproj",
       "packagesPath": "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\",
-      "outputPath": "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\HubStoreV2\\obj\\",
+      "outputPath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\HubStoreV2\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -4999,11 +4999,11 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\Core\\Core.csproj": {
-              "projectPath": "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\Core\\Core.csproj"
+            "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\Core\\Core.csproj": {
+              "projectPath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\Core\\Core.csproj"
             },
-            "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\Infrastructure\\Infrastructure.csproj": {
-              "projectPath": "D:\\ProjectHubStore\\NewHubStore\\NewHubStore\\Infrastructure\\Infrastructure.csproj"
+            "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\Infrastructure\\Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\NewHubStore\\Infrastructure\\Infrastructure.csproj"
             }
           }
         }
@@ -5016,7 +5016,7 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "direct"
+        "auditMode": "all"
       },
       "SdkAnalysisLevel": "9.0.300"
     },
@@ -5054,6 +5054,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.Net.Sdk.Compilers.Toolset",
+            "version": "[9.0.305, 9.0.305]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"

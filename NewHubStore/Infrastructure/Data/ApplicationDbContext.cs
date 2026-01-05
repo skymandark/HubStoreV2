@@ -34,6 +34,18 @@ namespace Infrastructure.Data
         public DbSet<OrderLine> OrderLines { get; set; }
         public DbSet<OrderType> OrderTypes { get; set; }
 
+        // Transfer Orders
+        public DbSet<TransferOrderHeader> TransferOrderHeaders { get; set; }
+        public DbSet<TransferOrderDetail> TransferOrderDetails { get; set; }
+        public DbSet<ShipmentType> ShipmentTypes { get; set; }
+        public DbSet<TransferOrderStatus> TransferOrderStatuses { get; set; }
+
+        // Direct Receipts
+        public DbSet<DirectReceiptHeader> DirectReceiptHeaders { get; set; }
+        public DbSet<DirectReceiptDetail> DirectReceiptDetails { get; set; }
+        public DbSet<SupplierInvoiceHeader> SupplierInvoiceHeaders { get; set; }
+        public DbSet<SupplierInvoiceDetail> SupplierInvoiceDetails { get; set; }
+
         // Reference Tables
         public DbSet<DocumentType> DocumentTypes { get; set; }
         public DbSet<ApprovalStatus> ApprovalStatuses { get; set; }
@@ -224,7 +236,120 @@ namespace Infrastructure.Data
                     .HasForeignKey(ol => ol.ItemId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-              
+
+            });
+
+            // ============================================
+            // TRANSFER ORDER CONFIGURATIONS
+            // ============================================
+
+            modelBuilder.Entity<TransferOrderHeader>(entity =>
+            {
+                entity.HasOne(toh => toh.FromBranch)
+                    .WithMany(b => b.TransferOrderHeadersFrom)
+                    .HasForeignKey(toh => toh.FromBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(toh => toh.ToBranch)
+                    .WithMany(b => b.TransferOrderHeadersTo)
+                    .HasForeignKey(toh => toh.ToBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(toh => toh.ShipmentType)
+                    .WithMany(st => st.TransferOrderHeaders)
+                    .HasForeignKey(toh => toh.ShipmentTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(toh => toh.TransferOrderStatus)
+                    .WithMany(tos => tos.TransferOrderHeaders)
+                    .HasForeignKey(toh => toh.TransferOrderStatusId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasQueryFilter(toh => !toh.IsDeleted);
+            });
+
+            modelBuilder.Entity<TransferOrderDetail>(entity =>
+            {
+                entity.HasOne(tod => tod.TransferOrderHeader)
+                    .WithMany(toh => toh.TransferOrderDetails)
+                    .HasForeignKey(tod => tod.TransferOrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(tod => tod.Item)
+                    .WithMany(i => i.TransferOrderDetails)
+                    .HasForeignKey(tod => tod.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasQueryFilter(tod => !tod.IsDeleted);
+            });
+
+            // ============================================
+            // DIRECT RECEIPT CONFIGURATIONS
+            // ============================================
+
+            modelBuilder.Entity<DirectReceiptHeader>(entity =>
+            {
+                entity.HasOne(drh => drh.Supplier)
+                    .WithMany(s => s.DirectReceiptHeaders)
+                    .HasForeignKey(drh => drh.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(drh => drh.Branch)
+                    .WithMany(b => b.DirectReceiptHeaders)
+                    .HasForeignKey(drh => drh.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(drh => drh.Status)
+                    .WithMany(a => a.DirectReceiptHeaders)
+                    .HasForeignKey(drh => drh.StatusId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasQueryFilter(drh => !drh.IsDeleted);
+            });
+
+            modelBuilder.Entity<DirectReceiptDetail>(entity =>
+            {
+                entity.HasOne(drd => drd.DirectReceiptHeader)
+                    .WithMany(drh => drh.DirectReceiptDetails)
+                    .HasForeignKey(drd => drd.DirectReceiptId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(drd => drd.Item)
+                    .WithMany(i => i.DirectReceiptDetails)
+                    .HasForeignKey(drd => drd.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasQueryFilter(drd => !drd.IsDeleted);
+            });
+
+            modelBuilder.Entity<SupplierInvoiceHeader>(entity =>
+            {
+                entity.HasOne(sih => sih.Supplier)
+                    .WithMany(s => s.SupplierInvoiceHeaders)
+                    .HasForeignKey(sih => sih.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sih => sih.DirectReceiptHeader)
+                    .WithMany(drh => drh.SupplierInvoiceHeaders)
+                    .HasForeignKey(sih => sih.DirectReceiptId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasQueryFilter(sih => !sih.IsDeleted);
+            });
+
+            modelBuilder.Entity<SupplierInvoiceDetail>(entity =>
+            {
+                entity.HasOne(sid => sid.SupplierInvoiceHeader)
+                    .WithMany(sih => sih.SupplierInvoiceDetails)
+                    .HasForeignKey(sid => sid.SupplierInvoiceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(sid => sid.Item)
+                    .WithMany(i => i.SupplierInvoiceDetails)
+                    .HasForeignKey(sid => sid.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasQueryFilter(sid => !sid.IsDeleted);
             });
 
             modelBuilder.Entity<ApprovalChain>(entity =>
