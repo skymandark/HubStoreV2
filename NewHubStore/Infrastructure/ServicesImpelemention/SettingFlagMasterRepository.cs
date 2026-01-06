@@ -1,33 +1,36 @@
-﻿using Core.Domin;
-using System;
+using Core.Domin;
+using Microsoft.EntityFrameworkCore;
+using Repository;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure
 {
     public class SettingFlagMasterRepository
     {
-        public SettingFlagMasterRepository(/*AppDbContext context*/)
+        private readonly ApplicationIdentityDbContext _context;
+
+        public SettingFlagMasterRepository(ApplicationIdentityDbContext context)
         {
-            // _context = context;
+            _context = context;
         }
 
         public async Task<List<Setting_flag_master>> GetAllAsync()
         {
-            //  dummy،DbContext
-            return new List<Setting_flag_master>();
+            return await _context.Set<Setting_flag_master>().ToListAsync();
         }
 
-        public async Task<Setting_flag_master> GetByIdAsync(int id)
+        public async Task<Setting_flag_master?> GetByNameAsync(string name)
         {
-            return new Setting_flag_master();
+            return await _context.Set<Setting_flag_master>()
+                                 .FirstOrDefaultAsync(x => x.FlagMasterName == name);
         }
+
 
         public async Task AddAsync(Setting_flag_master master)
         {
-            // _context.Add(master); await _context.SaveChangesAsync();
+            _context.Set<Setting_flag_master>().Add(master);
+            await _context.SaveChangesAsync();
         }
     }
 }
