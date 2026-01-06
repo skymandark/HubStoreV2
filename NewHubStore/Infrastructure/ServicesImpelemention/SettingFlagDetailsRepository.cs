@@ -1,22 +1,23 @@
-﻿using Core.Domin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Core.Domin;
+using Microsoft.EntityFrameworkCore;
+using Repository;
 using System.Threading.Tasks;
 
-namespace Infrastructure
+namespace Infrastructure.ServicesImpelemention
 {
     public class SettingFlagDetailsRepository
     {
-        public SettingFlagDetailsRepository(/*AppDbContext context*/)
+        private readonly ApplicationIdentityDbContext _context;
+
+        public SettingFlagDetailsRepository(ApplicationIdentityDbContext context)
         {
-            // _context = context;
+            _context = context;
         }
 
         public async Task AddAsync(Setting_flag_details detail)
         {
-            // _context.Add(detail); await _context.SaveChangesAsync();
+            _context.Set<Setting_flag_details>().Add(detail);
+            await _context.SaveChangesAsync();
         }
     }
 }
