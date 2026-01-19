@@ -1,0 +1,133 @@
+@model List<Core.ViewModels.StockInViewModels.StockInListDto>
+@{
+    ViewData["Title"] = "إذونات الاستلام - Enterprise View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .premium-grid-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: none;
+        overflow: hidden;
+    }
+
+    .grid-header-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .status-draft { background: #f1f5f9; color: #475569; }
+    .status-approved { background: #dcfce7; color: #15803d; }
+    .status-pending { background: #fef9c3; color: #854d0e; }
+    .status-received { background: #e0f2fe; color: #0369a1; }
+
+    .grid-action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 3px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .grid-action-btn:hover { transform: translateY(-2px); }
+</style>
+
+<div class="container-fluid animate__animated animate__fadeIn">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">إذونات الاستلام</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted small">الرئيسية</a></li>
+                    <li class="breadcrumb-item active small" aria-current="page">المخازن</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="@Url.Action("Create", "StockIn")" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                <i class="fas fa-plus-circle me-2"></i>إذن استلام جديد
+            </a>
+        </div>
+    </div>
+
+    <!-- DataGrid Section -->
+    <div class="card premium-grid-card">
+        <div class="card-body p-0">
+            <div id="stockInGrid"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            var data = @Html.Raw(Json.Serialize(Model));
+
+            $("#stockInGrid").dxDataGrid({
+                dataSource: data,
+                rtlEnabled: true,
+                showBorders: false,
+                rowAlternationEnabled: true,
+                columnAutoWidth: true,
+                hoverStateEnabled: true,
+                searchPanel: { visible: true, width: 300, placeholder: "بحث..." },
+                headerFilter: { visible: true },
+                filterRow: { visible: true },
+                paging: { pageSize: 15 },
+                pager: {
+                    showPageSizeSelector: true,
+                    allowedPageSizes: [10, 15, 25],
+                    showInfo: true
+                },
+                columns: [
+                    { dataField: "docCode", caption: "رقم الإذن", cssClass: "fw-bold text-primary" },
+                    { dataField: "purchaseOrderCode", caption: "أمر الشراء", alignment: "center" },
+                    { dataField: "supplierName", caption: "المورد", minWidth: 150 },
+                    { dataField: "branchName", caption: "الفرع" },
+                    { dataField: "docDate", caption: "التاريخ", dataType: "date", format: "dd/MM/yyyy" },
+                    { 
+                        dataField: "status", 
+                        caption: "الحالة", 
+                        alignment: "center",
+                        cellTemplate: function(container, options) {
+                            var status = options.value;
+                            var cls = "status-draft";
+                            switch(status) {
+                                case "Approved": cls = "status-approved"; break;
+                                case "PendingApproval": cls = "status-pending"; break;
+                                case "Received": cls = "status-received"; break;
+                            }
+                            $("<div />").addClass("status-badge " + cls).text(status).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: "إجراءات",
+                        alignment: "center",
+                        width: 100,
+                        cellTemplate: function(container, options) {
+                            var id = options.data.stockInId;
+                            $('<div class="d-flex justify-content-center">')
+                                .append($('<a href="/StockIn/Details/' + id + '" class="grid-action-btn bg-light text-info border" title="عرض"><i class="fas fa-eye"></i></a>'))
+                                .appendTo(container);
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}

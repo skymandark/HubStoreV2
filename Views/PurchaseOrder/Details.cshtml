@@ -1,0 +1,524 @@
+@model Core.ViewModels.PurchaseOrderViewModels.PurchaseOrderRequestDto
+@{
+    ViewData["Title"] = "تفاصيل طلب الشراء";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --info-color: #3498db;
+        --light-color: #ecf0f1;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        direction: rtl;
+    }
+
+    .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-section h2 {
+        margin: 0 0 10px 0;
+        font-weight: 600;
+        font-size: 28px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-weight: 600;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px 10px 0 0;
+        padding: 20px;
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .info-row {
+        display: flex;
+        padding: 15px 0;
+        border-bottom: 1px solid #e0e0e0;
+        align-items: center;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--primary-color);
+        flex: 0 0 250px;
+        font-size: 15px;
+    }
+
+    .info-value {
+        color: #555;
+        font-size: 15px;
+        flex: 1;
+    }
+
+    .info-value strong {
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .table {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background-color: #f5f5f5;
+        border-bottom: 2px solid #667eea;
+    }
+
+    .table thead th {
+        font-weight: 600;
+        color: var(--primary-color);
+        padding: 15px;
+        border: none;
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    .summary-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .summary-row:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 15px;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 16px;
+    }
+
+    .summary-total {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 15px;
+        border: 2px solid #667eea;
+    }
+
+    .summary-total .summary-label {
+        font-size: 18px;
+        color: var(--primary-color);
+    }
+
+    .summary-total .summary-value {
+        font-size: 24px;
+        color: #27ae60;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 6px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-success {
+        background: #27ae60;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #229954;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-warning {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+    }
+
+    .action-buttons .btn {
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .remarks-box {
+        background: #f5f5f5;
+        padding: 15px;
+        border-left: 4px solid #667eea;
+        border-radius: 6px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    @media (max-width: 768px) {
+        .info-row {
+            flex-direction: column;
+        }
+
+        .info-label {
+            flex: 1;
+            margin-bottom: 5px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons .btn {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4 mb-5">
+    <!-- Header -->
+    <div class="header-section">
+        <h2>
+            <i class="fas fa-receipt"></i> طلب الشراء رقم: <strong>@Model?.PurchaseOrderCode</strong>
+        </h2>
+        <div class="status-badge">
+            <i class="fas fa-check-circle"></i> حالة الطلب: مرتقب للموافقة
+        </div>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-info-circle"></i> معلومات الطلب الأساسية
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">رقم طلب الشراء:</span>
+                        <span class="info-value"><strong>@Model?.PurchaseOrderCode</strong></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">المرجع:</span>
+                        <span class="info-value">@(string.IsNullOrEmpty(Model?.Reference) ? "---" : Model.Reference)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">تاريخ المستند:</span>
+                        <span class="info-value"><strong>@Model?.DocDate.ToString("dd/MM/yyyy")</strong></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">تاريخ الإنشاء:</span>
+                        <span class="info-value">@Model?.EntryDate.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">نوع الإيصال:</span>
+                        <span class="info-value">
+                            @(Model?.ReceiptType.ToString() switch {
+                                "0" => "شراء عادي",
+                                "1" => "إرجاع",
+                                "2" => "شراء مباشر",
+                                _ => "---"
+                            })
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">نوع السداد:</span>
+                        <span class="info-value">
+                            @(Model?.CreditPayment == true ? "آجل" : "فوري")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Information -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-user-tie"></i> بيانات المورد
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">المورد:</span>
+                        <span class="info-value"><strong>@(Model?.SupplierId > 0 ? "بيانات المورد" : "---")</strong></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">مندوب المورد:</span>
+                        <span class="info-value">@(string.IsNullOrEmpty(Model?.SupplierDelegate) ? "---" : Model.SupplierDelegate)</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">رقم الفاتورة:</span>
+                        <span class="info-value">@(string.IsNullOrEmpty(Model?.InvoiceId) ? "---" : Model.InvoiceId)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">تاريخ التسليم:</span>
+                        <span class="info-value">
+                            @(Model?.DeliveryDate.HasValue ? Model.DeliveryDate?.ToString("dd/MM/yyyy") : "لم يتم تحديده")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Information -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-warehouse"></i> معلومات الفرع والمستودع
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">الفرع:</span>
+                        <span class="info-value"><strong>@(Model?.BranchId > 0 ? "اسم الفرع" : "---")</strong></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">المستودع:</span>
+                        <span class="info-value">@(Model?.BranchStockId.HasValue ? "اسم المستودع" : "---")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Terms -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-calendar-alt"></i> شروط السداد
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">مدة السداد:</span>
+                        <span class="info-value">
+                            @(Model?.PaymentPeriodDays.HasValue ? $"{Model.PaymentPeriodDays} أيام" : "---")
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <span class="info-label">تاريخ الاستحقاق:</span>
+                        <span class="info-value">
+                            @(Model?.DueDate.HasValue ? Model.DueDate?.ToString("dd/MM/yyyy") : "---")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-list"></i> تفاصيل الأصناف
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الصنف</th>
+                            <th>الكمية</th>
+                            <th>السعر (للوحدة)</th>
+                            <th>القيمة الإجمالية</th>
+                            <th>خصم (%)</th>
+                            <th>الضريبة</th>
+                            <th>القيمة النهائية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.PurchaseOrderDetails != null && Model.PurchaseOrderDetails.Count > 0)
+                        {
+                            @for (int i = 0; i < Model.PurchaseOrderDetails.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td><strong>اسم الصنف</strong></td>
+                                    <td>@Model.PurchaseOrderDetails[i].Quantity.ToString("F2")</td>
+                                    <td>@Model.PurchaseOrderDetails[i].Price.ToString("F2")</td>
+                                    <td>@Model.PurchaseOrderDetails[i].TotalValue.ToString("F2")</td>
+                                    <td>@Model.PurchaseOrderDetails[i].MainDiscountPercent.ToString("F2")%</td>
+                                    <td>@Model.PurchaseOrderDetails[i].VatValue.ToString("F2")</td>
+                                    <td><strong>@Model.PurchaseOrderDetails[i].NetValue.ToString("F2")</strong></td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    لا توجد أصناف مضافة
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-section">
+                <div class="summary-row">
+                    <span class="summary-label">إجمالي القيمة قبل الخصم:</span>
+                    <span class="summary-value">0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">إجمالي الخصم:</span>
+                    <span class="summary-value">0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">الضرائب:</span>
+                    <span class="summary-value">0.00</span>
+                </div>
+                <div class="summary-total">
+                    <div class="summary-row">
+                        <span class="summary-label">الإجمالي النهائي:</span>
+                        <span class="summary-value">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remarks -->
+    @if (!string.IsNullOrEmpty(Model?.Remarks))
+    {
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sticky-note"></i> ملاحظات
+            </div>
+            <div class="card-body">
+                <div class="remarks-box">
+                    @Model.Remarks
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="@Url.Action("Index", "PurchaseOrder")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> رجوع
+        </a>
+        <a href="@Url.Action("Edit", "PurchaseOrder", new { id = Model?.PurchaseOrderId })" class="btn btn-primary">
+            <i class="fas fa-edit"></i> تعديل
+        </a>
+        <button type="button" class="btn btn-success" onclick="approvePO()">
+            <i class="fas fa-check"></i> موافقة
+        </button>
+    </div>
+</div>
+
+<script>
+    function approvePO() {
+        alert('سيتم تنفيذ عملية الموافقة');
+    }
+</script>

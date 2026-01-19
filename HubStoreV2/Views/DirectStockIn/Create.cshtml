@@ -1,0 +1,343 @@
+@model Core.ViewModels.DirectStockInViewModels.DirectStockInRequestDto
+@{
+    ViewData["Title"] = "استلام مباشر - Enterprise View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b; /* Slate 800 */
+        --secondary-solid: #64748b; /* Slate 500 */
+        --accent-solid: #334155; /* Slate 700 */
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #fff;
+    }
+
+    .form-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .form-header-elegant h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+    .form-header-elegant p { font-size: 0.95rem; opacity: 0.8; margin: 5px 0 0 0; }
+
+    .dx-form-group-caption { font-weight: 700 !important; color: var(--primary-solid) !important; }
+
+    .grid-container-elegant {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-soft);
+    }
+
+    .summary-box-elegant {
+        background: var(--bg-soft);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid var(--border-soft);
+    }
+
+    .total-label-elegant { font-size: 0.9rem; color: var(--secondary-solid); text-transform: uppercase; letter-spacing: 0.5px; }
+    .total-value-elegant { font-size: 1.75rem; font-weight: 700; color: var(--primary-solid); }
+
+    .btn-elegant-primary {
+        background-color: #fff;
+        color: var(--primary-solid);
+        border: none;
+        padding: 10px 30px;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #f1f5f9;
+        transform: translateY(-1px);
+        color: var(--primary-solid);
+    }
+
+    .btn-elegant-outline {
+        border: 1.5px solid rgba(255,255,255,0.3);
+        color: white;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-outline:hover {
+        background-color: rgba(255,255,255,0.1);
+        border-color: #fff;
+        color: white;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f8fafc !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
+    }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <form asp-action="Create" method="post" id="directStockInForm">
+        @Html.AntiForgeryToken()
+
+        <div class="card card-elegant border-0">
+            <!-- Header -->
+            <div class="form-header-elegant d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-plus-circle me-3"></i>استلام بضاعة مباشر</h1>
+                    <p>إضافة بضائع للمخزن بشكل مباشر دون أمر شراء مسبق</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-elegant-outline px-4 rounded-pill">إلغاء</a>
+                    <button type="submit" class="btn btn-elegant-primary px-5 rounded-pill shadow">حفظ الاستلام</button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- Header Info -->
+                    <div class="col-lg-12">
+                        <div id="headerForm"></div>
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div class="col-lg-12 mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-slate-100 p-2 rounded-3 me-3">
+                                <i class="fas fa-cubes text-slate-600"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">أصناف الاستلام المباشر</h5>
+                        </div>
+                        <div id="itemsGrid" class="grid-container-elegant shadow-sm"></div>
+                    </div>
+
+                    <!-- Footer Remarks & Summary -->
+                    <div class="col-lg-12 mt-4">
+                        <div class="row g-4">
+                            <div class="col-lg-8">
+                                <div class="bg-light p-3 rounded-3 h-100">
+                                    <div id="remarksForm"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="summary-box-elegant h-100 d-flex flex-column justify-content-center">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="total-label-elegant">إجمالي القيمة</span>
+                                        <span id="grandTotalDisplay" class="total-value-elegant">0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                        <span class="text-muted fw-medium">عدد الأصناف</span>
+                                        <span id="itemCountDisplay" class="badge bg-white text-dark border px-3 py-2 fs-6 fw-bold shadow-sm">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            const suppliers = @Html.Raw(Json.Serialize(Model.Suppliers));
+            const branches = @Html.Raw(Json.Serialize(Model.Branches));
+            const items = @Html.Raw(Json.Serialize(Model.Items));
+
+            // 1. Initialize Header Form
+            const headerForm = $("#headerForm").dxForm({
+                rtlEnabled: true,
+                colCount: 3,
+                formData: {
+                    DocDate: new Date(),
+                    BranchId: @(Model.BranchId > 0 ? Model.BranchId : "null"),
+                    SupplierId: @(Model.SupplierId > 0 ? Model.SupplierId : "null"),
+                    InvoiceNo: "@Model.InvoiceNo"
+                },
+                items: [
+                    {
+                        dataField: "DocDate",
+                        label: { text: "تاريخ الاستلام" },
+                        editorType: "dxDateBox",
+                        editorOptions: { width: "100%", stylingMode: "outlined" },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "BranchId",
+                        label: { text: "الفرع المستلم" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: branches,
+                            displayExpr: "name",
+                            valueExpr: "branchId",
+                            stylingMode: "outlined",
+                            searchEnabled: true
+                        },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "SupplierId",
+                        label: { text: "المورد" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: suppliers,
+                            displayExpr: "name",
+                            valueExpr: "supplierId",
+                            stylingMode: "outlined",
+                            searchEnabled: true
+                        },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "InvoiceNo",
+                        label: { text: "رقم الفاتورة" },
+                        editorType: "dxTextBox",
+                        editorOptions: { stylingMode: "outlined", placeholder: "أدخل رقم الفاتورة..." },
+                        colSpan: 1
+                    }
+                ]
+            }).dxForm("instance");
+
+            // 2. Initialize Items Grid
+            const itemsGrid = $("#itemsGrid").dxDataGrid({
+                dataSource: [],
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                editing: {
+                    mode: "batch",
+                    allowAdding: true,
+                    allowUpdating: true,
+                    allowDeleting: true,
+                    useIcons: true
+                },
+                columns: [
+                    {
+                        dataField: "itemId",
+                        caption: "الصنف",
+                        width: 250,
+                        lookup: {
+                            dataSource: items,
+                            displayExpr: "name",
+                            valueExpr: "itemId"
+                        },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "qty",
+                        caption: "الكمية",
+                        dataType: "number",
+                        width: 100,
+                        validationRules: [{ type: "required" }, { type: "range", min: 0.01 }]
+                    },
+                    {
+                        dataField: "price",
+                        caption: "السعر",
+                        dataType: "number",
+                        format: "#,##0.00",
+                        width: 120,
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "discount",
+                        caption: "خصم (%)",
+                        dataType: "number",
+                        width: 80,
+                        defaultValue: 0
+                    },
+                    {
+                        dataField: "totalValue",
+                        caption: "الإجمالي",
+                        alignment: "center",
+                        dataType: "number",
+                        format: "#,##0.00",
+                        allowEditing: false,
+                        calculateCellValue: function(data) {
+                            const qty = data.qty || 0;
+                            const price = data.price || 0;
+                            const disc = data.discount || 0;
+                            return (qty * price) * (1 - (disc / 100));
+                        },
+                        cssClass: "fw-bold text-dark"
+                    },
+                    { dataField: "batchNo", caption: "رقم الوجبة", width: 120 },
+                    { dataField: "expiryDate", caption: "تاريخ الصلاحية", dataType: "date", width: 120 }
+                ],
+                onRowInserted: () => calculateTotals(),
+                onRowUpdated: () => calculateTotals(),
+                onRowRemoved: () => calculateTotals(),
+                onContentReady: () => calculateTotals()
+            }).dxDataGrid("instance");
+
+            // 3. Remarks Form
+            $("#remarksForm").dxForm({
+                rtlEnabled: true,
+                formData: { Remarks: "@Model.Remarks" },
+                items: [{
+                    dataField: "Remarks",
+                    label: { text: "ملاحظات الاستلام" },
+                    editorType: "dxTextArea",
+                    editorOptions: { height: 80, stylingMode: "outlined" }
+                }]
+            });
+
+            function calculateTotals() {
+                const data = itemsGrid.option("dataSource") || [];
+                let total = 0;
+                let count = 0;
+
+                data.forEach(item => {
+                    const qty = item.qty || 0;
+                    const price = item.price || 0;
+                    const disc = item.discount || 0;
+                    total += (qty * price) * (1 - (disc / 100));
+                    count++;
+                });
+
+                $("#grandTotalDisplay").text(total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                $("#itemCountDisplay").text(count);
+            }
+
+            // Form Submission
+            $("#directStockInForm").on("submit", function(e) {
+                const grid = $("#itemsGrid").dxDataGrid("instance");
+                const gridData = grid.option("dataSource");
+
+                if (!gridData || gridData.length === 0) {
+                    DevExpress.ui.notify("يرجى إضافة صنف واحد على الأقل", "error", 3000);
+                    return false;
+                }
+
+                // Add header data to form
+                const headerData = headerForm.option("formData");
+                $("<input>").attr("type", "hidden").attr("name", "DocDate").val(headerData.DocDate.toISOString()).appendTo(this);
+                $("<input>").attr("type", "hidden").attr("name", "BranchId").val(headerData.BranchId).appendTo(this);
+                $("<input>").attr("type", "hidden").attr("name", "SupplierId").val(headerData.SupplierId).appendTo(this);
+                $("<input>").attr("type", "hidden").attr("name", "InvoiceNo").val(headerData.InvoiceNo).appendTo(this);
+
+                // Add grid data
+                gridData.forEach((item, i) => {
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].ItemId`).val(item.itemId).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Qty`).val(item.qty).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Price`).val(item.price).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Discount`).val(item.discount || 0).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].TotalValue`).val((item.qty * item.price) * (1 - ((item.discount || 0) / 100))).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].BatchNo`).val(item.batchNo || "").appendTo(this);
+                    if (item.expiryDate) {
+                        $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].ExpiryDate`).val(item.expiryDate.toISOString()).appendTo(this);
+                    }
+                });
+
+                return true;
+            });
+        });
+    </script>
+}

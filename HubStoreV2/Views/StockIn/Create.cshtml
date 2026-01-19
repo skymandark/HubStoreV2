@@ -1,0 +1,338 @@
+@model Core.ViewModels.StockInViewModels.StockInRequestDto
+@{
+    ViewData["Title"] = "استلام من أمر شراء - Enterprise View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b; /* Slate 800 */
+        --secondary-solid: #64748b; /* Slate 500 */
+        --accent-solid: #334155; /* Slate 700 */
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #fff;
+    }
+
+    .form-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .form-header-elegant h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+    .form-header-elegant p { font-size: 0.95rem; opacity: 0.8; margin: 5px 0 0 0; }
+
+    .dx-form-group-caption { font-weight: 700 !important; color: var(--primary-solid) !important; }
+    
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 8px;
+    }
+    .status-active { background-color: #10b981; }
+
+    .grid-container-elegant {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-soft);
+    }
+
+    .quantity-badge-elegant {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-remaining-elegant { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    .btn-elegant-primary {
+        background-color: #fff;
+        color: var(--primary-solid);
+        border: none;
+        padding: 10px 30px;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #f1f5f9;
+        transform: translateY(-1px);
+        color: var(--primary-solid);
+    }
+
+    .btn-elegant-outline {
+        border: 1.5px solid rgba(255,255,255,0.3);
+        color: white;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-outline:hover {
+        background-color: rgba(255,255,255,0.1);
+        border-color: #fff;
+        color: white;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f8fafc !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
+    }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <form asp-action="Create" method="post" id="stockInForm">
+        @Html.AntiForgeryToken()
+        
+        <input type="hidden" asp-for="PurchaseOrderId" id="PurchaseOrderId" />
+        <input type="hidden" asp-for="SupplierId" id="SupplierId" />
+        <input type="hidden" asp-for="BranchId" id="BranchId" />
+
+        <div class="card card-elegant border-0">
+            <!-- Header -->
+            <div class="form-header-elegant d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-clipboard-check me-3"></i>استلام من أمر شراء</h1>
+                    <p>قم باختيار أمر الشراء ساري المفعول لتأكيد الكميات الواردة للمخزن</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Index")" class="btn btn-elegant-outline px-4 rounded-pill">إلغاء</a>
+                    <button type="submit" class="btn btn-elegant-primary px-5 rounded-pill shadow">تأكيد الاستلام</button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- PO Selection & Header Info -->
+                    <div class="col-lg-12">
+                        <div id="headerForm"></div>
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div class="col-lg-12 mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-slate-100 p-2 rounded-3 me-3">
+                                <i class="fas fa-boxes text-slate-600"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">الأصناف المتاحة للاستلام</h5>
+                            <span id="itemCountBadge" class="ms-3 badge bg-slate-200 text-slate-700 rounded-pill px-3">0 أصناف</span>
+                        </div>
+                        <div id="itemsGrid" class="grid-container-elegant shadow-sm"></div>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="col-lg-12">
+                        <div class="bg-light p-3 rounded-3">
+                            <div id="remarksForm"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            let purchaseOrders = [];
+            let itemsStore = [];
+
+            // 1. Initialize Header Form
+            const headerForm = $("#headerForm").dxForm({
+                rtlEnabled: true,
+                colCount: 4,
+                formData: {
+                    DocDate: new Date(),
+                    InvoiceNo: ""
+                },
+                items: [
+                    {
+                        dataField: "PurchaseOrderSelect",
+                        label: { text: "أمر الشراء المعمد" },
+                        colSpan: 2,
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            placeholder: "اختر أمر الشراء...",
+                            displayExpr: function(item) {
+                                return item ? `${item.purchaseOrderCode} - ${item.supplierName}` : "";
+                            },
+                            valueExpr: "purchaseOrderId",
+                            searchEnabled: true,
+                            stylingMode: "outlined",
+                            onValueChanged: function(e) {
+                                if (e.value) {
+                                    loadPODetails(e.value);
+                                } else {
+                                    clearData();
+                                }
+                            }
+                        },
+                        validationRules: [{ type: "required", message: "يجب اختيار أمر شراء" }]
+                    },
+                    {
+                        dataField: "DocDate",
+                        label: { text: "تاريخ الاستلام" },
+                        editorType: "dxDateBox",
+                        editorOptions: { width: "100%", stylingMode: "outlined" },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "InvoiceNo",
+                        label: { text: "رقم فاتورة المورد" },
+                        editorType: "dxTextBox",
+                        editorOptions: { stylingMode: "outlined", placeholder: "أدخل رقم الفاتورة..." }
+                    }
+                ]
+            }).dxForm("instance");
+
+            // 2. Initialize Items Grid
+            const itemsGrid = $("#itemsGrid").dxDataGrid({
+                dataSource: [],
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                editing: {
+                    mode: "cell",
+                    allowUpdating: true
+                },
+                columns: [
+                    { dataField: "itemName", caption: "الصنف", allowEditing: false, cssClass: "fw-bold text-slate-800" },
+                    { dataField: "orderedQty", caption: "المطلوب", allowEditing: false, alignment: "center" },
+                    { dataField: "receivedQty", caption: "المستلم سابقاً", allowEditing: false, alignment: "center" },
+                    { 
+                        dataField: "remainingQty", 
+                        caption: "المتبقي", 
+                        allowEditing: false, 
+                        alignment: "center",
+                        cellTemplate: function(container, options) {
+                            $("<span class='quantity-badge-elegant badge-remaining-elegant'>")
+                                .text(options.value)
+                                .appendTo(container);
+                        }
+                    },
+                    { 
+                        dataField: "qtyToReceive", 
+                        caption: "الكمية المستلمة الآن", 
+                        dataType: "number",
+                        alignment: "center",
+                        cssClass: "bg-light-primary fw-bold",
+                        validationRules: [
+                            { type: "required" },
+                            { 
+                                type: "custom", 
+                                validationCallback: function(e) {
+                                    return e.value >= 0 && e.value <= e.data.remainingQty;
+                                },
+                                message: "لا يمكن تجاوز الكمية المتبقية"
+                            }
+                        ]
+                    },
+                    { dataField: "price", caption: "السعر", dataType: "number", format: "N2" },
+                    { dataField: "batchNo", caption: "رقم الوجبة (Batch)", dataType: "string" },
+                    { dataField: "expiryDate", caption: "تاريخ الصلاحية", dataType: "date" }
+                ],
+                onContentReady: function(e) {
+                    const count = e.component.totalCount();
+                    $("#itemCountBadge").text(`${count} أصناف`);
+                }
+            }).dxDataGrid("instance");
+
+            // 3. Initialize Remarks Form
+            $("#remarksForm").dxForm({
+                rtlEnabled: true,
+                formData: @Html.Raw(Json.Serialize(Model)),
+                items: [{
+                    dataField: "Remarks",
+                    label: { text: "ملاحظات الاستلام" },
+                    editorType: "dxTextArea",
+                    editorOptions: { height: 80, stylingMode: "outlined" }
+                }]
+            });
+
+            // Load Initial POs
+            fetch('@Url.Action("GetPurchaseOrders")')
+                .then(r => r.json())
+                .then(data => {
+                    const selectBox = headerForm.getEditor("PurchaseOrderSelect");
+                    selectBox.option("dataSource", data);
+                });
+
+            function loadPODetails(poId) {
+                fetch(`@Url.Action("GetPurchaseOrderDetails")?purchaseOrderId=${poId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Map items for the grid
+                            const gridItems = data.items.map(item => ({
+                                ...item,
+                                qtyToReceive: item.remainingQty, // Default to full remaining
+                                expiryDate: null
+                            }));
+                            itemsGrid.option("dataSource", gridItems);
+                            
+                            // Update hidden fields
+                            $("#PurchaseOrderId").val(data.po.purchaseOrderId);
+                            $("#SupplierId").val(data.po.supplierId);
+                            $("#BranchId").val(data.po.branchId);
+                        }
+                    });
+            }
+
+            function clearData() {
+                itemsGrid.option("dataSource", []);
+                $("#PurchaseOrderId").val("");
+                $("#SupplierId").val("");
+                $("#BranchId").val("");
+            }
+
+            // Form Submission Logic
+            $("#stockInForm").on("submit", function(e) {
+                const poId = $("#PurchaseOrderId").val();
+                if (!poId) {
+                    DevExpress.ui.notify("يرجى اختيار أمر شراء أولاً", "error", 3000);
+                    return false;
+                }
+
+                // Collect Grid Data
+                const gridData = itemsGrid.option("dataSource");
+                const details = gridData.filter(d => d.qtyToReceive > 0).map((d, index) => {
+                    return {
+                        ItemId: d.itemId,
+                        Qty: d.qtyToReceive,
+                        Price: d.price,
+                        BatchNo: d.batchNo,
+                        ExpiryDate: d.expiryDate ? d.expiryDate.toISOString() : null,
+                        PurchaseOrderDetailId: d.purchaseOrderDetailId
+                    };
+                });
+
+                if (details.length === 0) {
+                    DevExpress.ui.notify("يجب استلام صنف واحد على الأقل بكمية أكبر من الصفر", "warning", 3000);
+                    return false;
+                }
+
+                // Add details to form
+                details.forEach((detail, i) => {
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].ItemId`).val(detail.ItemId).appendTo("#stockInForm");
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Qty`).val(detail.Qty).appendTo("#stockInForm");
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Price`).val(detail.Price).appendTo("#stockInForm");
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].BatchNo`).val(detail.BatchNo).appendTo("#stockInForm");
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].ExpiryDate`).val(detail.ExpiryDate).appendTo("#stockInForm");
+                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].PurchaseOrderDetailId`).val(detail.PurchaseOrderDetailId).appendTo("#stockInForm");
+                });
+
+                return true;
+            });
+        });
+    </script>
+}

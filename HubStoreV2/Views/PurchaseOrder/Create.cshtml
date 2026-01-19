@@ -1,0 +1,240 @@
+@model Core.ViewModels.PurchaseOrderViewModels.PurchaseOrderRequestDto
+@{
+    var isEdit = Model.PurchaseOrderId > 0;
+    ViewData["Title"] = isEdit ? "تعديل طلب شراء" : "إنشاء طلب شراء جديد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b; /* Slate 800 - Elegant & Professional */
+        --secondary-solid: #64748b; /* Slate 500 */
+        --accent-solid: #3b82f6; /* Blue 500 */
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        background: #fff;
+    }
+
+    .form-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .form-header-elegant h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+    .form-header-elegant p { font-size: 0.95rem; opacity: 0.8; margin: 5px 0 0 0; }
+
+    .dx-form-group-caption { font-weight: 700 !important; color: var(--primary-solid) !important; }
+
+    .summary-box-elegant {
+        background: var(--bg-soft);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid var(--border-soft);
+    }
+
+    .grand-total-label { font-size: 0.9rem; color: var(--secondary-solid); text-transform: uppercase; letter-spacing: 0.5px; }
+    .grand-total-value { font-size: 2rem; font-weight: 700; color: var(--primary-solid); }
+
+    .btn-elegant-primary {
+        background-color: var(--accent-solid);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        color: white;
+    }
+
+    .btn-elegant-outline {
+        border: 1.5px solid rgba(255,255,255,0.3);
+        color: white;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-outline:hover {
+        background-color: rgba(255,255,255,0.1);
+        border-color: #fff;
+        color: white;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f1f5f9 !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
+    }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <form asp-action="@(isEdit ? "Update" : "Create")" method="post" id="poForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="PurchaseOrderId" />
+
+        <div class="card card-elegant border-0">
+            <!-- Header -->
+            <div class="form-header-elegant d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>@(isEdit ? "تعديل الطلب #" + Model.PurchaseOrderCode : "إنشاء طلب شراء جديد")</h1>
+                    <p>أدخل تفاصيل الطلب والأصناف بدقة في النموذج التالي</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Index")" class="btn btn-elegant-outline px-4 rounded-pill">إلغاء</a>
+                    <button type="submit" class="btn btn-elegant-primary px-5 rounded-pill shadow">حفظ البيانات</button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- Basic Info -->
+                    <div class="col-12">
+                        <div id="headerForm"></div>
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div class="col-12 mt-5">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                                <i class="fas fa-list-ul text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">بنود طلب الشراء</h5>
+                        </div>
+                        <div id="itemsGrid" class="border rounded-3 overflow-hidden"></div>
+                    </div>
+
+                    <!-- Footer Summary -->
+                    <div class="col-lg-4 offset-lg-8">
+                        <div class="summary-box-elegant mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted fw-medium">إجمالي الكميات المضافة</span>
+                                <span id="summaryQty" class="badge bg-white text-dark border px-3 py-2 fs-6 fw-bold shadow-sm">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted fw-medium">صافي القيمة قبل الضريبة</span>
+                                <span id="summaryNet" class="fw-bold fs-5 text-dark">0.00</span>
+                            </div>
+                            <div class="pt-3 border-top text-center mt-3">
+                                <div class="grand-total-label mb-1">الإجمالي النهائي</div>
+                                <div class="grand-total-value">0.00 <small class="fs-6 fw-normal text-muted">ريال</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            var suppliers = @Html.Raw(Json.Serialize(Model.Suppliers));
+            var branches = @Html.Raw(Json.Serialize(Model.Branches));
+            var items = @Html.Raw(Json.Serialize(Model.Items));
+            var details = @Html.Raw(Json.Serialize(Model.PurchaseOrderDetails ?? new List<Core.ViewModels.PurchaseOrderViewModels.PurchaseOrderDetailDto>()));
+
+            // Elegant Form Setup
+            $("#headerForm").dxForm({
+                formData: @Html.Raw(Json.Serialize(Model)),
+                rtlEnabled: true,
+                colCount: 4,
+                labelMode: "floating",
+                items: [
+                    { dataField: "SupplierId", label: { text: "تحديد المورد" }, editorType: "dxSelectBox", 
+                      editorOptions: { dataSource: suppliers, displayExpr: "name", valueExpr: "supplierId", searchEnabled: true, stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
+                    { dataField: "BranchId", label: { text: "فرع الاستلام" }, editorType: "dxSelectBox", 
+                      editorOptions: { dataSource: branches, displayExpr: "name", valueExpr: "branchId", stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
+                    { dataField: "DocDate", label: { text: "تاريخ المستند" }, editorType: "dxDateBox", editorOptions: { width: "100%", stylingMode: "outlined" } },
+                    { dataField: "DeliveryDate", label: { text: "تاريخ التسليم المتوقع" }, editorType: "dxDateBox", editorOptions: { width: "100%", stylingMode: "outlined" } },
+                    { dataField: "Remarks", label: { text: "أي ملاحظات إضافية بخصوص هذا الطلب" }, editorType: "dxTextArea", colSpan: 4, editorOptions: { height: 80, stylingMode: "outlined" } }
+                ]
+            });
+
+            // Elegant Grid Setup
+            var grid = $("#itemsGrid").dxDataGrid({
+                dataSource: details,
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                showRowLines: true,
+                editing: {
+                    mode: "cell",
+                    allowUpdating: true,
+                    allowAdding: true,
+                    allowDeleting: true,
+                    newRowPosition: "last"
+                },
+                onRowInserted: function() { updateSummary(); },
+                onRowRemoved: function() { updateSummary(); },
+                onRowUpdated: function() { updateSummary(); },
+                columns: [
+                    { dataField: "itemId", caption: "الصنف", validationRules: [{ type: "required" }],
+                      lookup: { dataSource: items, valueExpr: "itemId", displayExpr: "name" }, width: 300 },
+                    { dataField: "quantity", caption: "الكمية المطلوبة", dataType: "number", validationRules: [{ type: "required" }] },
+                    { dataField: "price", caption: "سعر الوحدة", dataType: "number", format: "#,##0.00" },
+                    { dataField: "mainDiscountPercent", caption: "الخصم (%)", dataType: "number" },
+                    { dataField: "netValue", caption: "القيمة الصافية", dataType: "number", format: "#,##0.00", allowEditing: false, 
+                      calculateCellValue: function(rowData) {
+                          var total = (rowData.quantity || 0) * (rowData.price || 0);
+                          var discount = total * ((rowData.mainDiscountPercent || 0) / 100);
+                          return total - discount;
+                      }
+                    }
+                ],
+                onInitNewRow: function(e) { e.data.quantity = 1; e.data.price = 0; e.data.mainDiscountPercent = 0; }
+            }).dxDataGrid("instance");
+
+            function updateSummary() {
+                var rows = grid.getVisibleRows();
+                var totalQty = 0;
+                var totalNet = 0;
+                
+                rows.forEach(function(row) {
+                    var data = row.data;
+                    totalQty += (data.quantity || 0);
+                    var total = (data.quantity || 0) * (data.price || 0);
+                    totalNet += total - (total * ((data.mainDiscountPercent || 0) / 100));
+                });
+
+                $("#summaryQty").text(totalQty);
+                $("#summaryNet").text(totalNet.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+                $(".grand-total-value").contents().filter(function() { return this.nodeType == 3; }).first().replaceWith(totalNet.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " ");
+            }
+
+            // Submission Sync
+            $("#poForm").on("submit", function() {
+                var formData = $("#headerForm").dxForm("instance").option("formData");
+                var gridData = grid.option("dataSource");
+                
+                gridData.forEach(function(item, index) {
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].ItemId").val(item.itemId).appendTo("#poForm");
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].Quantity").val(item.quantity).appendTo("#poForm");
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].Price").val(item.price).appendTo("#poForm");
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].MainDiscountPercent").val(item.mainDiscountPercent).appendTo("#poForm");
+                });
+                
+                for (var key in formData) {
+                    if ($("[name='"+key+"']").length === 0) {
+                        $("<input>").attr("type", "hidden").attr("name", key).val(formData[key]).appendTo("#poForm");
+                    } else {
+                        $("[name='"+key+"']").val(formData[key]);
+                    }
+                }
+            });
+
+            setTimeout(updateSummary, 500);
+        });
+    </script>
+}

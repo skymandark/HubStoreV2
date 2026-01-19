@@ -1,0 +1,146 @@
+@model List<Core.ViewModels.PurchaseOrderViewModels.PurchaseOrderListDto>
+@{
+    ViewData["Title"] = "طلبات الشراء - Enterprise View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b;
+        --secondary-solid: #64748b;
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant-list {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--border-soft);
+        overflow: hidden;
+    }
+
+    .status-badge-elegant {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        border: 1px solid transparent;
+    }
+
+    .status-draft { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    .status-submitted { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .status-approved { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .status-rejected { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+    .dx-datagrid-headers {
+        background-color: #f8fafc !important;
+        color: var(--secondary-solid) !important;
+        font-weight: 700 !important;
+        border-bottom: 1px solid var(--border-soft) !important;
+    }
+
+    .grid-action-btn-elegant {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border-radius: 6px;
+        display: inline-block;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-soft);
+        background: white;
+        color: var(--secondary-solid);
+    }
+
+    .grid-action-btn-elegant:hover {
+        background: var(--bg-soft);
+        color: var(--primary-solid);
+        border-color: var(--secondary-solid);
+    }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">إدارة طلبات الشراء</h2>
+            <p class="text-muted small mb-0">عرض ومتابعة كافة طلبات الشراء الصادرة من النظام</p>
+        </div>
+        <div>
+            <a href="@Url.Action("Create", "PurchaseOrder")" class="btn btn-dark px-4 rounded-pill shadow-sm">
+                <i class="fas fa-plus me-2"></i>طلب شراء جديد
+            </a>
+        </div>
+    </div>
+
+    <!-- DataGrid Section -->
+    <div class="card card-elegant-list mt-2">
+        <div class="card-body p-0">
+            <div id="poGrid"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            var data = @Html.Raw(Json.Serialize(Model));
+
+            $("#poGrid").dxDataGrid({
+                dataSource: data,
+                rtlEnabled: true,
+                showBorders: false,
+                rowAlternationEnabled: true,
+                columnAutoWidth: true,
+                hoverStateEnabled: true,
+                searchPanel: { visible: true, width: 280, placeholder: "بحث في الطلبات..." },
+                paging: { pageSize: 12 },
+                columns: [
+                    { dataField: "purchaseOrderCode", caption: "رقم الطلب", alignment: "center", cssClass: "fw-bold text-dark" },
+                    { dataField: "docDate", caption: "تاريخ الطلب", dataType: "date", format: "dd/MM/yyyy" },
+                    { dataField: "supplierName", caption: "المورد المعتمد", minWidth: 220 },
+                    { dataField: "branchName", caption: "الفرع" },
+                    { 
+                        dataField: "totalValue", 
+                        caption: "إجمالي القيمة", 
+                        format: { type: "fixedPoint", precision: 2 },
+                        cssClass: "fw-bold text-dark"
+                    },
+                    { 
+                        dataField: "status", 
+                        caption: "حالة الطلب", 
+                        alignment: "center",
+                        cellTemplate: function(container, options) {
+                            var status = options.value;
+                            var cls = "status-draft";
+                            var txt = "مسودة";
+
+                            switch(status) {
+                                case "Submitted": cls = "status-submitted"; txt = "قيد المراجعة"; break;
+                                case "Approved": cls = "status-approved"; txt = "معتمد"; break;
+                                case "Rejected": cls = "status-rejected"; txt = "مرفوض"; break;
+                            }
+
+                            $("<div />").addClass("status-badge-elegant " + cls).text(txt).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: "الإجراءات",
+                        alignment: "center",
+                        width: 120,
+                        cellTemplate: function(container, options) {
+                            var id = options.data.purchaseOrderId;
+                            
+                            $('<div class="d-flex justify-content-center gap-1">')
+                                .append($('<a href="/PurchaseOrder/Details/' + id + '" class="grid-action-btn-elegant" title="عرض التفاصيل"><i class="fas fa-eye small"></i></a>'))
+                                .append($('<a href="/PurchaseOrder/Edit/' + id + '" class="grid-action-btn-elegant" title="تعديل"><i class="fas fa-edit small"></i></a>'))
+                                .appendTo(container);
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}

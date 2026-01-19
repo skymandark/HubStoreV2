@@ -1,0 +1,132 @@
+@model IEnumerable<Core.ViewModels.ItemViewModels.ItemViewModel>
+@{
+    ViewData["Title"] = "إدارة الأصناف - قائمة الأصناف";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b; 
+        --secondary-solid: #64748b;
+        --accent-solid: #3b82f6; 
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+
+    .page-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f1f5f9 !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
+    }
+
+    .btn-elegant-primary {
+        background-color: var(--accent-solid);
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border-radius: 50px;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        color: white;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .status-active { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-inactive { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="page-header-elegant d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-1"><i class="fas fa-boxes-stacked me-2"></i> إدارة الأصناف</h1>
+            <p class="mb-0 opacity-75">عرض وإدارة كافة الأصناف المسجلة في النظام</p>
+        </div>
+        <a href="@Url.Action("Create")" class="btn btn-elegant-primary shadow">
+            <i class="fas fa-plus me-2"></i> إضافة صنف جديد
+        </a>
+    </div>
+
+    <div class="card card-elegant">
+        <div class="card-body p-4">
+            <div id="itemsGrid"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            const items = @Html.Raw(Json.Serialize(Model));
+
+            $("#itemsGrid").dxDataGrid({
+                dataSource: items,
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                searchPanel: { visible: true, width: 240, placeholder: "بحث..." },
+                headerFilter: { visible: true },
+                paging: { pageSize: 15 },
+                export: { enabled: true },
+                columns: [
+                    { dataField: "itemCode", caption: "الكود", width: 100, cssClass: "fw-bold text-primary" },
+                    { dataField: "nameArab", caption: "الاسم (بالعربي)" },
+                    { dataField: "nameEng", caption: "الاسم (English)" },
+                    { dataField: "sectionName", caption: "القسم", width: 120 },
+                    { dataField: "mainItemName", caption: "القسم الرئيسي", width: 120 },
+                    { dataField: "itemTypeName", caption: "نوع الصنف", width: 120 },
+                    { dataField: "brandName", caption: "المُصنّع", width: 120 },
+                    { dataField: "mainUnitCode", caption: "الوحدة", width: 80 },
+                    { 
+                        dataField: "isActive", 
+                        caption: "الحالة", 
+                        width: 80,
+                        cellTemplate: function(container, options) {
+                            const status = options.data.isActive;
+                            const label = status ? "نشط" : "غير نشط";
+                            const cls = status ? "status-active" : "status-inactive";
+                            $("<span class='status-badge'>").addClass(cls).text(label).appendTo(container);
+                        }
+                    },
+                    {
+                        type: "buttons",
+                        width: 80,
+                        buttons: [{
+                            hint: "تعديل",
+                            icon: "edit",
+                            onClick: function(e) {
+                                location.href = `@Url.Action("Edit")/${e.row.data.itemId}`;
+                            }
+                        }]
+                    }
+                ]
+            });
+        });
+    </script>
+}

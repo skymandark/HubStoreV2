@@ -1,0 +1,162 @@
+@model Core.ViewModels.StockInViewModels.StockInListDto
+@{
+    ViewData["Title"] = "تفاصيل إذن الاستلام - Enterprise View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .premium-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+        background: #fff;
+        margin-bottom: 24px;
+    }
+
+    .detail-header-gradient {
+        background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px 20px 0 0;
+        margin-bottom: -20px;
+    }
+
+    .info-label { color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .info-value { color: #1e293b; font-size: 1.05rem; font-weight: 700; }
+
+    .status-banner {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .banner-draft { background: #f1f5f9; color: #475569; }
+    .banner-approved { background: #dcfce7; color: #15803d; }
+    .banner-received { background: #e0f2fe; color: #0369a1; }
+    .banner-pending { background: #fef9c3; color: #854d0e; }
+
+    .footer-summary { background: #f8fafc; border-radius: 15px; padding: 25px; border: 1px solid #e2e8f0; }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <!-- Header Area -->
+    <div class="detail-header-gradient d-flex justify-content-between align-items-center">
+        <div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <h1 class="fw-bold mb-0">إذن استلام #@Model.DocCode</h1>
+                @{
+                    var statusCls = "banner-draft";
+                    switch(Model.Status) {
+                        case "Approved": statusCls = "banner-approved"; break;
+                        case "Received": statusCls = "banner-received"; break;
+                        case "PendingApproval": statusCls = "banner-pending"; break;
+                    }
+                }
+                <div class="status-banner @statusCls">
+                    <i class="fas fa-circle fs-xs"></i> @Model.Status
+                </div>
+            </div>
+            <p class="mb-0 opacity-75">تاريخ الإذن: @Model.DocDate.ToString("dd MMMM yyyy")</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index")" class="btn btn-outline-light px-4 rounded-pill">العودة للقائمة</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <!-- Main Info Cards -->
+        <div class="col-lg-8">
+            <div class="card premium-card">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">تفاصيل الإذن والمورد</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="info-label">المورد</div>
+                            <div class="info-value">@Model.SupplierName</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-label">الفرع المستلم</div>
+                            <div class="info-value">@Model.BranchName</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-label">أمر الشراء المرجعي</div>
+                            <div class="info-value">@(Model.PurchaseOrderCode ?? "---")</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-label">رقم فاتورة المورد</div>
+                            <div class="info-value">@(Model.InvoiceNo ?? "---")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Remarks))
+            {
+                <div class="card premium-card">
+                    <div class="card-body p-4">
+                        <div class="info-label">ملاحظات</div>
+                        <p class="text-muted mb-0">@Model.Remarks</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar Summary & Actions -->
+        <div class="col-lg-4">
+            <div class="card premium-card">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 text-dark">الإجراءات المتاحة</h5>
+                    
+                    <div class="footer-summary mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-muted">إجمالي القيمة:</span>
+                            <span class="fw-bold fs-4 text-primary">@Model.TotalValue.ToString("N2")</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        @if (Model.Status == "Draft")
+                        {
+                            <button class="btn btn-success py-3 fw-bold rounded-15" onclick="approveStockIn(@Model.StockInId)">
+                                <i class="fas fa-check me-2"></i>اعتماد الإذن
+                            </button>
+                        }
+                        @if (Model.Status == "Approved")
+                        {
+                            <button class="btn btn-primary py-3 fw-bold rounded-15" onclick="receiveStockIn(@Model.StockInId)">
+                                <i class="fas fa-truck-loading me-2"></i>تأكيد الاستلام بالمخزن
+                            </button>
+                        }
+                        <button class="btn btn-outline-secondary py-3 fw-bold rounded-15" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>طباعة الإذن
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function approveStockIn(id) {
+        if (confirm('هل تريد الموافقة على هذا الإذن؟')) {
+            fetch(`/StockIn/Approve/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(() => { location.reload(); });
+        }
+    }
+
+    function receiveStockIn(id) {
+        if (confirm('هل تريد تأكيد استلام البضائع؟')) {
+            fetch(`/StockIn/Receive/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(() => { location.reload(); });
+        }
+    }
+</script>

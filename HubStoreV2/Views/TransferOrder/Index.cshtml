@@ -1,0 +1,75 @@
+@using Core.ViewModels.TransferOrderViewModels
+@using DevExtreme.AspNet.Mvc
+@model List<TransferOrderListDto>
+
+@{
+    ViewData["Title"] = "طلبات التحويل";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="@Url.Action("Create", "TransferOrder")" class="btn btn-primary">
+            <i class="fas fa-plus"></i> طلب نقل جديد
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        @(Html.DevExtreme().DataGrid<TransferOrderListDto>()
+            .DataSource(Model)
+            .ID("gridContainer")
+            .ShowBorders(true)
+            .ColumnAutoWidth(true)
+            .FilterRow(f => f.Visible(true))
+            .HeaderFilter(f => f.Visible(true))
+            .GroupPanel(g => g.Visible(true))
+            .SearchPanel(s => s.Visible(true))
+            .Paging(p => p.PageSize(10))
+            .Columns(columns => {
+                columns.AddFor(m => m.RequestId).Caption("رقم الطلب").SortOrder(SortOrder.Desc);
+                columns.AddFor(m => m.Reference).Caption("المرجع");
+                columns.AddFor(m => m.DocDate).Caption("التاريخ").DataType(GridColumnDataType.Date);
+                columns.AddFor(m => m.FromBranchName).Caption("من فرع");
+                columns.AddFor(m => m.ToBranchName).Caption("إلى فرع");
+                columns.AddFor(m => m.ShipmentTypeName).Caption("طريقة الشحن");
+                columns.AddFor(m => m.StatusName).Caption("الحالة");
+                columns.AddFor(m => m.StepName).Caption("المرحلة");
+                
+                columns.Add().Caption("الإجراءات").CellTemplate(@<text>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Details", "TransferOrder", new { id = new JS("data.RequestId") })" class="btn btn-sm btn-info" title="التفاصيل">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <a href="@Url.Action("Edit", "TransferOrder", new { id = new JS("data.RequestId") })" class="btn btn-sm btn-warning" title="تعديل">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="@Url.Action("Delete", "TransferOrder", new { id = new JS("data.RequestId") })" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </text>);
+            })
+        )
+    </div>
+</div>

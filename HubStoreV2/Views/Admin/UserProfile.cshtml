@@ -1,0 +1,496 @@
+﻿@model Core.Dto.UserDetalis.UserDto
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Newtonsoft.Json
+@{
+    if (Model.IsDefaultId())
+    {
+        ViewBag.Title = "إضافة مستخدم";
+    }
+    else
+    {
+        ViewBag.Title = "تعديل مستخدم";
+    }
+    Layout = "_Layout";
+}
+
+<form id="client-form" asp-controller="Admin" asp-action="UserProfile" Method="post">
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    @if (!Model.IsDefaultId())
+    {
+        <!--Button-->
+        <div class="form-group row">
+            <div class="col-md-12 col-m-b-10  col-m-t-10">
+                <button type="button" id="redirectToFlags" class="btn btn-outline-primary">تعديل فلاجات المستخدم</button>
+                <a asp-action="ChangePassword" asp-controller="Account" class="btn btn-warning">تغيير كلمة المرور</a>
+                <a asp-action="AuditLog" asp-controller="Log" asp-route-subjectIdentifier="@Model.Id" class="btn btn-primary">User Log</a>
+                <a asp-action="UserDelete" asp-route-id="@Model.Id" class="btn btn-danger">حذف المستخدم</a>
+            </div>
+        </div>
+    }
+
+    <!--Hidden -->
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Branches" />
+    <input type="hidden" asp-for="Roles" />
+    <input type="hidden" asp-for="Password" />
+
+    <div class="card mt-3">
+        @if (Model.IsDefaultId())
+        {
+            <h5 class="card-header text-center">إضافة مستخدم جديد</h5>
+        }
+        else
+        {
+            <h5 class="card-header text-center">تعديل مستخدم</h5>
+        }
+        <div class="card-body" dir="rtl">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <!--Input - text -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">اسم المستخدم</label>
+                        <div class="col-sm-9">
+                            @if (Model.IsDefaultId())
+                            {
+                                <input type="text" required class="form-control" asp-for="UserName" autocomplete="off" dir="ltr">
+                            }
+                            else
+                            {
+                                <input type="text" readonly required class="form-control" asp-for="UserName" autocomplete="off" dir="ltr">
+                            }
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @if (Model.IsDefaultId())
+                    {
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">كلمة المرور</label>
+                            <div class="col-sm-9">
+                                <input type="password" required class="form-control" id="myPassword" dir="ltr">
+                                <input type="hidden" class="form-control" asp-for="Password" dir="ltr">
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+                    }
+
+                    <!--Checkbox-->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">مدير للنظام؟</label>
+                        <div class="col-sm-2">
+                            <toggle-button>
+                                <input asp-for="IsAdmin" type="checkbox">
+                            </toggle-button>
+                        </div>
+                        <label class="col-sm-4 col-form-label">كود المستخدم</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" asp-for="UserSerial" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">PinCode</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" asp-for="PinCode" dir="ltr" autocomplete="off">
+                            <input type="hidden" dir="ltr" id="pinCodePackUp">
+                            <span asp-validation-for="PinCode" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">كود الموظف</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" asp-for="EmployeeId" autocomplete="off" dir="ltr">
+                        </div>
+                    </div>
+                    <!--Input - text -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">البريد الالكتروني</label>
+                        <div class="col-sm-9">
+                            <input type="email" required class="form-control" asp-for="Email" autocomplete="off" dir="ltr">
+                            <input asp-for="EmailConfirmed" type="hidden" value="true">
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!--Input - text -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">رقم الموبايل</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" asp-for="PhoneNumber" autocomplete="off" dir="ltr">
+                            <input asp-for="PhoneNumberConfirmed" type="hidden" value="true">
+                        </div>
+                    </div>
+
+                    <!--Checkbox-->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">فشل الدخول</label>
+                        <div class="col-sm-2">
+                            <toggle-button>
+                                <input asp-for="LockoutEnabled" type="checkbox">
+                            </toggle-button>
+                        </div>
+                        <label class="col-sm-4 col-form-label">عدد مرات فشل الدخول</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" asp-for="AccessFailedCount">
+                        </div>
+                    </div>
+
+                    <!--Input - text -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">نهاية مدة إيقاف المستخدم</label>
+                        <div class="col-sm-9">
+                            <div class="input-group date" id="logoutend-picker" data-target-input="nearest">
+                                <input asp-for="LockoutEnd" type="text" class="form-control" autocomplete="off" dir="ltr">
+                                <div class="input-group-append" data-target="#logoutend-picker" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">البرنامج</label>
+                        <div class="col-sm-9">
+                            <!-- Select يظهر HubStore فقط -->
+                            <select class="form-control" id="application" name="application">
+                                <option value="5" selected>HubStore</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">الفروع</label>
+                        <div class="col-sm-9">
+                            <select id="Branch"
+                                    name="Branch"
+                                    class="form-control"
+                                    style="width: 100%;"
+                                    multiple="multiple">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">الصلاحيات</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="role" name="role" dir="rtl" multiple>
+                                <option selected disabled>اختر البرنامج أولاً</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!--Button-->
+                    <div class="row" style="margin:10px;">
+                        <div class="col-sm-3">
+                            <button type="button" id="addData" class="btn btn-primary" style="background-color: indigo; margin:10px;"><i class="fas fa-chevron-circle-left"></i></button>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="col-sm-6">
+                    <div id="TableContainer1">
+                        <div id="gridBranches"></div>
+                    </div>
+                    <div id="TableContainer2" style="margin-top: 5px;">
+                        <div id="gridRoles"></div>
+                    </div>
+                    <div class="col-sm-12" style="margin:10px;">
+                        <button type="submit" id="submitData" class="btn btn-success">حفظ</button>
+                        <a href="/Admin/Users/" class="btn btn-danger">عودة</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<div class="row" style="margin: 10px;">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-2"><button type="submit" id="submitData" class="btn btn-success">حفظ</button></div>
+        <div class="col-sm-5"></div>
+    </div>*@
+</form>
+
+@section scripts
+{
+    <script type="text/javascript">
+        var gridBranches;
+        var gridRoles;
+        var sendArr = [];
+        var branchesArr = [], rolesArr = [];
+
+        @if (Model.BranchesList != null || Model.RolesList != null)
+        {
+            @:var branchesArr = @Html.Raw(JsonConvert.SerializeObject(Model.BranchesList));
+            @:var rolesArr = @Html.Raw(JsonConvert.SerializeObject(Model.RolesList));
+        }
+        else
+        {
+            @:var branchesArr = [];
+            @:var rolesArr = [];
+        }
+
+        //============[ DevExpress Branch Grid ]============
+        var branches = new DevExpress.data.CustomStore({
+            load: async function(loadOptions) {
+                await resolveAfter2Seconds();
+                return branchesArr;
+            }
+        });
+
+        function getBranchesGrid() {
+            DevExpress.config({ rtlEnabled: true });
+            gridBranches = $("#gridBranches").dxDataGrid({
+                dataSource: { store: branches },
+                allowColumnResizing: true,
+                showBorders: true,
+                showRowLines: true,
+                columnAutoWidth: true,
+                selection: { mode: "single" },
+                rowAlternationEnabled: true,
+                columns: [
+                    { dataField: "ApplicationName", caption: "البرنامج" },
+                    { dataField: "BranchName", caption: "الفرع" },
+                    {
+                        type: "buttons",
+                        buttons: [{
+                            icon: "fas fa-trash",
+                            hint: "حذف",
+                            onClick: function(e) {
+                                DeleteBranch(e.data.ApplicationId, e.data.BranchId);
+                            }
+                        }]
+                    }
+                ]
+            }).dxDataGrid("instance");
+        }
+        getBranchesGrid();
+
+        //============[ DevExpress Role Grid ]============
+        var roles = new DevExpress.data.CustomStore({
+            load: async function(loadOptions) {
+                await resolveAfter2Seconds();
+                return rolesArr;
+            }
+        });
+
+        function getRolesGrid() {
+            DevExpress.config({ rtlEnabled: true });
+            gridRoles = $("#gridRoles").dxDataGrid({
+                dataSource: { store: roles },
+                allowColumnResizing: true,
+                showBorders: true,
+                showRowLines: true,
+                columnAutoWidth: true,
+                selection: { mode: "single" },
+                rowAlternationEnabled: true,
+                columns: [
+                    { dataField: "ApplicationName", caption: "البرنامج" },
+                    { dataField: "RoleName", caption: "الصلاحية" },
+                    {
+                        type: "buttons",
+                        buttons: [{
+                            icon: "fas fa-trash",
+                            hint: "حذف",
+                            onClick: function(e) {
+                                DeleteRole(e.data.ApplicationId, e.data.RoleId);
+                            }
+                        }]
+                    }
+                ]
+            }).dxDataGrid("instance");
+        }
+        getRolesGrid();
+
+        //============[ Add Button ]============
+        $("#addData").click(function (e) {
+            e.preventDefault();
+
+            if ($("#application").val() == null) {
+                $.alert({
+                    title: 'عفواً!',
+                    content: 'لم يتم اختيار البرنامج',
+                    rtl: true
+                });
+                return false;
+            }
+
+            var branchText = $("#Branch :selected").map((i, el) => $(el).text());
+            var branchVal = $("#Branch :selected").map((i, el) => $(el).val());
+            var roleText = $("#role :selected").map((i, el) => $(el).text());
+            var roleVal = $("#role :selected").map((i, el) => $(el).val());
+
+            deleteAllBranchesById($("#application").val());
+            deleteAllRolesById($("#application").val());
+
+            for (var i = 0; i < branchVal.length; i++) {
+                branchesArr.push({
+                    ApplicationId: $("#application").val(),
+                    ApplicationName: $("#application option:selected").text(),
+                    BranchId: branchVal[i],
+                    BranchName: branchText[i]
+                });
+            }
+
+            for (var z = 0; z < roleVal.length; z++) {
+                rolesArr.push({
+                    ApplicationId: $("#application").val(),
+                    ApplicationName: $("#application option:selected").text(),
+                    RoleId: roleVal[z],
+                    RoleName: roleText[z]
+                });
+            }
+
+            gridBranches.refresh();
+            gridRoles.refresh();
+        });
+
+        //============[ Delete Functions ]============
+        function DeleteBranch(applicationId, branchId) {
+            branchesArr = branchesArr.filter(x => !(x.ApplicationId == applicationId && x.BranchId == branchId));
+            gridBranches.refresh();
+        }
+
+        function DeleteRole(applicationId, roleId) {
+            rolesArr = rolesArr.filter(x => !(x.ApplicationId == applicationId && x.RoleId == roleId));
+            gridRoles.refresh();
+        }
+
+        function deleteAllBranchesById(applicationId) {
+            branchesArr = branchesArr.filter(x => x.ApplicationId != applicationId);
+            gridBranches.refresh();
+        }
+
+        function deleteAllRolesById(applicationId) {
+            rolesArr = rolesArr.filter(x => x.ApplicationId != applicationId);
+            gridRoles.refresh();
+        }
+
+        //============[ إعدادات عامة + تحميل البيانات ]============
+        $(document).ready(function () {
+            // تهيئة Select2 للفروع والصلاحيات
+            // تأكد أن مكتبة select2 محمّلة في الصفحة (css & js)
+            $('#Branch').select2({
+                placeholder: "اختر الفروع",
+                width: '100%',
+                dir: 'rtl'
+            });
+
+            $('#role').select2({
+                placeholder: "اختر الصلاحيات",
+                width: '100%',
+                dir: 'rtl'
+            });
+
+            var userId = $("#Id").val() || "";
+
+            // تحميل فروع HubStore تلقائياً عند فتح الصفحة
+            GetBranches(5, userId);
+
+            // تحميل الرولات إن وُجد تطبيق محدد
+            var appId = $("#application").val();
+            if (appId) {
+                GetRoles(appId, userId);
+            }
+        });
+
+        //============[ عند تغيير البرنامج ]============
+        $('#application').on('change', function () {
+            var userId = $("#Id").val();
+            GetBranches(5, userId); // دايماً من HubStore
+            GetRoles($(this).val(), userId); // حسب البرنامج
+        });
+
+        //============[ AJAX Branches & Roles ]============
+        function GetBranches(applicationId, userId) {
+            applicationId = 5; // ثابت HubStore
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBranches", "Admin")',
+                data: { applicationId: applicationId, userId: userId },
+                success: function (data) {
+                    console.log("✅ GetBranches returned:", data);
+                    $('#Branch').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var option = `<option value="${data[i].BaseId}" ${(data[i].IsFound ? "selected" : "")}>${data[i].NameArab}</option>`;
+                        $('#Branch').append(option);
+                    }
+                    // حدث Select2 لالتقاط العناصر الجديدة
+                    $('#Branch').trigger('change');
+                },
+                error: function (e) {
+                    console.log("❌ ERROR : ", e);
+                    $('#Branch').empty().val([]).trigger('change');
+                }
+            });
+        }
+
+        function GetRoles(applicationId, userId) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetRolesByApplicationId", "Admin")',
+                data: { applicationId: applicationId, userId: userId },
+                success: function (data) {
+                    console.log("✅ GetRoles returned:", data);
+                    $('#role').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var option = `<option value="${data[i].Id}" ${(data[i].IsFound ? "selected" : "")}>${data[i].Name}</option>`;
+                        $('#role').append(option);
+                    }
+                    // حدث Select2 لالتقاط العناصر الجديدة
+                    $('#role').trigger('change');
+                },
+                error: function (e) {
+                    console.log("❌ ERROR : ", e);
+                    $('#role').empty().trigger('change');
+                }
+            });
+        }
+
+        //============[ حفظ البيانات قبل الإرسال ]============
+        $("#submitData").click(function () {
+            $("#Branches").val(JSON.stringify(branchesArr));
+            $("#Roles").val(JSON.stringify(rolesArr));
+
+            if ($("#Id").val().length > 3) {
+                $("#Password").val("Hidden");
+            }
+        });
+
+        function resolveAfter2Seconds() {
+            return new Promise(resolve => setTimeout(resolve, 600));
+        }
+
+        //============[ أحداث أخرى كما هي ]============
+        $("#redirectToFlags").click(() => {
+            window.location.href = ('@Url.Action("UserFlag", "Admin")?userId=' + $("#Id").val() + '&userName=' + $("#UserName").val());
+        });
+
+        $("#EmployeeId").change(function () {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("CheckEmpId", "Admin")',
+                data: { empId: $("#EmployeeId").val() },
+                success: function (data) {
+                    if (data)
+                        toastr.success('كود الموظف متاح', 'تهانينا');
+                    else {
+                        toastr.warning('كود الموظف غير متاح', 'عفواً');
+                        $("#EmployeeId").val("");
+                    }
+                },
+                error: function (e) {
+                    console.log("ERROR : ", e);
+                    toastr.error('حدث خطأ برجاء إعادة المحاولة', 'عفواً');
+                    $("#EmployeeId").val("");
+                }
+            });
+        });
+
+        $("#myPassword").keyup(function () {
+            $("#Password").val($(this).val());
+        });
+    </script>
+}

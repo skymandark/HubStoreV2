@@ -1,0 +1,160 @@
+@model Core.ViewModels.ReturnOrderViewModels.ReturnOrderRequestDto
+
+@{
+    ViewData["Title"] = "إنشاء أمر إرجاع جديد";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">إنشاء أمر إرجاع جديد</h1>
+
+    <form asp-action="Create" method="post" class="form-section">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="DocDate" class="form-label"></label>
+                <input asp-for="DocDate" class="form-control" type="date" />
+                <span asp-validation-for="DocDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="BranchId" class="form-label">الفرع</label>
+                <select asp-for="BranchId" class="form-select" asp-items="ViewBag.Branches">
+                    <option value="">اختر الفرع</option>
+                </select>
+                <span asp-validation-for="BranchId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="ReturnType" class="form-label">نوع الإرجاع</label>
+                <select asp-for="ReturnType" class="form-select" onchange="toggleSupplierClient()">
+                    <option value="">اختر النوع</option>
+                    <option value="SupplierReturn">إرجاع للمورد</option>
+                    <option value="CustomerReturn">إرجاع من العميل</option>
+                </select>
+                <span asp-validation-for="ReturnType" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ReturnReasonId" class="form-label">سبب الإرجاع</label>
+                <select asp-for="ReturnReasonId" class="form-select" asp-items="ViewBag.ReturnReasons">
+                    <option value="">اختر السبب</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3" id="supplierRow" style="display: none;">
+            <div class="col-md-6">
+                <label asp-for="SupplierId" class="form-label">المورد</label>
+                <select asp-for="SupplierId" class="form-select" asp-items="ViewBag.Suppliers">
+                    <option value="">اختر المورد</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3" id="clientRow" style="display: none;">
+            <div class="col-md-6">
+                <label asp-for="ClientId" class="form-label">العميل</label>
+                <select asp-for="ClientId" class="form-select" asp-items="ViewBag.Clients">
+                    <option value="">اختر العميل</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Remarks" class="form-label"></label>
+            <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+        </div>
+
+        <h3>تفاصيل الأصناف</h3>
+        <table class="table table-bordered" id="itemsTable">
+            <thead>
+                <tr>
+                    <th>الصنف</th>
+                    <th>الكمية</th>
+                    <th>السعر</th>
+                    <th>القيمة الإجمالية</th>
+                    <th>سبب الإرجاع</th>
+                    <th>رقم الدفعة</th>
+                    <th>تاريخ الانتهاء</th>
+                    <th>ملاحظات</th>
+                    <th>إجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.ReturnOrderDetails.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <select asp-for="ReturnOrderDetails[i].ItemId" class="form-select" asp-items="ViewBag.Items">
+                                <option value="">اختر الصنف</option>
+                            </select>
+                        </td>
+                        <td><input asp-for="ReturnOrderDetails[i].Qty" type="number" class="form-control qty" step="0.01" onchange="calculateTotal(this)" /></td>
+                        <td><input asp-for="ReturnOrderDetails[i].Price" type="number" class="form-control price" step="0.01" onchange="calculateTotal(this)" /></td>
+                        <td><input asp-for="ReturnOrderDetails[i].TotalValue" type="number" class="form-control total" step="0.01" readonly /></td>
+                        <td>
+                            <select asp-for="ReturnOrderDetails[i].ReturnReasonId" class="form-select" asp-items="ViewBag.ReturnReasons">
+                                <option value="">اختر السبب</option>
+                            </select>
+                        </td>
+                        <td><input asp-for="ReturnOrderDetails[i].BatchNo" type="text" class="form-control" /></td>
+                        <td><input asp-for="ReturnOrderDetails[i].ExpiryDate" type="date" class="form-control" /></td>
+                        <td><input asp-for="ReturnOrderDetails[i].Notes" type="text" class="form-control" /></td>
+                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">حذف</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-secondary mb-3" onclick="addItem()">إضافة صنف</button>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">حفظ</button>
+            <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSupplierClient() {
+            const returnType = document.getElementById('ReturnType').value;
+            const supplierRow = document.getElementById('supplierRow');
+            const clientRow = document.getElementById('clientRow');
+            if (returnType === 'SupplierReturn') {
+                supplierRow.style.display = 'block';
+                clientRow.style.display = 'none';
+            } else if (returnType === 'CustomerReturn') {
+                supplierRow.style.display = 'none';
+                clientRow.style.display = 'block';
+            } else {
+                supplierRow.style.display = 'none';
+                clientRow.style.display = 'none';
+            }
+        }
+
+        function calculateTotal(element) {
+            const row = element.closest('tr');
+            const qty = parseFloat(row.querySelector('.qty').value) || 0;
+            const price = parseFloat(row.querySelector('.price').value) || 0;
+            const total = qty * price;
+            row.querySelector('.total').value = total.toFixed(2);
+        }
+
+        function addItem() {
+            // This would need to be implemented with AJAX or by posting back
+            // For simplicity, redirect to add a new detail
+            window.location.href = '@Url.Action("Create")';
+        }
+
+        function removeItem(button) {
+            button.closest('tr').remove();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleSupplierClient();
+        });
+    </script>
+}

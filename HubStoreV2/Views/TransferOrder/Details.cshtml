@@ -1,0 +1,304 @@
+@model Core.ViewModels.TransferOrderViewModels.TransferOrderRequestDto
+@{
+    ViewData["Title"] = "تفاصيل طلب النقل";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var itemNames = ViewBag.ItemNames as Dictionary<int, string>;
+}
+
+<style>
+    /* Styling similar to PO Details */
+    :root {
+        --primary-color: #2c3e50;
+        --success-color: #27ae60;
+        --danger-color: #e74c3c;
+        --warning-color: #f39c12;
+        --info-color: #3498db;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: 600;
+        padding: 15px 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 10px;
+    }
+
+    .detail-item {
+        flex: 1 1 200px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+    }
+    
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        color: white;
+    }
+    .status-Pending { background-color: var(--warning-color); }
+    .status-Approved { background-color: var(--info-color); }
+    .status-Executed { background-color: var(--primary-color); }
+    .status-Received { background-color: var(--success-color); }
+
+</style>
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="page-header">
+        <h1><i class="fas fa-exchange-alt"></i> تفاصيل طلب النقل</h1>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Info Card -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-info-circle"></i> المعلومات الأساسية
+        </div>
+        <div class="card-body">
+            <div class="detail-row">
+                <div class="detail-item">
+                    <div class="detail-label">رقم الطلب</div>
+                    <div class="detail-value">#@Model.TransferOrderId</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">التاريخ</div>
+                    <div class="detail-value">@Model.DocDate.ToString("yyyy-MM-dd")</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">من فرع</div>
+                    <div class="detail-value">@ViewBag.FromBranchName</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">إلى فرع</div>
+                    <div class="detail-value">@ViewBag.ToBranchName</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">المرجع</div>
+                    <div class="detail-value">@Model.Reference</div>
+                </div>
+                 <div class="detail-item">
+                    <div class="detail-label">الحالة</div>
+                    <div class="detail-value">
+                        <span class="status-badge status-@Model.Status">
+                            @(Model.Status == 1 ? "Pending" : Model.Status == 2 ? "Approved" : "Executed")
+                        </span>
+                    </div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Remarks))
+            {
+                <div class="mt-3 p-3 bg-light rounded">
+                    <strong>ملاحظات:</strong> @Model.Remarks
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-list"></i> الأصناف
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>الصنف</th>
+                            <th>الكمية المطلوبة</th>
+                            <th>الكمية المشحونة (StockOut)</th>
+                            <th>الكمية المستلمة (StockIn)</th>
+                            <th>المتبقي للشحن</th>
+                            <th>المتبقي للاستلام</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TransferOrderDetails)
+                        {
+                            var itemName = itemNames != null && itemNames.ContainsKey(item.ItemId) ? itemNames[item.ItemId] : "Item " + item.ItemId;
+                            <tr>
+                                <td>@itemName</td>
+                                <td>@item.RequestedQty</td>
+                                <td>@item.ShippedQty</td>
+                                <td>@item.ReceivedQty</td>
+                                <td>@(item.RequestedQty - item.ShippedQty)</td>
+                                <td>@(item.ShippedQty - item.ReceivedQty)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Region -->
+    <div class="row mt-4">
+        <div class="col-12">
+            @if (Model.Status == 1) // Pending
+            {
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-white">
+                        <i class="fas fa-check-circle"></i> اعتماد الطلب
+                    </div>
+                    <div class="card-body">
+                        <p>هل تريد اعتماد هذا الطلب للبدء في التنفيذ؟</p>
+                        <form asp-action="Approve" asp-route-id="@Model.TransferOrderId" method="post">
+                             <button type="submit" class="btn btn-warning text-white btn-lg w-100" onclick="return confirm('تأكيد الاعتماد؟')">
+                                 <i class="fas fa-check"></i> اعتماد الطلب
+                             </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Execution (Shipping) Form -->
+                var pendingShipment = Model.TransferOrderDetails.Where(d => d.RequestedQty > d.ShippedQty).ToList();
+                if (pendingShipment.Any())
+                {
+                    <div class="card border-primary mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-truck-loading"></i> تنفيذ صرف (شحن) البضاعة
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="Execute" asp-route-id="@Model.TransferOrderId" method="post">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>الصنف</th>
+                                            <th>المطلوب</th>
+                                            <th>تم شحنه</th>
+                                            <th>الكمية للصرف الآن</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < pendingShipment.Count; i++)
+                                        {
+                                            var item = pendingShipment[i];
+                                            var itemName = itemNames != null && itemNames.ContainsKey(item.ItemId) ? itemNames[item.ItemId] : "Item " + item.ItemId;
+                                            var remaining = item.RequestedQty - item.ShippedQty;
+                                            
+                                            <input type="hidden" name="details[@i].ItemId" value="@item.ItemId" />
+                                            <tr>
+                                                <td>@itemName</td>
+                                                <td>@item.RequestedQty</td>
+                                                <td>@item.ShippedQty</td>
+                                                <td>
+                                                    <input type="number" name="details[@i].RequestedQty" class="form-control" value="@remaining" max="@remaining" min="0" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane"></i> تنفيذ الصرف
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+
+                <!-- Receiving Form -->
+                var pendingReceipt = Model.TransferOrderDetails.Where(d => d.ShippedQty > d.ReceivedQty).ToList();
+                if (pendingReceipt.Any())
+                {
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-box-open"></i> استلام البضاعة
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="Receive" asp-route-id="@Model.TransferOrderId" method="post">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>الصنف</th>
+                                            <th>تم شحنه</th>
+                                            <th>تم استلامه</th>
+                                            <th>الكمية للاستلام الآن</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < pendingReceipt.Count; i++)
+                                        {
+                                            var item = pendingReceipt[i];
+                                            var itemName = itemNames != null && itemNames.ContainsKey(item.ItemId) ? itemNames[item.ItemId] : "Item " + item.ItemId;
+                                            var remaining = item.ShippedQty - item.ReceivedQty;
+                                            
+                                            <input type="hidden" name="details[@i].ItemId" value="@item.ItemId" />
+                                            <tr>
+                                                <td>@itemName</td>
+                                                <td>@item.ShippedQty</td>
+                                                <td>@item.ReceivedQty</td>
+                                                <td>
+                                                    <input type="number" name="details[@i].RequestedQty" class="form-control" value="@remaining" max="@remaining" min="0" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-check-double"></i> استلام البضاعة
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> عودة للقائمة
+        </a>
+    </div>
+</div>

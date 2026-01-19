@@ -1,0 +1,249 @@
+﻿@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+<!-- Welcome Section -->
+<div class="welcome-section animate__animated animate__fadeIn">
+    <div class="welcome-content">
+        <div class="welcome-icon">
+            <i class="fas fa-cogs"></i>
+        </div>
+        <h1 class="welcome-title">مرحباً بك في HubStore ERP</h1>
+        <p class="welcome-subtitle">نظام إدارة شامل للمشتريات والمخزون والتحويلات</p>
+        <div class="welcome-features">
+            <div class="feature-item">
+                <i class="fas fa-shopping-cart"></i>
+                <span>إدارة المشتريات</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-warehouse"></i>
+                <span>نظام المخزون</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-truck"></i>
+                <span>التحويلات والشحن</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-users-cog"></i>
+                <span>إدارة المستخدمين</span>
+            </div>
+        </div>
+    </div>
+    <div class="welcome-image">
+        <div class="erp-illustration">
+            <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- Background -->
+                <rect width="400" height="300" fill="url(#bgGradient)" rx="10"/>
+                <!-- Buildings -->
+                <rect x="50" y="150" width="60" height="100" fill="#fff" opacity="0.9" rx="5"/>
+                <rect x="130" y="120" width="60" height="130" fill="#fff" opacity="0.9" rx="5"/>
+                <rect x="210" y="100" width="60" height="150" fill="#fff" opacity="0.9" rx="5"/>
+                <rect x="290" y="140" width="60" height="110" fill="#fff" opacity="0.9" rx="5"/>
+                <!-- Windows -->
+                <rect x="60" y="160" width="10" height="15" fill="#667eea" rx="2"/>
+                <rect x="75" y="160" width="10" height="15" fill="#667eea" rx="2"/>
+                <rect x="140" y="130" width="10" height="15" fill="#764ba2" rx="2"/>
+                <rect x="155" y="130" width="10" height="15" fill="#764ba2" rx="2"/>
+                <rect x="220" y="110" width="10" height="15" fill="#f093fb" rx="2"/>
+                <rect x="235" y="110" width="10" height="15" fill="#f093fb" rx="2"/>
+                <rect x="300" y="150" width="10" height="15" fill="#f5576c" rx="2"/>
+                <rect x="315" y="150" width="10" height="15" fill="#f5576c" rx="2"/>
+                <!-- Data Flow -->
+                <path d="M 20 200 Q 100 180 180 200 T 340 200" stroke="#fff" stroke-width="3" fill="none" opacity="0.7"/>
+                <circle cx="20" cy="200" r="5" fill="#fff"/>
+                <circle cx="180" cy="200" r="5" fill="#fff"/>
+                <circle cx="340" cy="200" r="5" fill="#fff"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access Cards -->
+<div class="quick-access animate__animated animate__fadeInUp animate__delay-1s">
+    <h3 class="section-title"><i class="fas fa-rocket"></i> الوصول السريع</h3>
+    <div class="access-grid">
+        <div class="access-card" onclick="navigateTo('PurchaseOrder', 'Index')">
+            <div class="access-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h4>المشتريات</h4>
+            <p>إدارة طلبات الشراء والاستلام</p>
+        </div>
+        <div class="access-card" onclick="navigateTo('Inventory', 'Index')">
+            <div class="access-icon">
+                <i class="fas fa-warehouse"></i>
+            </div>
+            <h4>المخزون</h4>
+            <p>مراقبة المخزون والحركات</p>
+        </div>
+        <div class="access-card" onclick="navigateTo('TransferOrderRequest', 'Index')">
+            <div class="access-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <h4>التحويلات</h4>
+            <p>إدارة طلبات التحويل بين الفروع</p>
+        </div>
+        <div class="access-card" onclick="navigateTo('ReturnOrder', 'Index')">
+            <div class="access-icon">
+                <i class="fas fa-undo"></i>
+            </div>
+            <h4>الإرجاع</h4>
+            <p>إدارة أوامر الإرجاع والصرف</p>
+        </div>
+        <div class="access-card" onclick="navigateTo('Admin', 'Index')">
+            <div class="access-icon">
+                <i class="fas fa-users-cog"></i>
+            </div>
+            <h4>الإدارة</h4>
+            <p>إدارة المستخدمين والصلاحيات</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .welcome-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 50px;
+        margin-bottom: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-content {
+        flex: 1;
+        text-align: right;
+        color: black;
+    }
+
+    .welcome-icon {
+        font-size: 4rem;
+        color: #fff;
+        margin-bottom: 20px;
+        text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .welcome-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        background: linear-gradient(45deg, #000, #333);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+    }
+
+    .welcome-features {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px 20px;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .feature-item i {
+        color: #667eea;
+    }
+
+    .welcome-image {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .erp-illustration {
+        width: 100%;
+        height: 300px;
+    }
+
+    .quick-access {
+        text-align: center;
+        color: black;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 40px;
+        color: black;
+    }
+
+    .access-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .access-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .access-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .access-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 20px;
+    }
+
+    .access-card h4 {
+        color: var(--primary-color);
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .access-card p {
+        color: #666;
+        margin: 0;
+    }
+
+    @@media (max-width: 768px) {
+        .welcome-section {
+            flex-direction: column;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .welcome-features {
+            justify-content: center;
+        }
+
+        .access-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
