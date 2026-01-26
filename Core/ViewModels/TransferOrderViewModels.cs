@@ -77,6 +77,7 @@ namespace Core.ViewModels.TransferOrderViewModels
         public int ItemId { get; set; }
         public string ItemNameEng { get; set; }
         public decimal Quantity { get; set; }
+        public decimal AvailableStock { get; set; }
         public int TempOrder { get; set; }
     }
 }

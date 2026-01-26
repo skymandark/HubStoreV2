@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HubStoreV2.Controllers
 {
     //[Authorize]
-    public class PurchaseOrderController : Controller
+    public class PurchaseOrderController : BaseController
     {
         private readonly IPurchaseOrderService _purchaseOrderService;
         private readonly ApplicationDbContext _context;
@@ -61,6 +61,8 @@ namespace HubStoreV2.Controllers
                 Suppliers = new List<SupplierDto>(),
                 Branches = new List<BranchDto>(),
                 Items = new List<ItemDto>(),
+                ItemPackages = new List<ItemUnitDto>(),
+                ApprovalSystemOptions = new List<ApprovalSystemOptionDto>(),
                 PurchaseOrderDetails = new List<PurchaseOrderDetailDto>()
             };
 
@@ -68,7 +70,10 @@ namespace HubStoreV2.Controllers
             {
                 var suppliers = await _context.Suppliers.Where(s => s.IsActive).ToListAsync();
                 var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
-                var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+                // Load all items - filtering will be done on client side
+                var items = await _context.Items
+                    .Where(i => !i.IsDeleted)
+                    .ToListAsync();
 
                 dto.Suppliers = suppliers.Select(s => new SupplierDto
                 {
@@ -83,7 +88,10 @@ namespace HubStoreV2.Controllers
                 dto.Items = items.Select(i => new ItemDto
                 {
                     ItemId = i.ItemId,
-                    Name = i.NameArab
+                    Name = i.NameArab,
+                    NameArab = i.NameArab,
+                    Code = i.ItemCode,
+                    BranchId = i.BranchId
                 }).ToList();
             }
             catch (Exception ex)
@@ -278,7 +286,10 @@ namespace HubStoreV2.Controllers
         {
             var suppliers = await _context.Suppliers.Where(s => s.IsActive).ToListAsync();
             var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
-            var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+            // Load all items - filtering will be done on client side
+            var items = await _context.Items
+                .Where(i => !i.IsDeleted)
+                .ToListAsync();
 
             dto.Suppliers = suppliers.Select(s => new SupplierDto 
             { 
@@ -295,8 +306,37 @@ namespace HubStoreV2.Controllers
             dto.Items = items.Select(i => new ItemDto 
             { 
                 ItemId = i.ItemId, 
-                Name = i.NameArab 
+                Name = i.NameArab,
+                NameArab = i.NameArab,
+                Code = i.ItemCode,
+                BranchId = i.BranchId
             }).ToList();
+            
+            // Load approval system options
+            dto.ApprovalSystemOptions = new List<ApprovalSystemOptionDto>
+            {
+                new ApprovalSystemOptionDto 
+                { 
+                    StatusId = 1, 
+                    Name = "موافقة تلقائية", 
+                    Description = "الموافقة التلقائية على طلب الشراء بدون الحاجة لموافقة يدوية",
+                    RequiresApproval = false
+                },
+                new ApprovalSystemOptionDto 
+                { 
+                    StatusId = 2, 
+                    Name = "موافقة يدوية", 
+                    Description = "يتطلب موافقة يدوية من المدير المختص",
+                    RequiresApproval = true
+                },
+                new ApprovalSystemOptionDto 
+                { 
+                    StatusId = 3, 
+                    Name = "موافقة مشروطة", 
+                    Description = "موافقة تلقائية للطلبات الأقل من مبلغ معين، وموافقة يدوية للطلبات الأكبر",
+                    RequiresApproval = true
+                }
+            };
         }
     }
 }

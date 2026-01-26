@@ -1,0 +1,273 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "تقرير أرصدة المخزون";
+}
+
+<div style="text-align: center; margin-bottom: 20px;">
+    <h1 style="color: #2c3e50;">تقرير أرصدة المخزون</h1>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div style="background-color: #d1ecf1; border: 3px solid #17a2b8; padding: 20px; margin: 10px;">
+            <div class="row">
+                <div class="col-md-4">
+                    <label style="margin-bottom: 10px;">اختر المخزن</label>
+                    <select class="form-select" id="branchIds" name="branchIds" multiple required style="height: 200px; font-size: 20px;">
+                        @foreach (var branch in Model.Branches)
+                        {
+                            <option value="@branch.BranchId">@branch.Name_Arab (@branch.Name)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label style="margin-bottom: 10px;">المورد</label>
+                    <select class="form-select" id="vendorId" name="vendorId" style="font-size: 20px;">
+                        <option value="">--اختر المصنع--</option>
+                        @foreach (var vendor in Model.Vendors)
+                        {
+                            <option value="@vendor.SupplierId">@vendor.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <div style="margin-top: 35px;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isGrouped" name="isGrouped">
+                            <label class="form-check-label" for="isGrouped" style="font-size: 18px;">
+                                مجمع؟
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-md-12" style="text-align: center;">
+                    <button type="button" id="generateReport" class="btn btn-success" style="margin: 0 10px;">
+                        <i class="fas fa-search"></i> عرض النتائج
+                    </button>
+                    <button type="button" id="printReport" class="btn btn-info" disabled style="margin: 0 10px;">
+                        <i class="fas fa-print"></i> طباعة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4" id="reportResults" style="display: none;">
+    <div class="col-md-12">
+        <div style="background-color: #d1ecf1; border: 3px solid #17a2b8; padding: 20px; margin: 10px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #6f42c1;">النتائج</h2>
+                <hr>
+            </div>
+            <div id="stockReportGrid" style="max-width: 1737px; margin: 0 auto;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    let reportData = [];
+
+    // Initialize multi-select for branches
+    $('#branchIds').select2({
+        placeholder: 'اختر المخازن',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Generate report
+    $('#generateReport').click(function() {
+        const branchIds = $('#branchIds').val();
+        const vendorId = $('#vendorId').val();
+        const isGrouped = $('#isGrouped').is(':checked');
+
+        if (!branchIds || branchIds.length === 0) {
+            alert('يجب اختيار مخزن واحد على الأقل');
+            return;
+        }
+
+        // Show loading
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> جاري التحميل...');
+
+        $.ajax({
+            url: '@Url.Action("ReadItemOpenBalances")',
+            type: 'POST',
+            data: {
+                branchIds: branchIds,
+                vendorId: vendorId || null,
+                isSummary: !isGrouped // isSummary is opposite of isGrouped
+            },
+            success: function(response) {
+                $('#generateReport').prop('disabled', false).html('<i class="fas fa-search"></i> عرض النتائج');
+
+                if (response.success) {
+                    reportData = response.data;
+                    initializeGrid(reportData, isGrouped);
+                    $('#reportResults').show();
+                    $('#printReport').prop('disabled', false);
+                } else {
+                    alert('خطأ: ' + response.message);
+                }
+            },
+            error: function() {
+                $('#generateReport').prop('disabled', false).html('<i class="fas fa-search"></i> عرض النتائج');
+                alert('حدث خطأ في جلب البيانات');
+            }
+        });
+    });
+
+    // Print report
+    $('#printReport').click(function() {
+        const branchIds = $('#branchIds').val();
+        const vendorId = $('#vendorId').val();
+        const isGrouped = $('#isGrouped').is(':checked');
+
+        const url = '@Url.Action("Details")?branchIds=' + branchIds.join('&branchIds=') +
+                   (vendorId ? '&vendorId=' + vendorId : '') +
+                   '&isSummary=' + !isGrouped;
+
+        window.open(url, '_blank');
+    });
+
+    function initializeGrid(data, isGrouped) {
+        const gridId = isGrouped ? 'GroupedgridReport' : 'gridReport';
+
+        $('#stockReportGrid').dxDataGrid({
+            dataSource: data,
+            showBorders: true,
+            showRowLines: true,
+            showColumnLines: true,
+            rowAlternationEnabled: true,
+            columnHidingEnabled: true,
+            allowColumnReordering: true,
+            allowColumnResizing: true,
+            paging: { enabled: true, pageSize: 30 },
+            pager: {
+                showPageSizeSelector: true,
+                allowedPageSizes: [10, 20, 30, 50],
+                showInfo: true,
+                showNavigationButtons: true
+            },
+            sorting: { mode: 'multiple' },
+            filterRow: { visible: true },
+            headerFilter: { visible: true },
+            groupPanel: { visible: true },
+            selection: { mode: 'single' },
+            height: 613,
+            scrolling: { mode: 'infinite', preloadEnabled: false },
+            columnAutoWidth: true,
+            stateStoring: { enabled: false },
+            export: { enabled: true },
+            columns: isGrouped ? [
+                // Grouped View Columns
+                { dataField: 'ItemId', caption: 'كود الصنف', width: 100 },
+                { dataField: 'BranchName', caption: 'المخزن', width: 150 },
+                { dataField: 'SectionName', caption: 'اسم القسم', width: 120 },
+                { dataField: 'MainItemName', caption: 'اسم الصنف الرئيسي', width: 150 },
+                { dataField: 'SubItemName', caption: 'اسم الصنف الفرعي', width: 150 },
+                { dataField: 'ItemName', caption: 'اسم الصنف', width: 200 },
+                { dataField: 'BalanceQuantity', caption: 'رصيد المخزن', width: 130, dataType: 'number', format: { type: 'fixedPoint', precision: 2 } },
+                { dataField: 'PackageName', caption: 'الفئة', width: 120 }
+            ] : [
+                // Detailed View Columns
+                { dataField: 'ItemId', caption: 'كود الصنف', width: 100 },
+                { dataField: 'BranchName', caption: 'اسم المخزن', width: 150 },
+                { dataField: 'SectionName', caption: 'اسم القسم', width: 120 },
+                { dataField: 'MainItemName', caption: 'اسم الصنف الرئيسي', width: 150 },
+                { dataField: 'SubItemName', caption: 'اسم الصنف الفرعي', width: 150 },
+                { dataField: 'ItemName', caption: 'اسم الصنف', width: 200 },
+                { dataField: 'ConsumerPrice', caption: 'سعر الجمهور', width: 120, dataType: 'number', format: { type: 'currency', precision: 2 } },
+                { dataField: 'BatchNumber', caption: 'رقم التشغيلة', width: 120 },
+                { dataField: 'CostValue', caption: 'متوسط التكلفة', width: 130, dataType: 'number', format: { type: 'currency', precision: 2 }, visible: false }, // Hidden based on permissions
+                { dataField: 'ExpireDate', caption: 'تاريخ الصلاحية', width: 120, dataType: 'date', format: 'MM/yyyy' },
+                { dataField: 'BalanceQuantity', caption: 'رصيد المخزن', width: 130, dataType: 'number', format: { type: 'fixedPoint', precision: 2 } },
+                { dataField: 'PackageName', caption: 'الفئة', width: 120 }
+            ],
+            summary: {
+                totalItems: [
+                    {
+                        column: 'BalanceQuantity',
+                        summaryType: 'sum',
+                        displayFormat: 'الإجمالي: {0}',
+                        valueFormat: { type: 'fixedPoint', precision: 2 }
+                    }
+                ]
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    .select2-container--default .select2-selection--multiple {
+        border-color: #bdc3c7 !important;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #95a5a6 !important;
+        box-shadow: 0 0 0 0.2rem rgba(149, 165, 166, 0.25) !important;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #34495e !important;
+        color: #ecf0f1 !important;
+    }
+
+    .dx-datagrid-headers .dx-header-row {
+        background-color: #34495e !important;
+    }
+
+    .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
+        background-color: #34495e !important;
+        color: #ecf0f1 !important;
+        border-color: #7f8c8d !important;
+    }
+
+    .dx-datagrid .dx-row-alt > td {
+        background-color: #f8f9fa !important;
+    }
+
+    .dx-datagrid .dx-row > td {
+        border-color: #dee2e6 !important;
+    }
+
+    .dx-pager {
+        background-color: #ecf0f1 !important;
+        border-color: #bdc3c7 !important;
+    }
+
+    .dx-texteditor-input {
+        border-color: #bdc3c7 !important;
+    }
+
+    .dx-texteditor-input:focus {
+        border-color: #95a5a6 !important;
+        box-shadow: 0 0 0 0.2rem rgba(149, 165, 166, 0.25) !important;
+    }
+
+    .dx-button {
+        background-color: #34495e !important;
+        border-color: #34495e !important;
+        color: #ecf0f1 !important;
+    }
+
+    .dx-button:hover {
+        background-color: #2c3e50 !important;
+        border-color: #2c3e50 !important;
+    }
+</style>

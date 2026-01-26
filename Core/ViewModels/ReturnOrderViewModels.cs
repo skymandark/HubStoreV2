@@ -29,6 +29,7 @@ namespace Core.ViewModels.ReturnOrderViewModels
         public string BatchNo { get; set; }
         public DateTime? ExpiryDate { get; set; }
         public string Notes { get; set; }
+        public decimal AvailableStock { get; set; }
     }
 
     public class ReturnOrderListDto

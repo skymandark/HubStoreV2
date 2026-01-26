@@ -1,0 +1,26 @@
+@page "/attachments/{EntityType}/{EntityId:int}"
+
+@using HubStoreV2.Pages.Attachments
+
+<h3>إدارة المرفقات لـ @EntityType (ID: @EntityId)</h3>
+
+<UploadAttachment EntityType="@EntityType" EntityId="@EntityId" OnUploadSuccess="RefreshList" />
+
+<hr />
+
+<AttachmentList EntityType="@EntityType" EntityId="@EntityId" @ref="AttachmentListRef" />
+
+@code {
+    [Parameter] public string EntityType { get; set; }
+    [Parameter] public int EntityId { get; set; }
+
+    private AttachmentList AttachmentListRef { get; set; }
+
+    private async Task RefreshList()
+    {
+        if (AttachmentListRef != null)
+        {
+            await AttachmentListRef.LoadAttachments();
+        }
+    }
+}

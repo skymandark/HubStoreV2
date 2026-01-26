@@ -1,73 +1,81 @@
-@model List<Core.ViewModels.StockInViewModels.StockInListDto>
+@model IEnumerable<Core.ViewModels.StockInViewModels.StockInListDto>
 @{
-    ViewData["Title"] = "إذونات الاستلام - Enterprise View";
+    ViewData["Title"] = "أذونات الاستلام - القائمة";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    .premium-grid-card {
-        background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        border: none;
-        overflow: hidden;
+    :root {
+        --primary-solid: #1e293b; 
+        --secondary-solid: #64748b;
+        --accent-solid: #3b82f6; 
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
     }
 
-    .grid-header-section {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+
+    .page-header-elegant {
+        background-color: var(--primary-solid);
         color: white;
-        padding: 30px;
-        border-radius: 20px 20px 0 0;
+        padding: 30px 40px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f1f5f9 !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
+    }
+
+    .btn-elegant-primary {
+        background-color: var(--accent-solid);
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border-radius: 50px;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        color: white;
     }
 
     .status-badge {
-        padding: 6px 14px;
+        padding: 5px 12px;
         border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        display: inline-block;
+        font-size: 0.85rem;
+        font-weight: 600;
     }
-    .status-draft { background: #f1f5f9; color: #475569; }
-    .status-approved { background: #dcfce7; color: #15803d; }
-    .status-pending { background: #fef9c3; color: #854d0e; }
-    .status-received { background: #e0f2fe; color: #0369a1; }
-
-    .grid-action-btn {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 3px;
-        transition: all 0.2s;
-        text-decoration: none;
-    }
-    .grid-action-btn:hover { transform: translateY(-2px); }
+    .status-draft { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .status-approved { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-received { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .status-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 </style>
 
-<div class="container-fluid animate__animated animate__fadeIn">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="page-header-elegant d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="fw-bold text-dark mb-1">إذونات الاستلام</h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted small">الرئيسية</a></li>
-                    <li class="breadcrumb-item active small" aria-current="page">المخازن</li>
-                </ol>
-            </nav>
+            <h1 class="mb-1"><i class="fas fa-file-import me-2"></i> أذونات الاستلام</h1>
+            <p class="mb-0 opacity-75">عرض وإدارة أذونات استلام البضائع من الموردين</p>
         </div>
-        <div>
-            <a href="@Url.Action("Create", "StockIn")" class="btn btn-primary px-4 rounded-pill shadow-sm">
-                <i class="fas fa-plus-circle me-2"></i>إذن استلام جديد
-            </a>
-        </div>
+        <a href="@Url.Action("Create")" class="btn btn-elegant-primary shadow">
+            <i class="fas fa-plus me-2"></i> إنشاء إذن استلام جديد
+        </a>
     </div>
 
-    <!-- DataGrid Section -->
-    <div class="card premium-grid-card">
-        <div class="card-body p-0">
+    <div class="card card-elegant">
+        <div class="card-body p-4">
             <div id="stockInGrid"></div>
         </div>
     </div>
@@ -75,56 +83,58 @@
 
 @section Scripts {
     <script>
-        $(function() {
-            var data = @Html.Raw(Json.Serialize(Model));
+        $(function () {
+            const stockIns = @Html.Raw(Json.Serialize(Model));
 
             $("#stockInGrid").dxDataGrid({
-                dataSource: data,
+                dataSource: stockIns,
                 rtlEnabled: true,
                 showBorders: false,
-                rowAlternationEnabled: true,
                 columnAutoWidth: true,
-                hoverStateEnabled: true,
-                searchPanel: { visible: true, width: 300, placeholder: "بحث..." },
+                rowAlternationEnabled: true,
+                searchPanel: { visible: true, width: 240, placeholder: "بحث..." },
                 headerFilter: { visible: true },
-                filterRow: { visible: true },
                 paging: { pageSize: 15 },
-                pager: {
-                    showPageSizeSelector: true,
-                    allowedPageSizes: [10, 15, 25],
-                    showInfo: true
-                },
+                export: { enabled: true },
                 columns: [
-                    { dataField: "docCode", caption: "رقم الإذن", cssClass: "fw-bold text-primary" },
-                    { dataField: "purchaseOrderCode", caption: "أمر الشراء", alignment: "center" },
-                    { dataField: "supplierName", caption: "المورد", minWidth: 150 },
-                    { dataField: "branchName", caption: "الفرع" },
-                    { dataField: "docDate", caption: "التاريخ", dataType: "date", format: "dd/MM/yyyy" },
+                    { dataField: "docCode", caption: "رقم الإذن", width: 130, cssClass: "fw-bold text-primary" },
+                    { dataField: "docDate", caption: "التاريخ", dataType: "date", format: "yyyy/MM/dd", width: 110 },
+                    { dataField: "supplierName", caption: "المورد" },
+                    { dataField: "branchName", caption: "الفرع", width: 150 },
+                    { dataField: "purchaseOrderCode", caption: "أمر الشراء", width: 130 },
+                    { dataField: "invoiceNo", caption: "رقم الفاتورة", width: 120 },
+                    { 
+                        dataField: "totalValue", 
+                        caption: "الإجمالي", 
+                        dataType: "number", 
+                        format: "#,##0.00",
+                        width: 120,
+                        cssClass: "fw-bold"
+                    },
                     { 
                         dataField: "status", 
                         caption: "الحالة", 
-                        alignment: "center",
+                        width: 100,
                         cellTemplate: function(container, options) {
-                            var status = options.value;
-                            var cls = "status-draft";
-                            switch(status) {
-                                case "Approved": cls = "status-approved"; break;
-                                case "PendingApproval": cls = "status-pending"; break;
-                                case "Received": cls = "status-received"; break;
-                            }
-                            $("<div />").addClass("status-badge " + cls).text(status).appendTo(container);
+                            const status = options.data.status;
+                            let cls = "status-draft";
+                            if (status === "Approved") cls = "status-approved";
+                            if (status === "Received") cls = "status-received";
+                            if (status === "Rejected") cls = "status-rejected";
+                            
+                            $("<span class='status-badge'>").addClass(cls).text(status).appendTo(container);
                         }
                     },
                     {
-                        caption: "إجراءات",
-                        alignment: "center",
-                        width: 100,
-                        cellTemplate: function(container, options) {
-                            var id = options.data.stockInId;
-                            $('<div class="d-flex justify-content-center">')
-                                .append($('<a href="/StockIn/Details/' + id + '" class="grid-action-btn bg-light text-info border" title="عرض"><i class="fas fa-eye"></i></a>'))
-                                .appendTo(container);
-                        }
+                        type: "buttons",
+                        width: 80,
+                        buttons: [{
+                            hint: "تفاصيل",
+                            icon: "info",
+                            onClick: function(e) {
+                                location.href = `@Url.Action("Details")/${e.row.data.stockInId}`;
+                            }
+                        }]
                     }
                 ]
             });

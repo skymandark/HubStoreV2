@@ -1,0 +1,177 @@
+@model Core.ViewModels.DirectPurchaseOrderViewModels.DirectPurchaseOrderViewModel
+@{
+    ViewData["Title"] = "تفاصيل طلب الشراء المباشر";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b;
+        --secondary-solid: #64748b;
+        --accent-solid: #3b82f6;
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #fff;
+    }
+
+    .details-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .info-label { color: var(--secondary-solid); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
+    .info-value { color: var(--primary-solid); font-weight: 700; font-size: 1.1rem; }
+
+    .status-badge-lg {
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .status-draft { background: #f1f5f9; color: #475569; }
+    .status-approved { background: #dcfce7; color: #15803d; }
+    .status-rejected { background: #fee2e2; color: #b91c1c; }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="card card-elegant border-0">
+        <div class="details-header-elegant d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-file-invoice-dollar me-3"></i> طلب شراء: @Model.DocCode</h1>
+                <p class="mb-0 opacity-75">عرض تفاصيل طلب الشراء المباشر وحالته</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Index")" class="btn btn-outline-light px-4 rounded-pill">العودة للقائمة</a>
+                
+                @if (Model.StatusName == "Draft")
+                {
+                    <form asp-action="Approve" method="post">
+                        <input type="hidden" name="id" value="@Model.DirectPurchaseOrderId" />
+                        <button type="submit" class="btn btn-success px-5 rounded-pill shadow">
+                            <i class="fas fa-check-circle me-2"></i> موافقة على الطلب
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <div class="card-body p-5">
+            <div class="row g-5 mb-5">
+                <div class="col-md-3">
+                    <div class="info-label">المورد</div>
+                    <div class="info-value">@Model.SupplierName</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">الفرع المستلم</div>
+                    <div class="info-value">@Model.BranchName</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">تاريخ الطلب</div>
+                    <div class="info-value">@Model.DocDate.ToShortDateString()</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">الحالة</div>
+                    <div>
+                        <span class="status-badge-lg status-@(Model.StatusName.ToLower())">@Model.StatusName</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">تاريخ التوصيل</div>
+                    <div class="info-value">@(Model.DeliveryDate?.ToShortDateString() ?? "---")</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">طريقة الشحن</div>
+                    <div class="info-value">@(Model.ShipmentTypeName ?? "---")</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">طريقة الدفع</div>
+                    <div class="info-value">@(Model.CreditPayment ? "آجل" : "نقدي")</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">بواسطة</div>
+                    <div class="info-value">@Model.CreatedBy</div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-4"><i class="fas fa-list me-2"></i> قائمة الأصناف المطلوبة</h5>
+            <div id="detailsGrid" class="grid-container-elegant shadow-sm mb-5"></div>
+
+            <div class="row g-5">
+                <div class="col-lg-8">
+                    <div class="bg-light p-4 rounded-3 h-100">
+                        <h6 class="fw-bold mb-3">ملاحظات</h6>
+                        <p class="mb-0">@(string.IsNullOrEmpty(Model.Notes) ? "لا توجد ملاحظات" : Model.Notes)</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border p-4 bg-soft">
+                        <h6 class="fw-bold mb-4">ملخص القيمة</h6>
+                        <div class="summary-item">
+                            <span class="text-muted">إجمالي القيمة</span>
+                            <span class="fw-bold">@Model.TotalPrice.ToString("N2")</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="text-muted">إجمالي الخصم</span>
+                            <span class="text-danger">@((Model.TotalDiscount + Model.TotalAddedDiscount).ToString("N2"))</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="text-muted">قيمة الضريبة</span>
+                            <span>@Model.VatValue.ToString("N2")</span>
+                        </div>
+                        <div class="summary-item border-0 pt-3">
+                            <span class="fs-5 fw-bold">صافي القيمة</span>
+                            <span class="fs-4 fw-bold text-primary">@Model.NetValue.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            const details = @Html.Raw(Json.Serialize(Model.Details));
+
+            $("#detailsGrid").dxDataGrid({
+                dataSource: details,
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                columns: [
+                    { dataField: "serial", caption: "#", width: 50 },
+                    { dataField: "itemName", caption: "الصنف" },
+                    { dataField: "quantity", caption: "الكمية", width: 100 },
+                    { dataField: "price", caption: "السعر", width: 120, format: "N2" },
+                    { 
+                        dataField: "mainDiscountPercent", 
+                        caption: "خصم (%)", 
+                        width: 100,
+                        cellTemplate: function(container, options) {
+                            if (options.value > 0) $("<span>").text(options.value + "%").appendTo(container);
+                            else $("<span>").text("0").appendTo(container);
+                        }
+                    },
+                    { dataField: "vatValue", caption: "الضريبة", width: 100, format: "N2" },
+                    { dataField: "netValue", caption: "الصافي", width: 150, format: "N2", cssClass: "fw-bold" }
+                ]
+            });
+        });
+    </script>
+}

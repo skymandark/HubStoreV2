@@ -51,6 +51,9 @@ namespace Core.Domin
 
         // 2. الفئات والتصنيفات (Categories and Classifications)
         [Required]
+        public int BranchId { get; set; }
+
+        [Required]
         public int SectionId { get; set; }
 
         [Required]
@@ -218,6 +221,9 @@ namespace Core.Domin
         public byte[] RowVersion { get; set; }
 
         // Navigation Properties - العلاقات
+        [ForeignKey(nameof(BranchId))]
+        public virtual Branch Branch { get; set; }
+
         [ForeignKey(nameof(SectionId))]
         public virtual Section Section { get; set; }
 

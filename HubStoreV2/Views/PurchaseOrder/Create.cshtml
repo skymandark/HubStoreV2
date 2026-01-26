@@ -7,127 +7,145 @@
 
 <style>
     :root {
-        --primary-solid: #1e293b; /* Slate 800 - Elegant & Professional */
-        --secondary-solid: #64748b; /* Slate 500 */
-        --accent-solid: #3b82f6; /* Blue 500 */
+        --primary-solid: #0f172a; /* Navy/Slate 900 */
+        --accent-solid: #6366f1; /* Indigo 500 */
+        --accent-hover: #4f46e5;
         --bg-soft: #f8fafc;
         --border-soft: #e2e8f0;
+        --success-text: #059669;
+        --danger-text: #dc2626;
     }
 
-    .card-elegant {
-        border: 1px solid var(--border-soft);
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    .card-premium {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
         background: #fff;
     }
 
-    .form-header-elegant {
-        background-color: var(--primary-solid);
+    .form-header-premium {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: white;
-        padding: 30px 40px;
-        border-radius: 12px 12px 0 0;
+        padding: 40px;
+        border-radius: 16px 16px 0 0;
+        position: relative;
+        overflow: hidden;
     }
 
-    .form-header-elegant h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
-    .form-header-elegant p { font-size: 0.95rem; opacity: 0.8; margin: 5px 0 0 0; }
-
-    .dx-form-group-caption { font-weight: 700 !important; color: var(--primary-solid) !important; }
-
-    .summary-box-elegant {
-        background: var(--bg-soft);
-        border-radius: 10px;
-        padding: 20px;
+    .form-header-premium h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.025em; }
+    
+    .grid-container-premium {
         border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        background: #fff;
+        padding: 1px;
     }
 
-    .grand-total-label { font-size: 0.9rem; color: var(--secondary-solid); text-transform: uppercase; letter-spacing: 0.5px; }
-    .grand-total-value { font-size: 2rem; font-weight: 700; color: var(--primary-solid); }
-
-    .btn-elegant-primary {
-        background-color: var(--accent-solid);
-        color: white;
-        border: none;
-        padding: 10px 30px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-
-    .btn-elegant-primary:hover {
-        background-color: #2563eb;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        color: white;
-    }
-
-    .btn-elegant-outline {
-        border: 1.5px solid rgba(255,255,255,0.3);
-        color: white;
-        transition: all 0.2s;
-    }
-
-    .btn-elegant-outline:hover {
-        background-color: rgba(255,255,255,0.1);
-        border-color: #fff;
-        color: white;
-    }
-
+    /* DX Grid Customization */
     .dx-datagrid-headers {
         background-color: #f1f5f9 !important;
         color: var(--primary-solid) !important;
         font-weight: 700 !important;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+    }
+
+    .dx-datagrid-rowsview .dx-selection.dx-row > td { background-color: rgba(99, 102, 241, 0.05) !important; }
+    
+    .price-cell { font-weight: 600; color: var(--primary-solid); }
+    .net-value-cell { font-weight: 700; color: var(--accent-solid); }
+    .vat-cell { color: var(--secondary-solid); font-size: 0.85rem; }
+
+    .summary-card {
+        background: var(--bg-soft);
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid var(--border-soft);
+    }
+
+    .btn-premium {
+        padding: 12px 32px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-premium-primary {
+        background: var(--accent-solid);
+        color: white;
+        box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+    }
+
+    .btn-premium-primary:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        color: white;
+    }
+
+    .item-code-badge {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-family: monospace;
+        margin-left: 8px;
     }
 </style>
 
-<div class="container-fluid py-4 animate__animated animate__fadeIn">
+<div class="container-fluid py-4">
     <form asp-action="@(isEdit ? "Update" : "Create")" method="post" id="poForm">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="PurchaseOrderId" />
 
-        <div class="card card-elegant border-0">
-            <!-- Header -->
-            <div class="form-header-elegant d-flex justify-content-between align-items-center">
+        <div class="card card-premium">
+            <div class="form-header-premium d-flex justify-content-between align-items-center">
                 <div>
                     <h1>@(isEdit ? "تعديل الطلب #" + Model.PurchaseOrderCode : "إنشاء طلب شراء جديد")</h1>
-                    <p>أدخل تفاصيل الطلب والأصناف بدقة في النموذج التالي</p>
+                    <p class="mb-0 opacity-75">إدارة المشتريات والطلبات الصادرة للموردين</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="@Url.Action("Index")" class="btn btn-elegant-outline px-4 rounded-pill">إلغاء</a>
-                    <button type="submit" class="btn btn-elegant-primary px-5 rounded-pill shadow">حفظ البيانات</button>
+                <div class="d-flex gap-3">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-light btn-premium">إلغاء</a>
+                    <button type="submit" class="btn btn-premium btn-premium-primary">حفظ الطلب</button>
                 </div>
             </div>
 
-            <div class="card-body p-4">
-                <div class="row g-4">
-                    <!-- Basic Info -->
-                    <div class="col-12">
-                        <div id="headerForm"></div>
-                    </div>
+            <div class="card-body p-4 p-lg-5">
+                <div id="headerForm" class="mb-5"></div>
 
-                    <!-- Items Grid -->
-                    <div class="col-12 mt-5">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
-                                <i class="fas fa-list-ul text-primary"></i>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-0">بنود طلب الشراء</h5>
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-indigo-100 p-2 rounded-lg me-3" style="background: rgba(99, 102, 241, 0.1);">
+                            <i class="fas fa-cubes text-indigo-600" style="color: var(--accent-solid);"></i>
                         </div>
-                        <div id="itemsGrid" class="border rounded-3 overflow-hidden"></div>
+                        <h4 class="fw-bold text-slate-900 mb-0">جدول بنود طلب الشراء</h4>
                     </div>
+                </div>
 
-                    <!-- Footer Summary -->
-                    <div class="col-lg-4 offset-lg-8">
-                        <div class="summary-box-elegant mt-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-muted fw-medium">إجمالي الكميات المضافة</span>
-                                <span id="summaryQty" class="badge bg-white text-dark border px-3 py-2 fs-6 fw-bold shadow-sm">0</span>
+                <div class="grid-container-premium">
+                    <div id="itemsGrid"></div>
+                </div>
+
+                <div class="row mt-5 pt-4 border-top">
+                    <div class="col-lg-4 ms-auto">
+                        <div class="summary-card">
+                            <div class="d-flex justify-content-between mb-3 text-slate-500">
+                                <span>إجمالي الأصناف:</span>
+                                <span id="summaryCount" class="fw-bold text-slate-900">0</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-muted fw-medium">صافي القيمة قبل الضريبة</span>
-                                <span id="summaryNet" class="fw-bold fs-5 text-dark">0.00</span>
+                            <div class="d-flex justify-content-between mb-3 text-slate-500">
+                                <span>إجمالي القيمة:</span>
+                                <span id="summaryTotal" class="fw-bold text-slate-900">0.00</span>
                             </div>
-                            <div class="pt-3 border-top text-center mt-3">
-                                <div class="grand-total-label mb-1">الإجمالي النهائي</div>
-                                <div class="grand-total-value">0.00 <small class="fs-6 fw-normal text-muted">ريال</small></div>
+                            <div class="d-flex justify-content-between mb-4 text-slate-500">
+                                <span>إجمالي الضريبة:</span>
+                                <span id="summaryVat" class="fw-bold text-slate-900">0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                <span class="fs-5 fw-bold text-slate-900">الصافي النهائي:</span>
+                                <span id="summaryGrandTotal" class="fs-2 fw-extrabold text-indigo-600" style="color: var(--accent-solid);">0.00</span>
                             </div>
                         </div>
                     </div>
@@ -143,88 +161,207 @@
             var suppliers = @Html.Raw(Json.Serialize(Model.Suppliers));
             var branches = @Html.Raw(Json.Serialize(Model.Branches));
             var items = @Html.Raw(Json.Serialize(Model.Items));
+            var packages = @Html.Raw(Json.Serialize(Model.ItemPackages));
             var details = @Html.Raw(Json.Serialize(Model.PurchaseOrderDetails ?? new List<Core.ViewModels.PurchaseOrderViewModels.PurchaseOrderDetailDto>()));
 
-            // Elegant Form Setup
             $("#headerForm").dxForm({
                 formData: @Html.Raw(Json.Serialize(Model)),
                 rtlEnabled: true,
-                colCount: 4,
+                colCount: 3,
                 labelMode: "floating",
                 items: [
-                    { dataField: "SupplierId", label: { text: "تحديد المورد" }, editorType: "dxSelectBox", 
-                      editorOptions: { dataSource: suppliers, displayExpr: "name", valueExpr: "supplierId", searchEnabled: true, stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
-                    { dataField: "BranchId", label: { text: "فرع الاستلام" }, editorType: "dxSelectBox", 
-                      editorOptions: { dataSource: branches, displayExpr: "name", valueExpr: "branchId", stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
-                    { dataField: "DocDate", label: { text: "تاريخ المستند" }, editorType: "dxDateBox", editorOptions: { width: "100%", stylingMode: "outlined" } },
-                    { dataField: "DeliveryDate", label: { text: "تاريخ التسليم المتوقع" }, editorType: "dxDateBox", editorOptions: { width: "100%", stylingMode: "outlined" } },
-                    { dataField: "Remarks", label: { text: "أي ملاحظات إضافية بخصوص هذا الطلب" }, editorType: "dxTextArea", colSpan: 4, editorOptions: { height: 80, stylingMode: "outlined" } }
+                    { dataField: "SupplierId", label: { text: "المورد" }, editorType: "dxSelectBox", 
+                      editorOptions: { dataSource: suppliers, displayExpr: "name", valueExpr: "supplierId", searchEnabled: true }, validationRules: [{ type: "required" }] },
+                    { dataField: "BranchId", label: { text: "الفرع" }, editorType: "dxSelectBox", 
+                      editorOptions: { dataSource: branches, displayExpr: "name", valueExpr: "branchId" }, validationRules: [{ type: "required" }] },
+                    { dataField: "DocDate", label: { text: "تاريخ المستند" }, editorType: "dxDateBox" },
+                    { dataField: "DeliveryDate", label: { text: "تاريخ التسليم المتوقع" }, editorType: "dxDateBox" },
+                    { dataField: "Reference", label: { text: "رقم المرجع (إن وجد)" }, editorType: "dxTextBox" },
+                    { dataField: "Remarks", label: { text: "ملاحظات إضافية" }, editorType: "dxTextArea", colSpan: 3, editorOptions: { height: 70 } }
                 ]
             });
 
-            // Elegant Grid Setup
             var grid = $("#itemsGrid").dxDataGrid({
                 dataSource: details,
                 rtlEnabled: true,
                 showBorders: false,
                 columnAutoWidth: true,
-                showRowLines: true,
+                rowAlternationEnabled: true,
+                hoverStateEnabled: true,
                 editing: {
                     mode: "cell",
                     allowUpdating: true,
                     allowAdding: true,
                     allowDeleting: true,
-                    newRowPosition: "last"
+                    newRowPosition: "last",
+                    useIcons: true
                 },
+                onContentReady: function() { updateSummary(); },
                 onRowInserted: function() { updateSummary(); },
                 onRowRemoved: function() { updateSummary(); },
                 onRowUpdated: function() { updateSummary(); },
+                onCellValueChanged: function(e) {
+                    if (e.column.dataField === "itemId") {
+                        var branchId = $("#headerForm").dxForm("instance").option("formData").BranchId;
+                        if (e.data.itemId && branchId) {
+                            $.post("@Url.Action("GetItemBalance", "Item")", { itemId: e.data.itemId, branchId: branchId }, function(res) {
+                                e.component.cellValue(e.row.rowIndex, "availableStock", res.balance);
+                            });
+                        }
+                    }
+                },
                 columns: [
-                    { dataField: "itemId", caption: "الصنف", validationRules: [{ type: "required" }],
-                      lookup: { dataSource: items, valueExpr: "itemId", displayExpr: "name" }, width: 300 },
-                    { dataField: "quantity", caption: "الكمية المطلوبة", dataType: "number", validationRules: [{ type: "required" }] },
-                    { dataField: "price", caption: "سعر الوحدة", dataType: "number", format: "#,##0.00" },
-                    { dataField: "mainDiscountPercent", caption: "الخصم (%)", dataType: "number" },
-                    { dataField: "netValue", caption: "القيمة الصافية", dataType: "number", format: "#,##0.00", allowEditing: false, 
-                      calculateCellValue: function(rowData) {
-                          var total = (rowData.quantity || 0) * (rowData.price || 0);
-                          var discount = total * ((rowData.mainDiscountPercent || 0) / 100);
-                          return total - discount;
-                      }
+                    { 
+                        dataField: "itemId", 
+                        caption: "الصنف", 
+                        validationRules: [{ type: "required" }],
+                        lookup: {
+                            dataSource: items,
+                            valueExpr: "itemId",
+                            displayExpr: function(item) {
+                                return item ? (item.code + " - " + item.name) : "";
+                            }
+                        },
+                        width: 300
+                    },
+                    { dataField: "availableStock", caption: "الرصيد", dataType: "number", allowEditing: false, 
+                      width: 100, alignment: "center", cssClass: "text-muted fw-bold" },
+                    { 
+                        dataField: "itemPackageId", 
+                        caption: "العبوة/الوحدة",
+                        lookup: { dataSource: packages, valueExpr: "itemUnitId", displayExpr: "name" }
+                    },
+                    { 
+                        dataField: "quantity", 
+                        caption: "الكمية", 
+                        dataType: "number", 
+                        validationRules: [{ type: "required" }],
+                        alignment: "center"
+                    },
+                    { 
+                        dataField: "price", 
+                        caption: "السعر", 
+                        dataType: "number", 
+                        format: "#,##0.00",
+                        cssClass: "price-cell"
+                    },
+                    { 
+                        dataField: "mainDiscountPercent", 
+                        caption: "% الخصم", 
+                        dataType: "number",
+                        alignment: "center"
+                    },
+                    { 
+                        dataField: "vatValue", 
+                        caption: "الضريبة", 
+                        dataType: "number", 
+                        format: "#,##0.00",
+                        cssClass: "vat-cell",
+                        allowEditing: false,
+                        calculateCellValue: function(rowData) {
+                            var subtotal = (rowData.quantity || 0) * (rowData.price || 0);
+                            var discount = subtotal * ((rowData.mainDiscountPercent || 0) / 100);
+                            return (subtotal - discount) * 0.15; // Assuming 15% VAT
+                        }
+                    },
+                    { 
+                        dataField: "netValue", 
+                        caption: "الصافي", 
+                        dataType: "number", 
+                        format: "#,##0.00", 
+                        allowEditing: false,
+                        cssClass: "net-value-cell",
+                        calculateCellValue: function(rowData) {
+                            var subtotal = (rowData.quantity || 0) * (rowData.price || 0);
+                            var discount = subtotal * ((rowData.mainDiscountPercent || 0) / 100);
+                            var netBeforeVat = subtotal - discount;
+                            return netBeforeVat + (netBeforeVat * 0.15);
+                        }
                     }
                 ],
-                onInitNewRow: function(e) { e.data.quantity = 1; e.data.price = 0; e.data.mainDiscountPercent = 0; }
+                toolbar: {
+                    items: [
+                        {
+                            location: "before",
+                            widget: "dxButton",
+                            options: {
+                                text: "إضافة صنف جديد للطلب",
+                                icon: "add",
+                                type: "default",
+                                stylingMode: "contained",
+                                onClick: function() { grid.addRow(); }
+                            }
+                        }
+                    ]
+                },
+                onInitNewRow: function(e) {
+                    e.data.quantity = 1;
+                    e.data.price = 0;
+                    e.data.mainDiscountPercent = 0;
+                }
             }).dxDataGrid("instance");
 
             function updateSummary() {
                 var rows = grid.getVisibleRows();
-                var totalQty = 0;
-                var totalNet = 0;
-                
+                var count = rows.length;
+                var total = 0;
+                var totalVat = 0;
+                var grandTotal = 0;
+
                 rows.forEach(function(row) {
                     var data = row.data;
-                    totalQty += (data.quantity || 0);
-                    var total = (data.quantity || 0) * (data.price || 0);
-                    totalNet += total - (total * ((data.mainDiscountPercent || 0) / 100));
+                    var qty = data.quantity || 0;
+                    var prc = data.price || 0;
+                    var disc = (qty * prc) * ((data.mainDiscountPercent || 0) / 100);
+                    var netBefore = (qty * prc) - disc;
+                    var vat = netBefore * 0.15;
+
+                    total += (qty * prc);
+                    totalVat += vat;
+                    grandTotal += (netBefore + vat);
                 });
 
-                $("#summaryQty").text(totalQty);
-                $("#summaryNet").text(totalNet.toLocaleString(undefined, { minimumFractionDigits: 2 }));
-                $(".grand-total-value").contents().filter(function() { return this.nodeType == 3; }).first().replaceWith(totalNet.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " ");
+                $("#summaryCount").text(count);
+                $("#summaryTotal").text(total.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+                $("#summaryVat").text(totalVat.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+                $("#summaryGrandTotal").text(grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 }));
             }
-
-            // Submission Sync
-            $("#poForm").on("submit", function() {
-                var formData = $("#headerForm").dxForm("instance").option("formData");
-                var gridData = grid.option("dataSource");
+            // Submission Sync with Validation
+            $("#poForm").on("submit", function(e) {
+                var headerForm = $("#headerForm").dxForm("instance");
+                var headerValidation = headerForm.validate();
                 
+                if (!headerValidation.isValid) {
+                    DevExpress.ui.notify("يرجى إكمال جميع الحقول المطلوبة في رأس الطلب", "error", 3000);
+                    e.preventDefault();
+                    return false;
+                }
+
+                var gridData = grid.option("dataSource");
+                if (!gridData || gridData.length === 0) {
+                    DevExpress.ui.notify("يجب إضافة صنف واحد على الأقل للطلب", "error", 3000);
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Prepare Data for Submit
                 gridData.forEach(function(item, index) {
                     $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].ItemId").val(item.itemId).appendTo("#poForm");
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].ItemPackageId").val(item.itemPackageId).appendTo("#poForm");
                     $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].Quantity").val(item.quantity).appendTo("#poForm");
                     $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].Price").val(item.price).appendTo("#poForm");
                     $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].MainDiscountPercent").val(item.mainDiscountPercent).appendTo("#poForm");
+                    
+                    var subtotal = (item.quantity || 0) * (item.price || 0);
+                    var discVal = subtotal * ((item.mainDiscountPercent || 0) / 100);
+                    var vatVal = (subtotal - discVal) * 0.15;
+                    var netVal = (subtotal - discVal) + vatVal;
+                    
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].VatValue").val(vatVal).appendTo("#poForm");
+                    $("<input>").attr("type", "hidden").attr("name", "PurchaseOrderDetails["+index+"].NetValue").val(netVal).appendTo("#poForm");
                 });
                 
+                var formData = headerForm.option("formData");
                 for (var key in formData) {
                     if ($("[name='"+key+"']").length === 0) {
                         $("<input>").attr("type", "hidden").attr("name", key).val(formData[key]).appendTo("#poForm");
@@ -233,8 +370,6 @@
                     }
                 }
             });
-
-            setTimeout(updateSummary, 500);
         });
     </script>
 }

@@ -11,10 +11,12 @@ namespace Core.Services.ItemServices
         Task<ItemViewModel> CreateItemAsync(CreateItemViewModel itemDto);
         Task<ItemViewModel> UpdateItemAsync(int itemId, UpdateItemViewModel itemDto);
         Task<ItemViewModel> GetItemAsync(int itemId);
-        Task<PaginatedResult<ItemViewModel>> GetItemsAsync(ItemFilterViewModel filters, PaginationViewModel pagination);
+        Task<PaginatedResult<ItemViewModel>> GetItemsAsync(ItemFilterViewModel filters, PaginationViewModel pagination, int? defaultBranchId = null);
         Task<bool> DeleteItemAsync(int itemId);
         Task<ItemViewModel> GetItemByBarcodeAsync(string barcode, bool isInternal);
-        Task<ItemHierarchyViewModel> GetItemHierarchyAsync();
+        Task<ItemViewModel> GetItemById(int itemId);
+        Task<List<ItemViewModel>> SearchItemsByName(string term);
+        Task<List<ItemViewModel>> SearchItemsByCode(string term);
         Task<ValidationResult> ValidateItemForMovementAsync(int itemId);
     }
 }

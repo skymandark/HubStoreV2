@@ -1,0 +1,391 @@
+@model Core.ViewModels.DirectPurchaseOrderViewModels.CreateDirectPurchaseOrderViewModel
+@{
+    ViewData["Title"] = "إنشاء طلب شراء مباشر";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b;
+        --secondary-solid: #64748b;
+        --accent-solid: #334155;
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #fff;
+    }
+
+    .form-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .grid-container-elegant {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-soft);
+    }
+
+    .summary-box-elegant {
+        background: var(--bg-soft);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid var(--border-soft);
+    }
+
+    .btn-elegant-primary {
+        background-color: #fff;
+        color: var(--primary-solid);
+        border: none;
+        padding: 10px 30px;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #f1f5f9;
+        transform: translateY(-1px);
+        color: var(--primary-solid);
+    }
+
+    .btn-elegant-outline {
+        border: 1.5px solid rgba(255,255,255,0.3);
+        color: white;
+        transition: all 0.2s;
+    }
+
+    .btn-elegant-outline:hover {
+        background-color: rgba(255,255,255,0.1);
+        border-color: #fff;
+        color: white;
+    }
+
+    .total-display {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-solid);
+    }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <form asp-action="Create" method="post" id="dpoForm">
+        @Html.AntiForgeryToken()
+
+        <div class="card card-elegant border-0">
+            <div class="form-header-elegant d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-file-signature me-3"></i> طلب شراء مباشر</h1>
+                    <p>طلب شراء أصناف مباشرة من المورد</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Index")" class="btn btn-elegant-outline px-4 rounded-pill">إلغاء</a>
+                    <button type="submit" class="btn btn-elegant-primary px-5 rounded-pill shadow">حفظ الطلب</button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div id="headerForm"></div>
+                    </div>
+
+                    <div class="col-lg-12 mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-slate-100 p-2 rounded-3 me-3">
+                                <i class="fas fa-list-check text-slate-600"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-0">أصناف الطلب</h5>
+                        </div>
+                        <div id="detailsGrid" class="grid-container-elegant shadow-sm"></div>
+                    </div>
+
+                    <div class="col-lg-12 mt-4">
+                        <div class="row g-4">
+                            <div class="col-lg-8">
+                                <div id="notesForm"></div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="summary-box-elegant h-100 d-flex flex-column justify-content-center">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">إجمالي القيمة</span>
+                                        <span id="totalPrice" class="fw-bold text-dark">0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">إجمالي الخصم</span>
+                                        <span id="totalDiscount" class="text-danger">0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">قيمة الضريبة</span>
+                                        <span id="vatValue">0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                        <span class="fw-bold">صافي القيمة</span>
+                                        <span id="netValue" class="total-display text-primary">0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            const suppliers = @Html.Raw(Json.Serialize(ViewBag.Suppliers));
+            const branches = @Html.Raw(Json.Serialize(ViewBag.Branches));
+            const items = @Html.Raw(Json.Serialize(ViewBag.Items));
+            const shipmentTypes = @Html.Raw(Json.Serialize(ViewBag.ShipmentTypes));
+
+            const headerForm = $("#headerForm").dxForm({
+                rtlEnabled: true,
+                colCount: 3,
+                formData: {
+                    DocDate: new Date("@Model.DocDate.ToString("yyyy-MM-dd")"),
+                    BranchId: @(Model.BranchId > 0 ? Model.BranchId : "null"),
+                    SupplierId: @(Model.SupplierId > 0 ? Model.SupplierId : "null"),
+                    ShipmentTypeId: @(Model.ShipmentTypeId > 0 ? Model.ShipmentTypeId : "null"),
+                    DeliveryDate: new Date("@(Model.DeliveryDate?.ToString("yyyy-MM-dd") ?? DateTime.Today.AddDays(7).ToString("yyyy-MM-dd"))"),
+                    CreditPayment: @(Model.CreditPayment ? "true" : "false")
+                },
+                items: [
+                    {
+                        dataField: "DocDate",
+                        label: { text: "تاريخ الطلب" },
+                        editorType: "dxDateBox",
+                        editorOptions: { width: "100%", stylingMode: "outlined" },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "SupplierId",
+                        label: { text: "المورد" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: suppliers,
+                            displayExpr: "name",
+                            valueExpr: "supplierId",
+                            stylingMode: "outlined",
+                            searchEnabled: true
+                        },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "BranchId",
+                        label: { text: "الفرع" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: branches,
+                            displayExpr: "name",
+                            valueExpr: "branchId",
+                            stylingMode: "outlined",
+                            searchEnabled: true
+                        },
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "ShipmentTypeId",
+                        label: { text: "طريقة الشحن" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: shipmentTypes,
+                            displayExpr: "name",
+                            valueExpr: "shipmentTypeId",
+                            stylingMode: "outlined"
+                        }
+                    },
+                    {
+                        dataField: "DeliveryDate",
+                        label: { text: "تاريخ التوصيل المتوقع" },
+                        editorType: "dxDateBox",
+                        editorOptions: { width: "100%", stylingMode: "outlined" }
+                    },
+                    {
+                        dataField: "CreditPayment",
+                        label: { text: "دفع آجل" },
+                        editorType: "dxCheckBox"
+                    }
+                ]
+            }).dxForm("instance");
+
+            const detailsGrid = $("#detailsGrid").dxDataGrid({
+                dataSource: [],
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                editing: {
+                    mode: "cell",
+                    allowAdding: true,
+                    allowUpdating: true,
+                    allowDeleting: true,
+                    useIcons: true
+                },
+                columns: [
+                    {
+                        dataField: "itemId",
+                        caption: "الصنف",
+                        width: 250,
+                        lookup: {
+                            dataSource: items,
+                            displayExpr: "nameArab",
+                            valueExpr: "itemId"
+                        },
+                        validationRules: [{ type: "required" }]
+                    },
+                    { dataField: "availableStock", caption: "الرصيد", dataType: "number", allowEditing: false, 
+                      width: 100, alignment: "center", cssClass: "text-muted fw-bold" },
+                    {
+                        dataField: "quantity",
+                        caption: "الكمية",
+                        dataType: "number",
+                        width: 100,
+                        validationRules: [{ type: "required" }, { type: "range", min: 0.01 }]
+                    },
+                    {
+                        dataField: "price",
+                        caption: "السعر",
+                        dataType: "number",
+                        format: "#,##0.00",
+                        width: 120,
+                        validationRules: [{ type: "required" }]
+                    },
+                    {
+                        dataField: "mainDiscountPercent",
+                        caption: "خصم أساسي (%)",
+                        dataType: "number",
+                        width: 100,
+                        defaultValue: 0
+                    },
+                    {
+                        dataField: "vatRate",
+                        caption: "الضريبة (%)",
+                        dataType: "number",
+                        width: 100,
+                        defaultValue: 15
+                    },
+                    {
+                        dataField: "netValue",
+                        caption: "الصافي",
+                        dataType: "number",
+                        format: "#,##0.00",
+                        allowEditing: false,
+                        calculateCellValue: function(rowData) {
+                            const total = (rowData.quantity || 0) * (rowData.price || 0);
+                            const discount = total * ((rowData.mainDiscountPercent || 0) / 100);
+                            const afterDiscount = total - discount;
+                            const vat = afterDiscount * ((rowData.vatRate || 0) / 100);
+                            return afterDiscount + vat;
+                        },
+                        cssClass: "fw-bold text-dark"
+                    }
+                ],
+                onRowInserted: () => calculateTotals(),
+                onRowUpdated: () => calculateTotals(),
+                onRowRemoved: () => calculateTotals(),
+                onContentReady: () => calculateTotals(),
+                onCellValueChanged: function(e) {
+                    if (e.column.dataField === "itemId") {
+                        const branchId = headerForm.option("formData").BranchId;
+                        if (e.data.itemId && branchId) {
+                            $.post("@Url.Action("GetItemBalance", "Item")", { itemId: e.data.itemId, branchId: branchId }, function(res) {
+                                e.component.cellValue(e.row.rowIndex, "availableStock", res.balance);
+                            });
+                        }
+                    }
+                }
+            }).dxDataGrid("instance");
+
+            $("#notesForm").dxForm({
+                rtlEnabled: true,
+                formData: { Notes: "" },
+                items: [{
+                    dataField: "Notes",
+                    label: { text: "ملاحظات إضافية" },
+                    editorType: "dxTextArea",
+                    editorOptions: { height: 100, stylingMode: "outlined" }
+                }]
+            });
+
+            function calculateTotals() {
+                const data = detailsGrid.option("dataSource") || [];
+                let totalPrice = 0;
+                let totalDiscount = 0;
+                let totalVat = 0;
+                let netValue = 0;
+
+                data.forEach(row => {
+                    const lineTotal = (row.quantity || 0) * (row.price || 0);
+                    const discount = lineTotal * ((row.mainDiscountPercent || 0) / 100);
+                    const afterDiscount = lineTotal - discount;
+                    const vat = afterDiscount * ((row.vatRate || 0) / 100);
+
+                    totalPrice += lineTotal;
+                    totalDiscount += discount;
+                    totalVat += vat;
+                    netValue += afterDiscount + vat;
+                });
+
+                $("#totalPrice").text(totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+                $("#totalDiscount").text(totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+                $("#vatValue").text(totalVat.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+                $("#netValue").text(netValue.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            }
+
+            $("#dpoForm").on("submit", function() {
+                const headerData = headerForm.option("formData");
+                const gridData = detailsGrid.option("dataSource");
+                const notesData = $("#notesForm").dxForm("instance").option("formData");
+
+                if (!gridData || gridData.length === 0) {
+                    DevExpress.ui.notify("يرجى إضافة صنف واحد على الأقل", "error");
+                    return false;
+                }
+
+                // Add header fields to hidden inputs
+                for (let key in headerData) {
+                    let val = headerData[key];
+                    if (val instanceof Date) val = val.toISOString();
+                    $("<input>").attr("type", "hidden").attr("name", key).val(val).appendTo(this);
+                }
+
+                // Add notes
+                $("<input>").attr("type", "hidden").attr("name", "Notes").val(notesData.Notes).appendTo(this);
+
+                // Add totals
+                $("<input>").attr("type", "hidden").attr("name", "TotalPrice").val($("#totalPrice").text().replace(/,/g, '')).appendTo(this);
+                $("<input>").attr("type", "hidden").attr("name", "TotalDiscount").val($("#totalDiscount").text().replace(/,/g, '')).appendTo(this);
+                $("<input>").attr("type", "hidden").attr("name", "VatValue").val($("#vatValue").text().replace(/,/g, '')).appendTo(this);
+                $("<input>").attr("type", "hidden").attr("name", "NetValue").val($("#netValue").text().replace(/,/g, '')).appendTo(this);
+
+                // Add grid details
+                gridData.forEach((item, i) => {
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].ItemId`).val(item.itemId).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].Quantity`).val(item.quantity).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].Price`).val(item.price).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].MainDiscountPercent`).val(item.mainDiscountPercent || 0).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].VatRate`).val(item.vatRate || 0).appendTo(this);
+                    
+                    const lineTotal = (item.quantity * item.price);
+                    const disc = lineTotal * ((item.mainDiscountPercent || 0) / 100);
+                    const afterDisc = lineTotal - disc;
+                    const vatVal = afterDisc * ((item.vatRate || 0) / 100);
+                    
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].TotalValue`).val(lineTotal).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].VatValue`).val(vatVal).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `Details[${i}].NetValue`).val(afterDisc + vatVal).appendTo(this);
+                });
+
+                return true;
+            });
+        });
+    </script>
+}

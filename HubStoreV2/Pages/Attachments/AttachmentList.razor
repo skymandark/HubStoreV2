@@ -1,0 +1,107 @@
+@using Core.ViewModels
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<h3>المرفقات</h3>
+
+@if (Attachments == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!Attachments.Any())
+{
+    <p>لا توجد مرفقات.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>اسم الملف</th>
+                <th>الحجم</th>
+                <th>تاريخ الرفع</th>
+                <th>الوصف</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var attachment in Attachments)
+            {
+                <tr>
+                    <td>@attachment.FileName</td>
+                    <td>@attachment.FileSizeDisplay</td>
+                    <td>@attachment.UploadedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@attachment.Description</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => DownloadFile(attachment.Id, attachment.FileName)">تحميل</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteAttachment(attachment.Id)">حذف</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public string EntityType { get; set; }
+    [Parameter] public int EntityId { get; set; }
+
+    private List<AttachmentViewModel> Attachments { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(EntityType) && EntityId > 0)
+        {
+            await LoadAttachments();
+        }
+    }
+
+    public async Task LoadAttachments()
+    {
+        try
+        {
+            Attachments = await Http.GetFromJsonAsync<List<AttachmentViewModel>>($"api/attachment/entity/{EntityType}/{EntityId}");
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task DownloadFile(int id, string fileName)
+    {
+        try
+        {
+            var response = await Http.GetAsync($"api/attachment/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                var fileBytes = await response.Content.ReadAsByteArrayAsync();
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, fileBytes);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+        }
+    }
+
+    private async Task DeleteAttachment(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف هذا المرفق؟"))
+        {
+            try
+            {
+                var response = await Http.DeleteAsync($"api/attachment/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadAttachments();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle error
+            }
+        }
+    }
+}

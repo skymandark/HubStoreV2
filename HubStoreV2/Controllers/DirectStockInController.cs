@@ -7,6 +7,7 @@ using Core.Services.OrderServices;
 
 using Core.ViewModels.DirectStockInViewModels;
 using Core.ViewModels.StockInViewModels;
+using StockInDto = Core.ViewModels.StockInViewModels;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HubStoreV2.Controllers
 {
-    public class DirectStockInController : Controller
+    public class DirectStockInController : BaseController
     {
         private readonly IStockInService _stockInService;
         private readonly ApplicationDbContext _context;
@@ -40,9 +41,9 @@ namespace HubStoreV2.Controllers
             var dto = new DirectStockInRequestDto
             {
                 DocDate = DateTime.Today,
-                Suppliers = new List<SupplierDto>(),
-                Branches = new List<BranchDto>(),
-                Items = new List<ItemDto>(),
+                Suppliers = new List<StockInDto.SupplierDto>(),
+                Branches = new List<StockInDto.BranchDto>(),
+                Items = new List<StockInDto.ItemDto>(),
                 StockInDetails = new List<DirectStockInDetailDto>()
             };
 
@@ -50,19 +51,22 @@ namespace HubStoreV2.Controllers
             {
                 var suppliers = await _context.Suppliers.Where(s => s.IsActive).ToListAsync();
                 var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
-                var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+                // Load all items - filtering will be done on client side
+                var items = await _context.Items
+                    .Where(i => !i.IsDeleted)
+                    .ToListAsync();
 
-                dto.Suppliers = suppliers.Select(s => new SupplierDto
+                dto.Suppliers = suppliers.Select(s => new StockInDto.SupplierDto
                 {
                     SupplierId = s.SupplierId,
                     Name = s.Name
                 }).ToList();
-                dto.Branches = branches.Select(b => new BranchDto
+                dto.Branches = branches.Select(b => new StockInDto.BranchDto
                 {
                     BranchId = b.BranchId,
                     Name = b.Name
                 }).ToList();
-                dto.Items = items.Select(i => new ItemDto
+                dto.Items = items.Select(i => new StockInDto.ItemDto
                 {
                     ItemId = i.ItemId,
                     Name = i.NameArab
@@ -144,21 +148,24 @@ namespace HubStoreV2.Controllers
         {
             var suppliers = await _context.Suppliers.Where(s => s.IsActive).ToListAsync();
             var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
-            var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+            // Load all items - filtering will be done on client side
+            var items = await _context.Items
+                .Where(i => !i.IsDeleted)
+                .ToListAsync();
 
-            dto.Suppliers = suppliers.Select(s => new SupplierDto
+            dto.Suppliers = suppliers.Select(s => new StockInDto.SupplierDto
             {
                 SupplierId = s.SupplierId,
                 Name = s.Name
             }).ToList();
 
-            dto.Branches = branches.Select(b => new BranchDto
+            dto.Branches = branches.Select(b => new StockInDto.BranchDto
             {
                 BranchId = b.BranchId,
                 Name = b.Name
             }).ToList();
 
-            dto.Items = items.Select(i => new ItemDto
+            dto.Items = items.Select(i => new StockInDto.ItemDto
             {
                 ItemId = i.ItemId,
                 Name = i.NameArab

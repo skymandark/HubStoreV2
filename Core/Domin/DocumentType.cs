@@ -29,6 +29,6 @@ namespace Core.Domin
         public virtual ICollection<ApprovalHistory> ApprovalHistories { get; set; }
         public virtual ICollection<AuditTrail> AuditTrails { get; set; }
         public virtual ICollection<ApprovalChain> ApprovalChains { get; set; }
-
+        public string CreatedBy { get; set; }
     }
 }

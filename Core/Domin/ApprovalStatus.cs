@@ -30,6 +30,7 @@ namespace Core.Domin
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<ApprovalHistory> ApprovalHistories { get; set; }
         public virtual ICollection<DirectReceiptHeader> DirectReceiptHeaders { get; set; }
+        public string CreatedBy { get; set; }
     }
 
     public enum DocumentStatus

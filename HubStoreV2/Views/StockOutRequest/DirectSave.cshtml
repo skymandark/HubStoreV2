@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "حفظ مباشر - معطل";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="alert alert-warning">
+        <h4><i class="fas fa-exclamation-triangle me-2"></i> هذه الخاصية معطلة</h4>
+        <p>خاصية الحفظ المباشر للطلبات غير متاحة حالياً. يرجى استخدام النموذج العادي لإنشاء الطلبات.</p>
+        <a href="@Url.Action("Index")" class="btn btn-primary">العودة إلى القائمة</a>
+    </div>
+</div>

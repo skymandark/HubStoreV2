@@ -430,11 +430,19 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="creditPayment">
-                                <input type="checkbox" id="creditPayment" name="CreditPayment" value="true"
-                                       checked="@(Model?.CreditPayment == true)">
-                                سداد آجل
-                            </label>
+                            <label for="approvalSystem" class="required">نظام الموافقات</label>
+                            <select id="approvalSystem" name="StatusId" class="form-control" required onchange="handleApprovalSystemChange()">
+                                <option value="">اختر نظام الموافقات</option>
+                                @if (Model?.ApprovalSystemOptions != null)
+                                {
+                                    @foreach (var option in Model.ApprovalSystemOptions)
+                                    {
+                                        <option value="@option.StatusId" selected="@(Model?.StatusId == option.StatusId)">
+                                            @option.Name - @option.Description
+                                        </option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -495,7 +503,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="branchId" class="required">الفرع</label>
-                            <select id="branchId" name="BranchId" class="form-control" required>
+                            <select id="branchId" name="BranchId" class="form-control" required onchange="filterItemsByBranch()">
                                 <option value="">-- اختر فرع --</option>
                                 @Html.Raw(string.Join("", Model?.Branches?.Select(b => $"<option value=\"{b.BranchId}\" {(Model?.BranchId == b.BranchId ? "selected" : "")}>{b.Name}</option>") ?? new string[0]))
                             </select>
@@ -540,22 +548,120 @@
 
         <!-- Line Items Card -->
         <div class="card">
-            <div class="card-header">
-                <i class="fas fa-list"></i> تفاصيل الأصناف
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-list"></i> تفاصيل الأصناف
+                    <span class="badge bg-primary ms-2" id="itemsCount">0 أصناف</span>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-success btn-sm" onclick="addNewLineItem()">
+                        <i class="fas fa-plus"></i> إضافة صنف جديد
+                    </button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="importFromExcel()">
+                        <i class="fas fa-file-excel"></i> استيراد من Excel
+                    </button>
+                </div>
             </div>
             <div class="card-body">
+                <!-- Advanced Search Section -->
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="itemSearch" class="required">البحث السريع</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-search"></i>
+                                                </span>
+                                                <input type="text" id="itemSearch" class="form-control" 
+                                                       placeholder="ابحث بالاسم أو الكود أو الباركود..."
+                                                       onkeyup="handleSearchKeyup(event)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="categoryFilter">التصنيف</label>
+                                            <select id="categoryFilter" class="form-control" onchange="filterItems()">
+                                                <option value="">جميع التصنيفات</option>
+                                                <!-- Categories will be loaded dynamically -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="priceRange">نطاق السعر</label>
+                                            <select id="priceRange" class="form-control" onchange="filterItems()">
+                                                <option value="">جميع الأسعار</option>
+                                                <option value="0-100">أقل من 100</option>
+                                                <option value="100-500">100 - 500</option>
+                                                <option value="500-1000">500 - 1000</option>
+                                                <option value="1000+">أكثر من 1000</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <div class="btn-group w-100">
+                                                <button type="button" class="btn btn-primary" onclick="searchItems()">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" onclick="clearSearch()">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search Results Table -->
+                <div id="searchResultsSection" style="display: none;">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <span id="searchResultsInfo">تم العثور على 0 نتيجة</span>
+                    </div>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-hover table-striped" id="searchResultsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="15%">الكود</th>
+                                    <th width="30%">اسم الصنف</th>
+                                    <th width="10%">السعر</th>
+                                    <th width="10%">المخزون</th>
+                                    <th width="20%">الوصف</th>
+                                    <th width="10%">الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="searchResultsBody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Professional Items Table -->
                 <div class="table-responsive">
-                    <table class="table" id="itemsTable">
-                        <thead>
+                    <table class="table table-bordered table-hover" id="itemsTable">
+                        <thead class="table-primary">
                             <tr>
-                                <th>الصنف</th>
-                                <th>الكمية</th>
-                                <th>السعر (للوحدة)</th>
-                                <th>القيمة الإجمالية</th>
-                                <th>خصم رئيسي (%)</th>
-                                <th>الضريبة</th>
-                                <th>القيمة النهائية</th>
-                                <th style="width: 100px;">الإجراء</th>
+                                <th width="3%" class="text-center">#</th>
+                                <th width="25%">الصنف</th>
+                                <th width="8%" class="text-center">الكمية</th>
+                                <th width="10%" class="text-center">السعر (للوحدة)</th>
+                                <th width="10%" class="text-center">القيمة الإجمالية</th>
+                                <th width="8%" class="text-center">خصم رئيسي (%)</th>
+                                <th width="8%" class="text-center">خصم إضافي (%)</th>
+                                <th width="8%" class="text-center">الضريبة</th>
+                                <th width="10%" class="text-center">القيمة النهائية</th>
+                                <th width="10%" class="text-center">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="lineItemsContainer">
@@ -563,102 +669,203 @@
                             {
                                 @for (int i = 0; i < Model.PurchaseOrderDetails.Count; i++)
                                 {
-                                    <tr class="line-item-row">
-                                        <td>
-                                            <select name="PurchaseOrderDetails[@i].ItemId" class="form-control item-select" required>
-                                                <option value="">-- اختر صنف --</option>
-                                                @Html.Raw(string.Join("", Model?.Items?.Select(item => $"<option value=\"{item.ItemId}\" {(Model.PurchaseOrderDetails[i].ItemId == item.ItemId ? "selected" : "")}>{item.Name}</option>") ?? new string[0]))
-                                            </select>
+                                    <tr class="line-item-row" data-line-number="@i">
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">@(i + 1)</span>
                                         </td>
                                         <td>
-                                            <input type="number" name="PurchaseOrderDetails[@i].Quantity" 
-                                                   class="form-control quantity-input" placeholder="الكمية" 
-                                                   value="@Model.PurchaseOrderDetails[i].Quantity" 
-                                                   step="0.01" required>
+                                            <div class="input-group">
+                                                <select name="PurchaseOrderDetails[@i].ItemId" class="form-control form-select item-select" required onchange="updateItemInfo(@i)">
+                                                    <option value="">-- اختر صنف --</option>
+                                                    @Html.Raw(string.Join("", Model?.Items?.Select(item => $"<option value=\"{item.ItemId}\" data-code=\"{item.Code}\" data-price=\"{item.Price}\" {(Model.PurchaseOrderDetails[i].ItemId == item.ItemId ? "selected" : "")}>{item.Name}</option>") ?? new string[0]))
+                                                </select>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="openItemSelector(@i)" title="اختر من القائمة">
+                                                    <i class="fas fa-list"></i>
+                                                </button>
+                                            </div>
+                                            <small class="text-muted" id="itemCode_@i">كود: @Model.PurchaseOrderDetails[i].ItemName</small>
                                         </td>
                                         <td>
-                                            <input type="number" name="PurchaseOrderDetails[@i].Price" 
-                                                   class="form-control price-input" placeholder="السعر" 
-                                                   value="@Model.PurchaseOrderDetails[i].Price" 
-                                                   step="0.01" required>
+                                            <div class="input-group">
+                                                <input type="number" name="PurchaseOrderDetails[@i].Quantity" 
+                                                       class="form-control quantity-input text-center" placeholder="الكمية" 
+                                                       value="@Model.PurchaseOrderDetails[i].Quantity" 
+                                                       step="0.01" min="0.001" required
+                                                       onchange="calculateLineTotal(@i)">
+                                                <span class="input-group-text">وحدة</span>
+                                            </div>
                                         </td>
                                         <td>
-                                            <input type="number" name="PurchaseOrderDetails[@i].TotalValue" 
-                                                   class="form-control total-value-input" placeholder="القيمة" 
-                                                   value="@Model.PurchaseOrderDetails[i].TotalValue" 
-                                                   step="0.01" readonly>
+                                            <div class="input-group">
+                                                <span class="input-group-text">ج.م</span>
+                                                <input type="number" name="PurchaseOrderDetails[@i].Price" 
+                                                       class="form-control price-input text-center" placeholder="السعر" 
+                                                       value="@Model.PurchaseOrderDetails[i].Price" 
+                                                       step="0.01" min="0.01" required
+                                                       onchange="calculateLineTotal(@i)">
+                                            </div>
                                         </td>
                                         <td>
-                                            <input type="number" name="PurchaseOrderDetails[@i].MainDiscountPercent" 
-                                                   class="form-control discount-input" placeholder="خصم %" 
-                                                   value="@Model.PurchaseOrderDetails[i].MainDiscountPercent" 
-                                                   step="0.01">
+                                            <div class="input-group">
+                                                <span class="input-group-text">ج.م</span>
+                                                <input type="number" name="PurchaseOrderDetails[@i].TotalValue" 
+                                                       class="form-control total-value-input text-center" placeholder="القيمة" 
+                                                       value="@Model.PurchaseOrderDetails[i].TotalValue" 
+                                                       step="0.01" readonly>
+                                            </div>
                                         </td>
                                         <td>
-                                            <input type="number" name="PurchaseOrderDetails[@i].VatValue" 
-                                                   class="form-control vat-input" placeholder="ضريبة" 
-                                                   value="@Model.PurchaseOrderDetails[i].VatValue" 
-                                                   step="0.01">
+                                            <div class="input-group">
+                                                <input type="number" name="PurchaseOrderDetails[@i].MainDiscountPercent" 
+                                                       class="form-control discount-input text-center" placeholder="%" 
+                                                       value="@Model.PurchaseOrderDetails[i].MainDiscountPercent" 
+                                                       step="0.01" min="0" max="100"
+                                                       onchange="calculateLineTotal(@i)">
+                                                <span class="input-group-text">%</span>
+                                            </div>
                                         </td>
                                         <td>
-                                            <input type="number" name="PurchaseOrderDetails[@i].NetValue" 
-                                                   class="form-control net-value-input" placeholder="القيمة النهائية" 
-                                                   value="@Model.PurchaseOrderDetails[i].NetValue" 
-                                                   step="0.01" readonly>
+                                            <div class="input-group">
+                                                <input type="number" name="PurchaseOrderDetails[@i].AddedDiscountPercent" 
+                                                       class="form-control added-discount-input text-center" placeholder="%" 
+                                                       value="@Model.PurchaseOrderDetails[i].AddedDiscountPercent" 
+                                                       step="0.01" min="0" max="100"
+                                                       onchange="calculateLineTotal(@i)">
+                                                <span class="input-group-text">%</span>
+                                            </div>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-danger btn-sm btn-action" 
-                                                    onclick="removeLineItem(this)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="input-group">
+                                                <input type="number" name="PurchaseOrderDetails[@i].VatValue" 
+                                                       class="form-control vat-input text-center" placeholder="ضريبة" 
+                                                       value="@Model.PurchaseOrderDetails[i].VatValue" 
+                                                       step="0.01" min="0"
+                                                       onchange="calculateLineTotal(@i)">
+                                                <span class="input-group-text">ج.م</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <span class="input-group-text">ج.م</span>
+                                                <input type="number" name="PurchaseOrderDetails[@i].NetValue" 
+                                                       class="form-control net-value-input text-center" placeholder="القيمة النهائية" 
+                                                       value="@Model.PurchaseOrderDetails[i].NetValue" 
+                                                       step="0.01" readonly>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                        onclick="duplicateLineItem(@i)" title="تكرار الصنف">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-info btn-sm" 
+                                                        onclick="editLineItem(@i)" title="تعديل">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                        onclick="removeLineItem(this)" title="حذف">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 }
                             }
                             else
                             {
-                                <tr class="line-item-row">
-                                    <td>
-                                        <select name="PurchaseOrderDetails[0].ItemId" class="form-control item-select" required>
-                                            <option value="">-- اختر صنف --</option>
-                                            @Html.Raw(string.Join("", Model?.Items?.Select(item => $"<option value=\"{item.ItemId}\">{item.Name}</option>") ?? new string[0]))
-                                        </select>
+                                <tr class="line-item-row" data-line-number="0">
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary">1</span>
                                     </td>
                                     <td>
-                                        <input type="number" name="PurchaseOrderDetails[0].Quantity" 
-                                               class="form-control quantity-input" placeholder="الكمية" 
-                                               step="0.01" required>
+                                        <div class="input-group">
+                                            <select name="PurchaseOrderDetails[0].ItemId" class="form-control form-select item-select" required onchange="updateItemInfo(0)">
+                                                <option value="">-- اختر صنف --</option>
+                                                @Html.Raw(string.Join("", Model?.Items?.Select(item => $"<option value=\"{item.ItemId}\" data-code=\"{item.Code}\" data-price=\"{item.Price}\">{item.Name}</option>") ?? new string[0]))
+                                            </select>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="openItemSelector(0)" title="اختر من القائمة">
+                                                <i class="fas fa-list"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted" id="itemCode_0">كود: -</small>
                                     </td>
                                     <td>
-                                        <input type="number" name="PurchaseOrderDetails[0].Price" 
-                                               class="form-control price-input" placeholder="السعر" 
-                                               step="0.01" required>
+                                        <div class="input-group">
+                                            <input type="number" name="PurchaseOrderDetails[0].Quantity" 
+                                                   class="form-control quantity-input text-center" placeholder="الكمية" 
+                                                   step="0.01" min="0.001" required
+                                                   onchange="calculateLineTotal(0)">
+                                            <span class="input-group-text">وحدة</span>
+                                        </div>
                                     </td>
                                     <td>
-                                        <input type="number" name="PurchaseOrderDetails[0].TotalValue" 
-                                               class="form-control total-value-input" placeholder="القيمة" 
-                                               step="0.01" readonly>
+                                        <div class="input-group">
+                                            <span class="input-group-text">ج.م</span>
+                                            <input type="number" name="PurchaseOrderDetails[0].Price" 
+                                                   class="form-control price-input text-center" placeholder="السعر" 
+                                                   step="0.01" min="0.01" required
+                                                   onchange="calculateLineTotal(0)">
+                                        </div>
                                     </td>
                                     <td>
-                                        <input type="number" name="PurchaseOrderDetails[0].MainDiscountPercent" 
-                                               class="form-control discount-input" placeholder="خصم %" 
-                                               step="0.01">
+                                        <div class="input-group">
+                                            <span class="input-group-text">ج.م</span>
+                                            <input type="number" name="PurchaseOrderDetails[0].TotalValue" 
+                                                   class="form-control total-value-input text-center" placeholder="القيمة" 
+                                                   step="0.01" readonly>
+                                        </div>
                                     </td>
                                     <td>
-                                        <input type="number" name="PurchaseOrderDetails[0].VatValue" 
-                                               class="form-control vat-input" placeholder="ضريبة" 
-                                               step="0.01">
+                                        <div class="input-group">
+                                            <input type="number" name="PurchaseOrderDetails[0].MainDiscountPercent" 
+                                                   class="form-control discount-input text-center" placeholder="%" 
+                                                   step="0.01" min="0" max="100"
+                                                   onchange="calculateLineTotal(0)">
+                                            <span class="input-group-text">%</span>
+                                        </div>
                                     </td>
                                     <td>
-                                        <input type="number" name="PurchaseOrderDetails[0].NetValue" 
-                                               class="form-control net-value-input" placeholder="القيمة النهائية" 
-                                               step="0.01" readonly>
+                                        <div class="input-group">
+                                            <input type="number" name="PurchaseOrderDetails[0].AddedDiscountPercent" 
+                                                   class="form-control added-discount-input text-center" placeholder="%" 
+                                                   step="0.01" min="0" max="100"
+                                                   onchange="calculateLineTotal(0)">
+                                            <span class="input-group-text">%</span>
+                                        </div>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-danger btn-sm btn-action" 
-                                                onclick="removeLineItem(this)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <div class="input-group">
+                                            <input type="number" name="PurchaseOrderDetails[0].VatValue" 
+                                                   class="form-control vat-input text-center" placeholder="ضريبة" 
+                                                   step="0.01" min="0"
+                                                   onchange="calculateLineTotal(0)">
+                                            <span class="input-group-text">ج.م</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-text">ج.م</span>
+                                            <input type="number" name="PurchaseOrderDetails[0].NetValue" 
+                                                   class="form-control net-value-input text-center" placeholder="القيمة النهائية" 
+                                                   step="0.01" readonly>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    onclick="duplicateLineItem(0)" title="تكرار الصنف">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-info btn-sm" 
+                                                    onclick="editLineItem(0)" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="removeLineItem(this)" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -733,6 +940,686 @@
     // Store item options for dynamic rows
     let itemOptions = document.querySelector('.item-select').innerHTML;
     itemOptions = itemOptions.replace(/selected/g, '');
+    
+    // Store all items data for search
+    let allItems = @Html.Raw(Json.Serialize(Model?.Items ?? new List<object>()));
+    
+    // Advanced search and filtering functions
+    function handleSearchKeyup(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchItems();
+        } else if (event.target.value.length >= 2) {
+            // Auto-search after typing 2 characters
+            setTimeout(() => searchItems(), 300);
+        }
+    }
+    
+    function filterItems() {
+        const category = document.getElementById('categoryFilter').value;
+        const priceRange = document.getElementById('priceRange').value;
+        const searchTerm = document.getElementById('itemSearch').value.toLowerCase();
+        
+        let filteredItems = allItems;
+        
+        // Filter by branch
+        const selectedBranchId = document.getElementById('branchId').value;
+        if (selectedBranchId) {
+            filteredItems = filteredItems.filter(item => item.branchId == selectedBranchId);
+        }
+        
+        // Filter by category
+        if (category) {
+            filteredItems = filteredItems.filter(item => item.categoryId == category);
+        }
+        
+        // Filter by price range
+        if (priceRange) {
+            const [min, max] = priceRange.split('-').map(p => p.replace('+', ''));
+            filteredItems = filteredItems.filter(item => {
+                const price = parseFloat(item.price) || 0;
+                if (max) {
+                    return price >= parseFloat(min) && price <= parseFloat(max);
+                } else {
+                    return price >= parseFloat(min);
+                }
+            });
+        }
+        
+        // Filter by search term
+        if (searchTerm) {
+            filteredItems = filteredItems.filter(item => 
+                item.itemId.toString().includes(searchTerm) ||
+                (item.code && item.code.toLowerCase().includes(searchTerm)) ||
+                (item.nameArab && item.nameArab.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        displaySearchResults(filteredItems);
+    }
+    
+    function displaySearchResults(items) {
+        const resultsSection = document.getElementById('searchResultsSection');
+        const resultsBody = document.getElementById('searchResultsBody');
+        const resultsInfo = document.getElementById('searchResultsInfo');
+        
+        resultsBody.innerHTML = '';
+        
+        if (items.length === 0) {
+            resultsInfo.textContent = 'لم يتم العثور على نتائج';
+            resultsBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">لا توجد أصناف مطابقة للبحث</td></tr>';
+        } else {
+            resultsInfo.textContent = `تم العثور على ${items.length} نتيجة`;
+            
+            items.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="text-center">${index + 1}</td>
+                    <td><strong>${item.code || '-'}</strong></td>
+                    <td>${item.nameArab || '-'}</td>
+                    <td class="text-center">${item.price ? parseFloat(item.price).toFixed(2) : '-'}</td>
+                    <td class="text-center">
+                        <span class="badge bg-success">${item.stock || 0}</span>
+                    </td>
+                    <td><small class="text-muted">${item.description || '-'}</small></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-success btn-sm" 
+                                onclick="selectItemFromSearch(${item.itemId}, '${item.nameArab || ''}', '${item.code || ''}', ${item.price || 0})">
+                            <i class="fas fa-plus"></i> إضافة
+                        </button>
+                    </td>
+                `;
+                resultsBody.appendChild(row);
+            });
+        }
+        
+        resultsSection.style.display = 'block';
+    }
+    
+    function selectItemFromSearch(itemId, itemName, itemCode, itemPrice) {
+        // Find first empty row or add new one
+        const container = document.getElementById('lineItemsContainer');
+        let targetRow = null;
+        
+        // Look for empty row
+        const rows = container.querySelectorAll('.line-item-row');
+        for (let row of rows) {
+            const select = row.querySelector('.item-select');
+            if (!select.value) {
+                targetRow = row;
+                break;
+            }
+        }
+        
+        // If no empty row, add new one
+        if (!targetRow) {
+            addNewLineItem();
+            targetRow = container.lastElementChild;
+        }
+        
+        const lineNumber = targetRow.dataset.lineNumber || container.children.length - 1;
+        
+        // Set item in dropdown
+        const select = targetRow.querySelector('.item-select');
+        select.value = itemId;
+        
+        // Set price if available
+        if (itemPrice > 0) {
+            const priceInput = targetRow.querySelector('.price-input');
+            priceInput.value = itemPrice;
+            calculateLineTotal(lineNumber);
+        }
+        
+        // Update item info
+        updateItemInfo(lineNumber);
+        
+        // Clear search
+        clearSearch();
+        
+        // Scroll to the row
+        targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Focus on quantity
+        targetRow.querySelector('.quantity-input').focus();
+        
+        updateItemsCount();
+    }
+    
+    function addNewLineItem() {
+        const container = document.getElementById('lineItemsContainer');
+        const lineCount = container.children.length;
+        
+        const newRow = document.createElement('tr');
+        newRow.className = 'line-item-row';
+        newRow.dataset.lineNumber = lineCount;
+        newRow.innerHTML = `
+            <td class="text-center">
+                <span class="badge bg-secondary">${lineCount + 1}</span>
+            </td>
+            <td>
+                <div class="input-group">
+                    <select name="PurchaseOrderDetails[${lineCount}].ItemId" class="form-control form-select item-select" required onchange="updateItemInfo(${lineCount})">
+                        <option value="">-- اختر صنف --</option>
+                        ${itemOptions}
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" onclick="openItemSelector(${lineCount})" title="اختر من القائمة">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                <small class="text-muted" id="itemCode_${lineCount}">كود: -</small>
+            </td>
+            <td>
+                <div class="input-group">
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].Quantity" 
+                           class="form-control quantity-input text-center" placeholder="الكمية" 
+                           step="0.01" min="0.001" required
+                           onchange="calculateLineTotal(${lineCount})">
+                    <span class="input-group-text">وحدة</span>
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">ج.م</span>
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].Price" 
+                           class="form-control price-input text-center" placeholder="السعر" 
+                           step="0.01" min="0.01" required
+                           onchange="calculateLineTotal(${lineCount})">
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">ج.م</span>
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].TotalValue" 
+                           class="form-control total-value-input text-center" placeholder="القيمة" 
+                           step="0.01" readonly>
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].MainDiscountPercent" 
+                           class="form-control discount-input text-center" placeholder="%" 
+                           step="0.01" min="0" max="100"
+                           onchange="calculateLineTotal(${lineCount})">
+                    <span class="input-group-text">%</span>
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].AddedDiscountPercent" 
+                           class="form-control added-discount-input text-center" placeholder="%" 
+                           step="0.01" min="0" max="100"
+                           onchange="calculateLineTotal(${lineCount})">
+                    <span class="input-group-text">%</span>
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].VatValue" 
+                           class="form-control vat-input text-center" placeholder="ضريبة" 
+                           step="0.01" min="0"
+                           onchange="calculateLineTotal(${lineCount})">
+                    <span class="input-group-text">ج.م</span>
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">ج.م</span>
+                    <input type="number" name="PurchaseOrderDetails[${lineCount}].NetValue" 
+                           class="form-control net-value-input text-center" placeholder="القيمة النهائية" 
+                           step="0.01" readonly>
+                </div>
+            </td>
+            <td class="text-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                            onclick="duplicateLineItem(${lineCount})" title="تكرار الصنف">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm" 
+                            onclick="editLineItem(${lineCount})" title="تعديل">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                            onclick="removeLineItem(this)" title="حذف">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        container.appendChild(newRow);
+        updateItemsCount();
+        updateRowNumbers();
+    }
+    
+    function duplicateLineItem(lineNumber) {
+        const sourceRow = document.querySelector(`[data-line-number="${lineNumber}"]`);
+        if (!sourceRow) return;
+        
+        const container = document.getElementById('lineItemsContainer');
+        const newLineNumber = container.children.length;
+        
+        const newRow = sourceRow.cloneNode(true);
+        newRow.dataset.lineNumber = newLineNumber;
+        
+        // Update all input names and IDs
+        const inputs = newRow.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const name = input.name.replace(/\[\d+\]/, `[${newLineNumber}]`);
+            input.name = name;
+            
+            // Clear values for quantity and other fields
+            if (input.classList.contains('quantity-input') || 
+                input.classList.contains('discount-input') || 
+                input.classList.contains('added-discount-input') || 
+                input.classList.contains('vat-input')) {
+                input.value = '';
+            }
+            
+            // Update onchange handlers
+            if (input.onchange) {
+                input.setAttribute('onchange', input.getAttribute('onchange').replace(/\d+/, newLineNumber));
+            }
+        });
+        
+        // Update button onclick handlers
+        const buttons = newRow.querySelectorAll('button[onclick]');
+        buttons.forEach(button => {
+            const onclick = button.getAttribute('onclick').replace(/\d+/, newLineNumber);
+            button.setAttribute('onclick', onclick);
+        });
+        
+        // Update item code span
+        const itemCodeSpan = newRow.querySelector(`[id^="itemCode_"]`);
+        if (itemCodeSpan) {
+            itemCodeSpan.id = `itemCode_${newLineNumber}`;
+        }
+        
+        container.appendChild(newRow);
+        updateItemsCount();
+        updateRowNumbers();
+        
+        // Scroll to new row
+        newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function editLineItem(lineNumber) {
+        const row = document.querySelector(`[data-line-number="${lineNumber}"]`);
+        if (!row) return;
+        
+        // Make all inputs editable
+        const inputs = row.querySelectorAll('input');
+        inputs.forEach(input => {
+            if (input.readOnly) {
+                input.readOnly = false;
+                input.classList.add('bg-warning', 'bg-opacity-25');
+            }
+        });
+        
+        // Focus on first input
+        row.querySelector('input').focus();
+        
+        // Show notification
+        showNotification('تم تفعيل وضع التعديل للصف المحدد', 'info');
+    }
+    
+    function openItemSelector(lineNumber) {
+        // This could open a modal with advanced item selection
+        showNotification('سيتم فتح نافذة اختيار الأصناف المتقدمة', 'info');
+    }
+    
+    function importFromExcel() {
+        // This could open a file picker and parse Excel
+        showNotification('سيتم فتح نافذة استيراد من Excel', 'info');
+    }
+    
+    function updateItemsCount() {
+        const container = document.getElementById('lineItemsContainer');
+        const count = container.querySelectorAll('.line-item-row').length;
+        document.getElementById('itemsCount').textContent = `${count} أصناف`;
+    }
+    
+    function updateRowNumbers() {
+        const rows = document.querySelectorAll('.line-item-row');
+        rows.forEach((row, index) => {
+            const badge = row.querySelector('.badge');
+            if (badge) {
+                badge.textContent = index + 1;
+            }
+        });
+    }
+    
+    function updateItemInfo(lineNumber) {
+        const row = document.querySelector(`[data-line-number="${lineNumber}"]`);
+        if (!row) return;
+        
+        const select = row.querySelector('.item-select');
+        const selectedOption = select.options[select.selectedIndex];
+        const itemCode = selectedOption.getAttribute('data-code');
+        const itemPrice = selectedOption.getAttribute('data-price');
+        
+        const codeSpan = document.getElementById(`itemCode_${lineNumber}`);
+        if (codeSpan) {
+            codeSpan.textContent = `كود: ${itemCode || '-'}`;
+        }
+        
+        // Auto-fill price if available
+        if (itemPrice && itemPrice !== '0') {
+            const priceInput = row.querySelector('.price-input');
+            if (priceInput && !priceInput.value) {
+                priceInput.value = itemPrice;
+                calculateLineTotal(lineNumber);
+            }
+        }
+    }
+    
+    function calculateLineTotal(lineNumber) {
+        const row = document.querySelector(`[data-line-number="${lineNumber}"]`);
+        if (!row) return;
+        
+        const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const price = parseFloat(row.querySelector('.price-input').value) || 0;
+        const mainDiscount = parseFloat(row.querySelector('.discount-input').value) || 0;
+        const addedDiscount = parseFloat(row.querySelector('.added-discount-input').value) || 0;
+        const vat = parseFloat(row.querySelector('.vat-input').value) || 0;
+        
+        // Calculate total before discounts
+        let totalValue = quantity * price;
+        
+        // Apply main discount
+        if (mainDiscount > 0) {
+            totalValue -= totalValue * (mainDiscount / 100);
+        }
+        
+        // Apply added discount
+        if (addedDiscount > 0) {
+            totalValue -= totalValue * (addedDiscount / 100);
+        }
+        
+        // Add VAT
+        let netValue = totalValue + vat;
+        
+        // Update fields
+        row.querySelector('.total-value-input').value = totalValue.toFixed(2);
+        row.querySelector('.net-value-input').value = netValue.toFixed(2);
+        
+        calculateSummary();
+    }
+    
+    function calculateSummary() {
+        const rows = document.querySelectorAll('.line-item-row');
+        let totalBeforeDiscount = 0;
+        let totalDiscount = 0;
+        let totalTax = 0;
+        let totalNet = 0;
+        
+        rows.forEach(row => {
+            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            const mainDiscount = parseFloat(row.querySelector('.discount-input').value) || 0;
+            const addedDiscount = parseFloat(row.querySelector('.added-discount-input').value) || 0;
+            const vat = parseFloat(row.querySelector('.vat-input').value) || 0;
+            
+            const lineTotal = quantity * price;
+            totalBeforeDiscount += lineTotal;
+            
+            const discountAmount = lineTotal * ((mainDiscount + addedDiscount) / 100);
+            totalDiscount += discountAmount;
+            
+            totalTax += vat;
+            
+            const netValue = parseFloat(row.querySelector('.net-value-input').value) || 0;
+            totalNet += netValue;
+        });
+        
+        document.getElementById('totalBeforeDiscount').textContent = totalBeforeDiscount.toFixed(2);
+        document.getElementById('totalDiscount').textContent = totalDiscount.toFixed(2);
+        document.getElementById('totalTax').textContent = totalTax.toFixed(2);
+        document.getElementById('totalNet').textContent = totalNet.toFixed(2);
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
+    
+    // Clear search function
+    function clearSearch() {
+        document.getElementById('itemSearch').value = '';
+        document.getElementById('searchResultsSection').style.display = 'none';
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const branchId = document.getElementById('branchId').value;
+        if (branchId) {
+            filterItemsByBranch();
+        }
+        
+        // Initialize approval system info
+        const approvalSystem = document.getElementById('approvalSystem').value;
+        if (approvalSystem) {
+            handleApprovalSystemChange();
+        }
+        
+        // Initialize items count
+        updateItemsCount();
+        
+        // Calculate initial summary
+        calculateSummary();
+        
+        // Add event listeners for real-time validation
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('quantity-input')) {
+                validateQuantity(e.target);
+            }
+            if (e.target.classList.contains('price-input')) {
+                validatePrice(e.target);
+            }
+            if (e.target.classList.contains('discount-input') || e.target.classList.contains('added-discount-input')) {
+                validateDiscount(e.target);
+            }
+            if (e.target.classList.contains('vat-input')) {
+                validateVat(e.target);
+            }
+        });
+        
+        // Handle Enter key in search
+        document.getElementById('itemSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchItems();
+            }
+        });
+    });
+    
+    // Validation functions
+    function validateQuantity(input) {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value <= 0) {
+            input.classList.add('is-invalid');
+            showFieldError(input, 'الكمية يجب أن تكون أكبر من صفر');
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function validatePrice(input) {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value <= 0) {
+            input.classList.add('is-invalid');
+            showFieldError(input, 'السعر يجب أن يكون أكبر من صفر');
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function validateDiscount(input) {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value < 0 || value > 100) {
+            input.classList.add('is-invalid');
+            showFieldError(input, 'الخصم يجب أن يكون بين 0 و 100');
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function validateVat(input) {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value < 0) {
+            input.classList.add('is-invalid');
+            showFieldError(input, 'الضريبة يجب أن تكون قيمة موجبة');
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function showFieldError(input, message) {
+        let errorDiv = input.parentNode.querySelector('.invalid-feedback');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            input.parentNode.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+    }
+    
+    function hideFieldError(input) {
+        const errorDiv = input.parentNode.querySelector('.invalid-feedback');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    // Form validation before submission
+    function validateForm() {
+        let isValid = true;
+        const rows = document.querySelectorAll('.line-item-row');
+        
+        if (rows.length === 0) {
+            showNotification('يجب إضافة صنف واحد على الأقل', 'danger');
+            return false;
+        }
+        
+        rows.forEach((row, index) => {
+            const itemSelect = row.querySelector('.item-select');
+            const quantityInput = row.querySelector('.quantity-input');
+            const priceInput = row.querySelector('.price-input');
+            
+            if (!itemSelect.value) {
+                showNotification(`يجب اختيار الصنف في الصف ${index + 1}`, 'danger');
+                isValid = false;
+            }
+            
+            if (!quantityInput.value || parseFloat(quantityInput.value) <= 0) {
+                showNotification(`يجب إدخال كمية صحيحة في الصف ${index + 1}`, 'danger');
+                isValid = false;
+            }
+            
+            if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
+                showNotification(`يجب إدخال سعر صحيح في الصف ${index + 1}`, 'danger');
+                isValid = false;
+            }
+        });
+        
+        return isValid;
+    }
+    
+    // Override form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function validatePrice(input) {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value <= 0) {
+            input.classList.add('is-invalid');
+            showFieldError(input, 'السعر يجب أن يكون أكبر من صفر');
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function validateDiscount(input) {
+        const value = parseFloat(input.value);
+        if (!isNaN(value) && (value < 0 || value > 100)) {
+            input.classList.add('is-invalid');
+            showFieldError(input, 'الخصم يجب أن يكون بين 0 و 100%');
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            hideFieldError(input);
+            return true;
+        }
+    }
+    
+    function showFieldError(input, message) {
+        let errorDiv = input.parentNode.querySelector('.field-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error text-danger small mt-1';
+            input.parentNode.appendChild(errorDiv);
+        }
+        errorDiv.textContent = message;
+    }
+    
+    function hideFieldError(input) {
+        const errorDiv = input.parentNode.querySelector('.field-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    // Validate required dropdowns on change
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'supplierId' || e.target.id === 'branchId' || e.target.id === 'receiptType') {
+            if (!e.target.value) {
+                e.target.classList.add('is-invalid');
+                showFieldError(e.target, 'هذا الحقل مطلوب');
+            } else {
+                e.target.classList.remove('is-invalid');
+                hideFieldError(e.target);
+            }
+        }
+    });
 
     // Calculate line totals
     document.addEventListener('input', function(e) {
@@ -849,12 +1736,119 @@
         calculateSummary();
     });
 
-    // Form submission
+    // Form submission validation
     document.getElementById('purchaseOrderForm').addEventListener('submit', function(e) {
+        let isValid = true;
+        let errorMessage = '';
+        
+        // Check if at least one item exists
         const rows = document.querySelectorAll('#lineItemsContainer tr');
         if (rows.length === 0) {
+            isValid = false;
+            errorMessage = 'يجب إضافة صنف واحد على الأقل!';
+        }
+        
+        // Validate each item row
+        rows.forEach((row, index) => {
+            const itemSelect = row.querySelector('.item-select');
+            const quantityInput = row.querySelector('.quantity-input');
+            const priceInput = row.querySelector('.price-input');
+            
+            if (!itemSelect.value) {
+                isValid = false;
+                errorMessage += `\\n- الصنف في الصف ${index + 1} مطلوب`;
+            }
+            
+            if (!quantityInput.value || parseFloat(quantityInput.value) <= 0) {
+                isValid = false;
+                errorMessage += `\\n- الكمية في الصف ${index + 1} يجب أن تكون أكبر من صفر`;
+            }
+            
+            if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
+                isValid = false;
+                errorMessage += `\\n- السعر في الصف ${index + 1} يجب أن يكون أكبر من صفر`;
+            }
+        });
+        
+        // Validate main form fields
+        const supplierId = document.getElementById('supplierId').value;
+        const branchId = document.getElementById('branchId').value;
+        const docDate = document.getElementById('docDate').value;
+        const receiptType = document.getElementById('receiptType').value;
+        
+        if (!receiptType) {
+            isValid = false;
+            errorMessage += '\\n- يجب اختيار نوع الإيصال';
+        }
+        
+        if (!docDate) {
+            isValid = false;
+            errorMessage += '\\n- تاريخ المستند مطلوب';
+        }
+        
+        if (!supplierId) {
+            isValid = false;
+            errorMessage += '\\n- يجب اختيار المورد';
+        }
+        
+        if (!branchId) {
+            isValid = false;
+            errorMessage += '\\n- يجب اختيار الفرع';
+        }
+        
+        // Validate dates
+        const deliveryDate = document.getElementById('deliveryDate').value;
+        const dueDate = document.getElementById('dueDate').value;
+        
+        if (deliveryDate && new Date(deliveryDate) < new Date(docDate)) {
+            isValid = false;
+            errorMessage += '\\n- تاريخ التسليم يجب أن يكون بعد تاريخ المستند';
+        }
+        
+        if (dueDate && new Date(dueDate) < new Date(docDate)) {
+            isValid = false;
+            errorMessage += '\\n- تاريخ الاستحقاق يجب أن يكون بعد تاريخ المستند';
+        }
+        
+        // Validate payment period
+        const paymentPeriodDays = document.getElementById('paymentPeriodDays').value;
+        if (paymentPeriodDays && (parseInt(paymentPeriodDays) < 0 || parseInt(paymentPeriodDays) > 365)) {
+            isValid = false;
+            errorMessage += '\\n- مدة السداد يجب أن تكون بين 0 و 365 يوم';
+        }
+        
+        if (!isValid) {
             e.preventDefault();
-            alert('يجب إضافة صنف واحد على الأقل!');
+            showValidationAlert(errorMessage);
         }
     });
+    
+    // Show validation alert with better formatting
+    function showValidationAlert(message) {
+        // Create a custom alert instead of using alert()
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 500px;';
+        alertDiv.innerHTML = `
+            <h6><i class="fas fa-exclamation-triangle"></i> خطأ في التحقق</h6>
+            <p class="mb-0">${message.replace(/\\n/g, '<br>')}</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 10 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 10000);
+        
+        // Remove on close button click
+        alertDiv.querySelector('.btn-close').addEventListener('click', () => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        });
+    }
 </script>

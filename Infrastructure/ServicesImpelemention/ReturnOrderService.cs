@@ -20,69 +20,80 @@ namespace Infrastructure.ServicesImpelemention
 
         public async Task<int> CreateReturnOrder(ReturnOrderRequestDto dto, string user)
         {
-            var header = new ReturnOrderHeader
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                DocCode = GenerateDocCode(),
-                DocDate = dto.DocDate,
-                BranchId = dto.BranchId,
-                ReturnType = dto.ReturnType,
-                SupplierId = dto.SupplierId,
-                ClientId = dto.ClientId,
-                ReturnReasonId = dto.ReturnReasonId,
-                Remarks = dto.Remarks,
-                CreatedBy = user
-            };
-
-            _context.ReturnOrderHeaders.Add(header);
-            await _context.SaveChangesAsync();
-
-            foreach (var detail in dto.ReturnOrderDetails)
-            {
-                // Validation Logic
-                if (dto.ReturnType == ReturnType.SupplierReturn)
+                try
                 {
-                    var original = await _context.StockInDetails.FindAsync(detail.OriginalMovementDetailId);
-                    if (original == null) throw new Exception($"Original StockIn Detail {detail.OriginalMovementDetailId} not found");
+                    var header = new ReturnOrderHeader
+                    {
+                        DocCode = GenerateDocCode(),
+                        DocDate = dto.DocDate,
+                        BranchId = dto.BranchId,
+                        ReturnType = dto.ReturnType,
+                        SupplierId = dto.SupplierId,
+                        ClientId = dto.ClientId,
+                        ReturnReasonId = dto.ReturnReasonId,
+                        Remarks = dto.Remarks,
+                        CreatedBy = user
+                    };
 
-                    var returnedQty = await _context.ReturnOrderDetails
-                        .Where(x => x.OriginalStockInDetailId == detail.OriginalMovementDetailId && !x.IsDeleted)
-                        .SumAsync(x => x.Qty);
+                    _context.ReturnOrderHeaders.Add(header);
 
-                    if (returnedQty + detail.Qty > original.Qty)
-                        throw new Exception($"Cannot return {detail.Qty}. Already returned {returnedQty} of {original.Qty}");
+                    foreach (var detail in dto.ReturnOrderDetails)
+                    {
+                        // Validation Logic
+                        if (dto.ReturnType == ReturnType.SupplierReturn)
+                        {
+                            var original = await _context.StockInDetails.FindAsync(detail.OriginalMovementDetailId);
+                            if (original == null) throw new Exception($"Original StockIn Detail {detail.OriginalMovementDetailId} not found");
+
+                            var returnedQty = await _context.ReturnOrderDetails
+                                .Where(x => x.OriginalStockInDetailId == detail.OriginalMovementDetailId && !x.IsDeleted)
+                                .SumAsync(x => x.Qty);
+
+                            if (returnedQty + detail.Qty > original.Qty)
+                                throw new Exception($"Cannot return {detail.Qty}. Already returned {returnedQty} of {original.Qty}");
+                        }
+                        else if (dto.ReturnType == ReturnType.CustomerReturn)
+                        {
+                            var original = await _context.StockOutDetails.FindAsync(detail.OriginalMovementDetailId);
+                            if (original == null) throw new Exception($"Original StockOut Detail {detail.OriginalMovementDetailId} not found");
+
+                            var returnedQty = await _context.ReturnOrderDetails
+                                .Where(x => x.OriginalStockOutDetailId == detail.OriginalMovementDetailId && !x.IsDeleted)
+                                .SumAsync(x => x.Qty);
+
+                            if (returnedQty + detail.Qty > original.Qty)
+                                throw new Exception($"Cannot return {detail.Qty}. Already returned {returnedQty} of {original.Qty}");
+                        }
+
+                        var rod = new ReturnOrderDetail
+                        {
+                            ReturnOrderId = header.ReturnOrderId,
+                            ItemId = detail.ItemId,
+                            Qty = detail.Qty,
+                            ReturnReasonId = detail.ReturnReasonId,
+                            // Set OriginalMovementDetailId based on type
+                            OriginalStockInDetailId = dto.ReturnType == ReturnType.SupplierReturn ? detail.OriginalMovementDetailId : null,
+                            OriginalStockOutDetailId = dto.ReturnType == ReturnType.CustomerReturn ? detail.OriginalMovementDetailId : null,
+                            BatchNo = detail.BatchNo,
+                            ExpiryDate = detail.ExpiryDate,
+                            Notes = detail.Notes,
+                            CreatedBy = user
+                        };
+                        _context.ReturnOrderDetails.Add(rod);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return header.ReturnOrderId;
                 }
-                else if (dto.ReturnType == ReturnType.CustomerReturn)
+                catch
                 {
-                    var original = await _context.StockOutDetails.FindAsync(detail.OriginalMovementDetailId);
-                    if (original == null) throw new Exception($"Original StockOut Detail {detail.OriginalMovementDetailId} not found");
-
-                    var returnedQty = await _context.ReturnOrderDetails
-                        .Where(x => x.OriginalStockOutDetailId == detail.OriginalMovementDetailId && !x.IsDeleted)
-                        .SumAsync(x => x.Qty);
-
-                    if (returnedQty + detail.Qty > original.Qty)
-                        throw new Exception($"Cannot return {detail.Qty}. Already returned {returnedQty} of {original.Qty}");
+                    await transaction.RollbackAsync();
+                    throw;
                 }
-
-                var rod = new ReturnOrderDetail
-                {
-                    ReturnOrderId = header.ReturnOrderId,
-                    ItemId = detail.ItemId,
-                    Qty = detail.Qty,
-                    ReturnReasonId = detail.ReturnReasonId,
-                    // Set OriginalMovementDetailId based on type
-                    OriginalStockInDetailId = dto.ReturnType == ReturnType.SupplierReturn ? detail.OriginalMovementDetailId : null,
-                    OriginalStockOutDetailId = dto.ReturnType == ReturnType.CustomerReturn ? detail.OriginalMovementDetailId : null,
-                    BatchNo = detail.BatchNo,
-                    ExpiryDate = detail.ExpiryDate,
-                    Notes = detail.Notes,
-                    CreatedBy = user
-                };
-                _context.ReturnOrderDetails.Add(rod);
             }
-
-            await _context.SaveChangesAsync();
-            return header.ReturnOrderId;
         }
 
         public async Task UpdateReturnOrder(ReturnOrderRequestDto dto, string user)

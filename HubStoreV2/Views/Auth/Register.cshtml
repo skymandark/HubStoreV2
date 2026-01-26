@@ -1,0 +1,519 @@
+@{
+    ViewData["Title"] = "إنشاء حساب جديد";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HubStore ERP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            direction: rtl;
+            padding: 20px 0;
+        }
+
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 550px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .register-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .register-header p {
+            color: #666;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .register-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .register-logo i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            background: white;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: #999;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .form-control:focus + .input-icon {
+            color: var(--secondary-color);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: none;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .login-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            margin-left: 8px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-wrapper label {
+            margin: 0;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            width: 0%;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: var(--accent-color);
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f39c12;
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: var(--success-color);
+        }
+
+        media (max-width: 768px) {
+            .register-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            .register-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-group.full-width {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container animate__animated animate__fadeIn">
+        <div class="register-header">
+            <div class="register-logo">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2>إنشاء حساب جديد</h2>
+            <p>انضم إلى نظام HubStore ERP</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني *</label>
+                    <input type="email" id="email" class="form-control" placeholder="example@domain.com" required>
+                    <i class="fas fa-envelope input-icon"></i>
+                </div>
+
+                <div class="form-group">
+                    <label for="userName">اسم المستخدم</label>
+                    <input type="text" id="userName" class="form-control" placeholder="اختر اسم مستخدم">
+                    <i class="fas fa-user input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">كلمة المرور *</label>
+                    <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" required>
+                    <i class="fas fa-lock input-icon"></i>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrength"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">تأكيد كلمة المرور *</label>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="أعد إدخال كلمة المرور" required>
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phoneNumber">رقم الهاتف</label>
+                    <input type="tel" id="phoneNumber" class="form-control" placeholder="05xxxxxxxx">
+                    <i class="fas fa-phone input-icon"></i>
+                </div>
+
+                <div class="form-group">
+                    <label for="employeeId">رقم الموظف</label>
+                    <input type="number" id="employeeId" class="form-control" placeholder="رقم الموظف (اختياري)">
+                    <i class="fas fa-id-badge input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pinCode">رمز PIN</label>
+                    <input type="password" id="pinCode" class="form-control" placeholder="4 أرقام" maxlength="4">
+                    <i class="fas fa-key input-icon"></i>
+                </div>
+
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="isAdmin">
+                        <label for="isAdmin">مسؤول نظام</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register">
+                <span class="loading-spinner" id="registerSpinner"></span>
+                <span id="registerButtonText">إنشاء الحساب</span>
+            </button>
+        </form>
+
+        <div class="login-link">
+            <p>لديك حساب بالفعل؟ <a href="/Auth/Login">تسجيل الدخول</a></p>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Register form submission
+            $('#registerForm').on('submit', function(e) {
+                e.preventDefault();
+                register();
+            });
+
+            // Password strength checker
+            $('#password').on('input', function() {
+                checkPasswordStrength($(this).val());
+            });
+
+            // PIN code input - only numbers
+            $('#pinCode').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // Phone number input - only numbers
+            $('#phoneNumber').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+
+        function checkPasswordStrength(password) {
+            const strengthBar = $('#passwordStrength');
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+            strengthBar.removeClass('weak medium strong');
+
+            if (password.length === 0) {
+                strengthBar.css('width', '0%');
+            } else if (strength <= 1) {
+                strengthBar.addClass('weak');
+            } else if (strength === 2) {
+                strengthBar.addClass('medium');
+            } else {
+                strengthBar.addClass('strong');
+            }
+        }
+
+        async function register() {
+            const email = $('#email').val().trim();
+            const userName = $('#userName').val().trim() || email;
+            const password = $('#password').val();
+            const confirmPassword = $('#confirmPassword').val();
+            const phoneNumber = $('#phoneNumber').val().trim();
+            const employeeId = $('#employeeId').val() ? parseInt($('#employeeId').val()) : null;
+            const pinCode = $('#pinCode').val().trim();
+            const isAdmin = $('#isAdmin').is(':checked');
+
+            // Validation
+            if (!email || !password || !confirmPassword) {
+                showAlert('الرجاء إدخال الحقول المطلوبة', 'danger');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAlert('كلمات المرور غير متطابقة', 'danger');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'danger');
+                return;
+            }
+
+            if (pinCode && pinCode.length !== 4) {
+                showAlert('رمز PIN يجب أن يكون 4 أرقام', 'danger');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        userName: userName,
+                        password: password,
+                        confirmPassword: confirmPassword,
+                        phoneNumber: phoneNumber,
+                        employeeId: employeeId,
+                        pinCode: pinCode,
+                        isAdmin: isAdmin
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.succeeded) {
+                    showAlert('تم إنشاء الحساب بنجاح! جاري التوجيه لتسجيل الدخول...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/Auth/Login';
+                    }, 2000);
+                } else {
+                    const errorMessage = result.errors && result.errors.length > 0 
+                        ? result.errors.join(', ') 
+                        : result.message || 'فشل إنشاء الحساب';
+                    showAlert(errorMessage, 'danger');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert('حدث خطأ أثناء إنشاء الحساب', 'danger');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function setLoading(isLoading) {
+            $('#registerSpinner').toggle(isLoading);
+            $('#registerButtonText').text(isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب');
+            $('#registerForm button').prop('disabled', isLoading);
+        }
+
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('#alertContainer').html(alertHtml);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HubStoreV2.Controllers
 {
     //[Authorize]
-    public class StockInController : Controller
+    public class StockInController : BaseController
     {
         private readonly IStockInService _stockInService;
         private readonly ApplicationDbContext _context;
@@ -65,7 +65,10 @@ namespace HubStoreV2.Controllers
             {
                 var suppliers = await _context.Suppliers.Where(s => s.IsActive).ToListAsync();
                 var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
-                var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+                // Load all items - filtering will be done on client side
+                var items = await _context.Items
+                    .Where(i => !i.IsDeleted)
+                    .ToListAsync();
 
                 if (purchaseOrderId.HasValue)
                 {
@@ -290,7 +293,14 @@ namespace HubStoreV2.Controllers
         {
             var suppliers = await _context.Suppliers.Where(s => s.IsActive).ToListAsync();
             var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
-            var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+            // Load all items - filtering will be done on client side
+            var items = await _context.Items
+                .Where(i => !i.IsDeleted)
+                .ToListAsync();
+
+            dto.Suppliers = suppliers.Select(s => new SupplierDto { SupplierId = s.SupplierId, Name = s.Name }).ToList();
+            dto.Branches = branches.Select(b => new BranchDto { BranchId = b.BranchId, Name = b.Name }).ToList();
+            dto.Items = items.Select(i => new ItemDto { ItemId = i.ItemId, Name = i.NameArab }).ToList();
 
             ViewBag.Suppliers = suppliers.Select(s => new { s.SupplierId, s.Name }).ToList();
             ViewBag.Branches = branches.Select(b => new { b.BranchId, b.Name }).ToList();

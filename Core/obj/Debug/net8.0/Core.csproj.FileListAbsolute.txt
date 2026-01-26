@@ -48,3 +48,16 @@ C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\refint\Core.dll
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.pdb
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\ref\Core.dll
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\bin\Debug\net8.0\Core.deps.json
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\bin\Debug\net8.0\Core.dll
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\bin\Debug\net8.0\Core.pdb
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.csproj.AssemblyReference.cache
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.GeneratedMSBuildEditorConfig.editorconfig
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.AssemblyInfoInputs.cache
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.AssemblyInfo.cs
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.csproj.CoreCompileInputs.cache
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.sourcelink.json
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.dll
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\refint\Core.dll
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\Core.pdb
+g:\HubStoreV2\HubStoreV2\NewHubStore\Core\obj\Debug\net8.0\ref\Core.dll

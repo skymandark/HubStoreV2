@@ -33,7 +33,7 @@ namespace Core.Domin
 
         public int? ReturnOrderId { get; set; }
 
-        public int TransactionTypeId { get; set; } = 1; // 1 Purchase Receipt, 2 Transfer In, 4 Direct Purchase
+        public int TransactionTypeId { get; set; } = 1;
 
         public int Status { get; set; } // 0 Draft, 1 Approved, 2 PendingApproval, 3 Received, 4 Rejected
 

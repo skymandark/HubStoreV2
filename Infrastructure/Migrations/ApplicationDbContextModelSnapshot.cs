@@ -120,9 +120,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("DocumentTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DocumentTypeId1")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsMandatory")
                         .HasColumnType("bit");
 
@@ -143,8 +140,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("ApprovalChainId");
 
                     b.HasIndex("DocumentTypeId");
-
-                    b.HasIndex("DocumentTypeId1");
 
                     b.HasIndex("RoleId");
 
@@ -171,10 +166,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ActionTimestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("ApprovalStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ApprovalStatusId1")
                         .HasColumnType("int");
 
                     b.Property<int>("DocumentId")
@@ -222,9 +217,9 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ActionByUserId");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("ApprovalStatusId");
+
+                    b.HasIndex("ApprovalStatusId1");
 
                     b.HasIndex("DocumentTypeId");
 
@@ -280,6 +275,58 @@ namespace Infrastructure.Migrations
                     b.ToTable("ApprovalStatuses");
                 });
 
+            modelBuilder.Entity("Core.Domin.Attachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Attachments");
+                });
+
             modelBuilder.Entity("Core.Domin.AttemptLog", b =>
                 {
                     b.Property<long>("AttemptLogId")
@@ -292,9 +339,6 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClientDevice")
                         .IsRequired()
@@ -333,8 +377,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("AttemptLogId");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("AttemptLogs");
@@ -356,9 +398,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("ClientDevice")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -373,9 +412,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("DocumentTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DocumentTypeId1")
                         .HasColumnType("int");
 
                     b.Property<string>("NewValues")
@@ -397,11 +433,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("LogId");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("DocumentTypeId");
-
-                    b.HasIndex("DocumentTypeId1");
 
                     b.HasIndex("UserId");
 
@@ -563,6 +595,188 @@ namespace Infrastructure.Migrations
                     b.ToTable("CostingMethods");
                 });
 
+            modelBuilder.Entity("Core.Domin.DirectPurchaseOrderDetail", b =>
+                {
+                    b.Property<int>("DirectPurchaseOrderDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DirectPurchaseOrderDetailId"));
+
+                    b.Property<decimal>("AddedDiscountPercent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AddedDiscountValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BonusQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("DirectPurchaseOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("InQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ItemPackageId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MainDiscountPercent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MainDiscountValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NetValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RemarksArab")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("RemarksEng")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Serial")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("VatValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("DirectPurchaseOrderDetailId");
+
+                    b.HasIndex("DirectPurchaseOrderId");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("ItemPackageId");
+
+                    b.ToTable("DirectPurchaseOrderDetails");
+                });
+
+            modelBuilder.Entity("Core.Domin.DirectPurchaseOrderHeader", b =>
+                {
+                    b.Property<int>("DirectPurchaseOrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DirectPurchaseOrderId"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("CreditPayment")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DocCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("DocDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EntryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("InvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("NetValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("PaymentPeriodDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ShipmentTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAddedDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("VatValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("DirectPurchaseOrderId");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("ShipmentTypeId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("DirectPurchaseOrderHeaders");
+                });
+
             modelBuilder.Entity("Core.Domin.DirectReceiptDetail", b =>
                 {
                     b.Property<int>("DirectReceiptDetailId")
@@ -650,9 +864,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DirectReceiptId"));
 
-                    b.Property<int?>("ApprovalStatusId")
-                        .HasColumnType("int");
-
                     b.Property<int>("BranchId")
                         .HasColumnType("int");
 
@@ -714,9 +925,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("TotalValue")
                         .HasColumnType("decimal(18,2)");
 
@@ -725,8 +933,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("DirectReceiptId");
 
-                    b.HasIndex("ApprovalStatusId");
-
                     b.HasIndex("BranchId");
 
                     b.HasIndex("BranchId1");
@@ -734,8 +940,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("StatusId");
 
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId1");
 
                     b.ToTable("DirectReceiptHeaders");
                 });
@@ -779,9 +983,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ExportLogId"));
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("datetime2");
 
@@ -810,8 +1011,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ExportLogId");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("UserId");
 
@@ -921,6 +1120,57 @@ namespace Infrastructure.Migrations
                     b.ToTable("ImportTypes");
                 });
 
+            modelBuilder.Entity("Core.Domin.InventoryLayer", b =>
+                {
+                    b.Property<int>("InventoryLayerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryLayerId"));
+
+                    b.Property<string>("BatchNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("QuantityRemaining")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<DateTime>("ReceiptDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SourceDocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SourceDocumentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("InventoryLayerId");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("InventoryLayers");
+                });
+
             modelBuilder.Entity("Core.Domin.Item", b =>
                 {
                     b.Property<int>("ItemId")
@@ -945,6 +1195,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<decimal?>("BasicPrice")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("BrandId")
                         .HasColumnType("int");
@@ -1175,9 +1428,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SectionId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("SellMainPackageId")
                         .HasColumnType("int");
 
@@ -1225,6 +1475,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("ItemId");
 
+                    b.HasIndex("BranchId");
+
                     b.HasIndex("BrandId");
 
                     b.HasIndex("BrandId1");
@@ -1256,8 +1508,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ScientificGroupId");
 
                     b.HasIndex("SectionId");
-
-                    b.HasIndex("SectionId1");
 
                     b.HasIndex("SellMainPackageId");
 
@@ -1418,9 +1668,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("PackageId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PackageId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("PackageTransactionType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -1431,8 +1678,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ItemId");
 
                     b.HasIndex("PackageId");
-
-                    b.HasIndex("PackageId1");
 
                     b.ToTable("ItemPackages");
                 });
@@ -1561,9 +1806,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemUnitHistoryId"));
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("ChangedByUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -1594,8 +1836,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("ItemUnitHistoryId");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("ChangedByUserId");
 
@@ -1767,9 +2007,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("MovementTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MovementTypeId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -1802,8 +2039,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("MovementTypeId");
-
-                    b.HasIndex("MovementTypeId1");
 
                     b.HasIndex("SupplierId");
 
@@ -1939,9 +2174,6 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("NotificationId"));
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -1985,8 +2217,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("NotificationId");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
@@ -2003,10 +2233,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BranchId1")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("CostValue")
+                    b.Property<decimal>("CostPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CreatedBy")
@@ -2018,9 +2245,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("FiscalYear")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("FiscalYearId")
                         .HasColumnType("int");
 
                     b.Property<int>("ItemId")
@@ -2041,11 +2265,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BranchId");
 
-                    b.HasIndex("BranchId1");
-
                     b.HasIndex("FiscalYear");
-
-                    b.HasIndex("FiscalYearId");
 
                     b.HasIndex("ItemId");
 
@@ -2059,9 +2279,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ApprovalStatusId")
                         .HasColumnType("int");
@@ -2161,9 +2378,6 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("TotalQuantityBase")
                         .HasColumnType("decimal(18,6)");
 
@@ -2171,8 +2385,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("OrderId");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("ApprovalStatusId");
 
@@ -2189,8 +2401,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("RequestedByUserId");
 
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId1");
 
                     b.ToTable("Orders");
                 });
@@ -2439,6 +2649,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ItemId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2");
 
@@ -2480,6 +2693,8 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ItemId");
 
+                    b.HasIndex("ItemId1");
+
                     b.HasIndex("PurchaseOrderId");
 
                     b.HasIndex("UnitId");
@@ -2503,9 +2718,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("BranchId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BranchId1")
                         .HasColumnType("int");
 
                     b.Property<int?>("BranchStockId")
@@ -2592,8 +2804,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("PurchaseOrderId");
 
                     b.HasIndex("BranchId");
-
-                    b.HasIndex("BranchId1");
 
                     b.HasIndex("BranchStockId");
 
@@ -2732,9 +2942,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BranchId1")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ClientId")
                         .HasColumnType("int");
 
@@ -2790,18 +2997,11 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId1")
-                        .HasColumnType("int");
-
                     b.HasKey("ReturnOrderId");
 
                     b.HasIndex("BranchId");
 
-                    b.HasIndex("BranchId1");
-
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId1");
 
                     b.ToTable("ReturnOrderHeaders");
                 });
@@ -2813,9 +3013,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SavedViewId"));
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ColumnsJson")
                         .IsRequired()
@@ -2851,8 +3048,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("SavedViewId");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("UserId");
 
@@ -3079,6 +3274,12 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<decimal>("BonusQuantity")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("ConsumerPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -3099,6 +3300,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ItemId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2");
 
@@ -3106,6 +3310,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("NetValue")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -3131,20 +3338,23 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("TransferOrderDetailId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TransferOrderDetailId1")
-                        .HasColumnType("int");
+                    b.Property<decimal>("VatAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("VatRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("StockInDetailId");
 
                     b.HasIndex("ItemId");
+
+                    b.HasIndex("ItemId1");
 
                     b.HasIndex("PurchaseOrderDetailId");
 
                     b.HasIndex("StockInId");
 
                     b.HasIndex("TransferOrderDetailId");
-
-                    b.HasIndex("TransferOrderDetailId1");
 
                     b.ToTable("StockInDetails");
                 });
@@ -3214,9 +3424,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int?>("ReturnOrderHeaderReturnOrderId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ReturnOrderId")
                         .HasColumnType("int");
 
@@ -3254,8 +3461,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("BranchId1");
 
                     b.HasIndex("PurchaseOrderId");
-
-                    b.HasIndex("ReturnOrderHeaderReturnOrderId");
 
                     b.HasIndex("ReturnOrderId");
 
@@ -3559,9 +3764,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BranchId1")
-                        .HasColumnType("int");
-
                     b.Property<int?>("BranchStockId")
                         .HasColumnType("int");
 
@@ -3626,9 +3828,6 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("TotalAddedDiscount")
                         .HasColumnType("decimal(18,2)");
 
@@ -3651,15 +3850,11 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BranchId");
 
-                    b.HasIndex("BranchId1");
-
                     b.HasIndex("BranchStockId");
 
                     b.HasIndex("ReturnOrderId");
 
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId1");
 
                     b.ToTable("StockOutReturnHeaders");
                 });
@@ -3904,9 +4099,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SupplierId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -3918,8 +4110,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("DirectReceiptId");
 
                     b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId1");
 
                     b.ToTable("SupplierInvoiceHeaders");
                 });
@@ -4130,12 +4320,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("ApprovedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("BranchId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BranchId1")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ClosedDate")
                         .HasColumnType("datetime2");
 
@@ -4186,9 +4370,6 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("ShipmentTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ShipmentTypeId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("ToBranchId")
                         .HasColumnType("int");
 
@@ -4200,26 +4381,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("TransferOrderStatusId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TransferOrderStatusId1")
-                        .HasColumnType("int");
-
                     b.HasKey("TransferOrderId");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("BranchId1");
 
                     b.HasIndex("FromBranchId");
 
                     b.HasIndex("ShipmentTypeId");
 
-                    b.HasIndex("ShipmentTypeId1");
-
                     b.HasIndex("ToBranchId");
 
                     b.HasIndex("TransferOrderStatusId");
-
-                    b.HasIndex("TransferOrderStatusId1");
 
                     b.ToTable("TransferOrderHeaders");
                 });
@@ -4481,19 +4651,15 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.ApprovalChain", b =>
                 {
                     b.HasOne("Core.Domin.DocumentType", "DocumentType")
-                        .WithMany()
-                        .HasForeignKey("DocumentTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.DocumentType", null)
                         .WithMany("ApprovalChains")
-                        .HasForeignKey("DocumentTypeId1");
+                        .HasForeignKey("DocumentTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DocumentType");
@@ -4504,25 +4670,25 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.ApprovalHistory", b =>
                 {
                     b.HasOne("Core.Domin.AppUser", "ActionByUser")
-                        .WithMany()
-                        .HasForeignKey("ActionByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.AppUser", null)
                         .WithMany("ApprovalHistories")
-                        .HasForeignKey("AppUserId");
+                        .HasForeignKey("ActionByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.ApprovalStatus", "ApprovalStatus")
-                        .WithMany("ApprovalHistories")
+                        .WithMany()
                         .HasForeignKey("ApprovalStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Core.Domin.ApprovalStatus", null)
+                        .WithMany("ApprovalHistories")
+                        .HasForeignKey("ApprovalStatusId1");
 
                     b.HasOne("Core.Domin.DocumentType", "DocumentType")
                         .WithMany()
                         .HasForeignKey("DocumentTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.DocumentType", null)
@@ -4570,14 +4736,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.AttemptLog", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("AttemptLogs")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.AppUser", "User")
-                        .WithMany()
+                        .WithMany("AttemptLogs")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -4585,29 +4747,71 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.AuditTrail", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("AuditTrails")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.DocumentType", "DocumentType")
-                        .WithMany()
+                        .WithMany("AuditTrails")
                         .HasForeignKey("DocumentTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.Domin.DocumentType", null)
-                        .WithMany("AuditTrails")
-                        .HasForeignKey("DocumentTypeId1");
-
                     b.HasOne("Core.Domin.AppUser", "User")
-                        .WithMany()
+                        .WithMany("AuditTrails")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DocumentType");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Domin.DirectPurchaseOrderDetail", b =>
+                {
+                    b.HasOne("Core.Domin.DirectPurchaseOrderHeader", "DirectPurchaseOrderHeader")
+                        .WithMany("DirectPurchaseOrderDetails")
+                        .HasForeignKey("DirectPurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Domin.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Domin.ItemPackage", "ItemPackage")
+                        .WithMany()
+                        .HasForeignKey("ItemPackageId");
+
+                    b.Navigation("DirectPurchaseOrderHeader");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("ItemPackage");
+                });
+
+            modelBuilder.Entity("Core.Domin.DirectPurchaseOrderHeader", b =>
+                {
+                    b.HasOne("Core.Domin.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Domin.ShipmentType", "ShipmentType")
+                        .WithMany()
+                        .HasForeignKey("ShipmentTypeId");
+
+                    b.HasOne("Core.Domin.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("ShipmentType");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("Core.Domin.DirectReceiptDetail", b =>
@@ -4621,7 +4825,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("DirectReceiptDetails")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DirectReceiptHeader");
@@ -4631,14 +4835,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.DirectReceiptHeader", b =>
                 {
-                    b.HasOne("Core.Domin.ApprovalStatus", null)
-                        .WithMany("DirectReceiptHeaders")
-                        .HasForeignKey("ApprovalStatusId");
-
                     b.HasOne("Core.Domin.Branch", "Branch")
                         .WithMany()
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Branch", null)
@@ -4646,20 +4846,16 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("BranchId1");
 
                     b.HasOne("Core.Domin.ApprovalStatus", "Status")
-                        .WithMany()
+                        .WithMany("DirectReceiptHeaders")
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Supplier", null)
                         .WithMany("DirectReceiptHeaders")
-                        .HasForeignKey("SupplierId1");
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Branch");
 
@@ -4670,25 +4866,45 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.ExportLog", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("ExportLogs")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.AppUser", "User")
-                        .WithMany()
+                        .WithMany("ExportLogs")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Core.Domin.InventoryLayer", b =>
+                {
+                    b.HasOne("Core.Domin.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Domin.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("Core.Domin.Item", b =>
                 {
+                    b.HasOne("Core.Domin.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Core.Domin.Brand", "Brand")
                         .WithMany()
-                        .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("BrandId");
 
                     b.HasOne("Core.Domin.Brand", null)
                         .WithMany("Items")
@@ -4697,18 +4913,16 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Package", "BuyMainPackage")
                         .WithMany("BuyMainItems")
                         .HasForeignKey("BuyMainPackageId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Package", "BuySubPackage")
                         .WithMany("BuySubItems")
-                        .HasForeignKey("BuySubPackageId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("BuySubPackageId");
 
                     b.HasOne("Core.Domin.TradeType", "BuyTradeType")
                         .WithMany("BuyItems")
-                        .HasForeignKey("BuyTradeTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("BuyTradeTypeId");
 
                     b.HasOne("Core.Domin.ImportType", null)
                         .WithMany("Items")
@@ -4716,8 +4930,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.ItemCategory", "ItemCategory")
                         .WithMany()
-                        .HasForeignKey("ItemCategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ItemCategoryId");
 
                     b.HasOne("Core.Domin.ItemCategory", null)
                         .WithMany("Items")
@@ -4725,8 +4938,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.ItemType", "ItemType")
                         .WithMany()
-                        .HasForeignKey("ItemTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ItemTypeId");
 
                     b.HasOne("Core.Domin.ItemType", null)
                         .WithMany("Items")
@@ -4735,7 +4947,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.MainItem", "MainItem")
                         .WithMany()
                         .HasForeignKey("MainItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.MainItem", null)
@@ -4748,43 +4960,36 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.Item", "ParentItem")
                         .WithMany("ChildItems")
-                        .HasForeignKey("ParentItemId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ParentItemId");
 
                     b.HasOne("Core.Domin.ScientificGroup", null)
                         .WithMany("Items")
                         .HasForeignKey("ScientificGroupId");
 
                     b.HasOne("Core.Domin.Section", "Section")
-                        .WithMany()
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Section", null)
                         .WithMany("Items")
-                        .HasForeignKey("SectionId1");
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.Package", "SellMainPackage")
                         .WithMany("SellMainItems")
                         .HasForeignKey("SellMainPackageId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Package", "SellSubPackage")
                         .WithMany("SellSubItems")
-                        .HasForeignKey("SellSubPackageId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("SellSubPackageId");
 
                     b.HasOne("Core.Domin.TradeType", "SellTradeType")
                         .WithMany("SellItems")
-                        .HasForeignKey("SellTradeTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("SellTradeTypeId");
 
                     b.HasOne("Core.Domin.SubItem", "SubItem")
                         .WithMany()
                         .HasForeignKey("SubItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.SubItem", null)
@@ -4793,12 +4998,13 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.Vendor", "Vendor")
                         .WithMany()
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("VendorId");
 
                     b.HasOne("Core.Domin.Vendor", null)
                         .WithMany("Items")
                         .HasForeignKey("VendorId1");
+
+                    b.Navigation("Branch");
 
                     b.Navigation("Brand");
 
@@ -4858,14 +5064,10 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Package", "Package")
-                        .WithMany()
-                        .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Package", null)
                         .WithMany("ItemPackages")
-                        .HasForeignKey("PackageId1");
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Item");
 
@@ -4882,8 +5084,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.ItemUnit", "ParentUnit")
                         .WithMany("ChildUnits")
-                        .HasForeignKey("ParentUnitId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ParentUnitId");
 
                     b.Navigation("Item");
 
@@ -4892,14 +5093,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.ItemUnitHistory", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("ItemUnitHistories")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.AppUser", "ChangedByUser")
-                        .WithMany()
+                        .WithMany("ItemUnitHistories")
                         .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Item", "Item")
@@ -4933,39 +5130,32 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.ApprovalStatus", "ApprovalStatus")
                         .WithMany("Movements")
                         .HasForeignKey("ApprovalStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Branch", "BranchFrom")
                         .WithMany("MovementsFrom")
-                        .HasForeignKey("BranchFromId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("BranchFromId");
 
                     b.HasOne("Core.Domin.Branch", "BranchTo")
                         .WithMany("MovementsTo")
-                        .HasForeignKey("BranchToId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("BranchToId");
 
                     b.HasOne("Core.Domin.AppUser", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.MovementType", "MovementType")
-                        .WithMany()
-                        .HasForeignKey("MovementTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.MovementType", null)
                         .WithMany("Movements")
-                        .HasForeignKey("MovementTypeId1");
+                        .HasForeignKey("MovementTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
                         .WithMany("Movements")
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("SupplierId");
 
                     b.Navigation("ApprovalStatus");
 
@@ -4985,25 +5175,25 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Branch", "Branch")
                         .WithMany("MovementLines")
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("MovementLines")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Movement", "Movement")
                         .WithMany("MovementLines")
                         .HasForeignKey("MovementId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.MovementType", "MovementType")
                         .WithMany("MovementLines")
                         .HasForeignKey("MovementTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Branch");
@@ -5017,14 +5207,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.Notification", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("Notifications")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.AppUser", "User")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -5033,29 +5219,21 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.OpeningBalance", b =>
                 {
                     b.HasOne("Core.Domin.Branch", "Branch")
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Branch", null)
                         .WithMany("OpeningBalances")
-                        .HasForeignKey("BranchId1");
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.FiscalYear", "FiscalYearNavigation")
-                        .WithMany()
-                        .HasForeignKey("FiscalYear")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.FiscalYear", null)
                         .WithMany("OpeningBalances")
-                        .HasForeignKey("FiscalYearId");
+                        .HasForeignKey("FiscalYear")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("OpeningBalances")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Branch");
@@ -5067,25 +5245,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.Order", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("OrdersRequested")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.ApprovalStatus", "ApprovalStatus")
                         .WithMany("Orders")
                         .HasForeignKey("ApprovalStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Branch", "BranchFrom")
                         .WithMany("OrdersFrom")
-                        .HasForeignKey("BranchFromId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("BranchFromId");
 
                     b.HasOne("Core.Domin.Branch", "BranchTo")
                         .WithMany("OrdersTo")
-                        .HasForeignKey("BranchToId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("BranchToId");
 
                     b.HasOne("Core.Domin.DirectReceiptHeader", null)
                         .WithMany("Orders")
@@ -5094,7 +5266,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.OrderType", "OrderType")
                         .WithMany()
                         .HasForeignKey("OrderTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.OrderType", null)
@@ -5102,19 +5274,14 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("OrderTypeId1");
 
                     b.HasOne("Core.Domin.AppUser", "RequestedByUser")
-                        .WithMany()
+                        .WithMany("OrdersRequested")
                         .HasForeignKey("RequestedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Core.Domin.Supplier", null)
                         .WithMany("Orders")
-                        .HasForeignKey("SupplierId1");
+                        .HasForeignKey("SupplierId");
 
                     b.Navigation("ApprovalStatus");
 
@@ -5134,13 +5301,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("OrderLines")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Order", "Order")
                         .WithMany("OrderLines")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Item");
@@ -5151,10 +5318,14 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.PurchaseOrderDetail", b =>
                 {
                     b.HasOne("Core.Domin.Item", "Item")
-                        .WithMany("PurchaseOrderDetails")
+                        .WithMany()
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("Core.Domin.Item", null)
+                        .WithMany("PurchaseOrderDetails")
+                        .HasForeignKey("ItemId1");
 
                     b.HasOne("Core.Domin.PurchaseOrderHeader", "PurchaseOrderHeader")
                         .WithMany("PurchaseOrderDetails")
@@ -5165,7 +5336,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.ItemUnit", "Unit")
                         .WithMany()
                         .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Item");
@@ -5178,24 +5349,19 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.PurchaseOrderHeader", b =>
                 {
                     b.HasOne("Core.Domin.Branch", "Branch")
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Branch", null)
                         .WithMany("PurchaseOrderHeaders")
-                        .HasForeignKey("BranchId1");
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.Branch", "BranchStock")
                         .WithMany()
-                        .HasForeignKey("BranchStockId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("BranchStockId");
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Supplier", null)
@@ -5214,7 +5380,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Movement", "Movement")
                         .WithMany()
                         .HasForeignKey("MovementId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.OrderLine", "OrderLine")
@@ -5233,18 +5399,16 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("ReturnOrderDetails")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.StockInDetail", "OriginalStockInDetail")
                         .WithMany()
-                        .HasForeignKey("OriginalStockInDetailId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("OriginalStockInDetailId");
 
                     b.HasOne("Core.Domin.StockOutDetail", "OriginalStockOutDetail")
                         .WithMany()
-                        .HasForeignKey("OriginalStockOutDetailId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("OriginalStockOutDetailId");
 
                     b.HasOne("Core.Domin.ReturnOrderHeader", "ReturnOrderHeader")
                         .WithMany("ReturnOrderDetails")
@@ -5264,23 +5428,14 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.ReturnOrderHeader", b =>
                 {
                     b.HasOne("Core.Domin.Branch", "Branch")
-                        .WithMany()
+                        .WithMany("ReturnOrderHeaders")
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.Domin.Branch", null)
-                        .WithMany("ReturnOrderHeaders")
-                        .HasForeignKey("BranchId1");
-
                     b.HasOne("Core.Domin.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Core.Domin.Supplier", null)
                         .WithMany("ReturnOrderHeaders")
-                        .HasForeignKey("SupplierId1");
+                        .HasForeignKey("SupplierId");
 
                     b.Navigation("Branch");
 
@@ -5289,14 +5444,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.SavedView", b =>
                 {
-                    b.HasOne("Core.Domin.AppUser", null)
-                        .WithMany("SavedViews")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("Core.Domin.AppUser", "User")
-                        .WithMany()
+                        .WithMany("SavedViews")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -5307,13 +5458,12 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Setting_flag_master", "Setting_flag_master")
                         .WithMany()
                         .HasForeignKey("FlagMasterId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.FlagType", "FlagType")
                         .WithMany()
-                        .HasForeignKey("FlagTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("FlagTypeId");
 
                     b.Navigation("FlagType");
 
@@ -5323,15 +5473,18 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.StockInDetail", b =>
                 {
                     b.HasOne("Core.Domin.Item", "Item")
-                        .WithMany("StockInDetails")
+                        .WithMany()
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Core.Domin.Item", null)
+                        .WithMany("StockInDetails")
+                        .HasForeignKey("ItemId1");
 
                     b.HasOne("Core.Domin.PurchaseOrderDetail", "PurchaseOrderDetail")
                         .WithMany("StockInDetails")
-                        .HasForeignKey("PurchaseOrderDetailId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("PurchaseOrderDetailId");
 
                     b.HasOne("Core.Domin.StockInHeader", "StockInHeader")
                         .WithMany("StockInDetails")
@@ -5340,13 +5493,8 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Core.Domin.TransferOrderDetail", "TransferOrderDetail")
-                        .WithMany()
-                        .HasForeignKey("TransferOrderDetailId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Core.Domin.TransferOrderDetail", null)
                         .WithMany("StockInDetails")
-                        .HasForeignKey("TransferOrderDetailId1");
+                        .HasForeignKey("TransferOrderDetailId");
 
                     b.Navigation("Item");
 
@@ -5362,7 +5510,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Branch", "Branch")
                         .WithMany()
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.Branch", null)
@@ -5371,22 +5519,16 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.PurchaseOrderHeader", "PurchaseOrderHeader")
                         .WithMany("StockInHeaders")
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Core.Domin.ReturnOrderHeader", null)
-                        .WithMany("StockInHeaders")
-                        .HasForeignKey("ReturnOrderHeaderReturnOrderId");
+                        .HasForeignKey("PurchaseOrderId");
 
                     b.HasOne("Core.Domin.ReturnOrderHeader", "ReturnOrderHeader")
-                        .WithMany()
-                        .HasForeignKey("ReturnOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany("StockInHeaders")
+                        .HasForeignKey("ReturnOrderId");
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Core.Domin.Supplier", null)
                         .WithMany("StockInHeaders")
@@ -5394,8 +5536,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.TransferOrderHeader", "TransferOrderHeader")
                         .WithMany("StockInHeaders")
-                        .HasForeignKey("TransferOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TransferOrderId");
 
                     b.Navigation("Branch");
 
@@ -5413,7 +5554,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("StockOutDetails")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.StockOutHeader", "StockOutHeader")
@@ -5424,8 +5565,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Core.Domin.TransferOrderDetail", "TransferOrderDetail")
                         .WithMany()
-                        .HasForeignKey("TransferOrderDetailId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TransferOrderDetailId");
 
                     b.Navigation("Item");
 
@@ -5439,18 +5579,16 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Branch", "Branch")
                         .WithMany()
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.ReturnOrderHeader", "ReturnOrderHeader")
                         .WithMany()
-                        .HasForeignKey("ReturnOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ReturnOrderId");
 
                     b.HasOne("Core.Domin.TransferOrderHeader", "TransferOrderHeader")
                         .WithMany("StockOutHeaders")
-                        .HasForeignKey("TransferOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TransferOrderId");
 
                     b.Navigation("Branch");
 
@@ -5464,18 +5602,16 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("StockOutReturnDetails")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.ItemUnit", "ItemPackage")
                         .WithMany()
-                        .HasForeignKey("ItemPackageId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ItemPackageId");
 
                     b.HasOne("Core.Domin.ReturnOrderDetail", "ReturnOrderDetail")
                         .WithMany("StockOutReturnDetails")
-                        .HasForeignKey("ReturnOrderDetailId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ReturnOrderDetailId");
 
                     b.HasOne("Core.Domin.StockOutReturnHeader", "StockOutReturnHeader")
                         .WithMany("StockOutReturnDetails")
@@ -5495,33 +5631,22 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.StockOutReturnHeader", b =>
                 {
                     b.HasOne("Core.Domin.Branch", "Branch")
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Branch", null)
                         .WithMany("StockOutReturnHeaders")
-                        .HasForeignKey("BranchId1");
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Domin.Branch", "BranchStock")
                         .WithMany()
-                        .HasForeignKey("BranchStockId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("BranchStockId");
 
                     b.HasOne("Core.Domin.ReturnOrderHeader", "ReturnOrderHeader")
                         .WithMany("StockOutReturnHeaders")
-                        .HasForeignKey("ReturnOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ReturnOrderId");
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Core.Domin.Supplier", null)
                         .WithMany("StockOutReturnHeaders")
-                        .HasForeignKey("SupplierId1");
+                        .HasForeignKey("SupplierId");
 
                     b.Navigation("Branch");
 
@@ -5548,7 +5673,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("SupplierInvoiceDetails")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.SupplierInvoiceHeader", "SupplierInvoiceHeader")
@@ -5566,18 +5691,13 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Domin.DirectReceiptHeader", "DirectReceiptHeader")
                         .WithMany("SupplierInvoiceHeaders")
-                        .HasForeignKey("DirectReceiptId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("DirectReceiptId");
 
                     b.HasOne("Core.Domin.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.Supplier", null)
                         .WithMany("SupplierInvoiceHeaders")
-                        .HasForeignKey("SupplierId1");
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("DirectReceiptHeader");
 
@@ -5589,7 +5709,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Core.Domin.Item", "Item")
                         .WithMany("TransferOrderDetails")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.TransferOrderHeader", "TransferOrderHeader")
@@ -5605,44 +5725,27 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domin.TransferOrderHeader", b =>
                 {
-                    b.HasOne("Core.Domin.Branch", null)
-                        .WithMany("TransferOrderHeadersFrom")
-                        .HasForeignKey("BranchId");
-
-                    b.HasOne("Core.Domin.Branch", null)
-                        .WithMany("TransferOrderHeadersTo")
-                        .HasForeignKey("BranchId1");
-
                     b.HasOne("Core.Domin.Branch", "FromBranch")
-                        .WithMany()
+                        .WithMany("TransferOrderHeadersFrom")
                         .HasForeignKey("FromBranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.ShipmentType", "ShipmentType")
-                        .WithMany()
-                        .HasForeignKey("ShipmentTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Core.Domin.ShipmentType", null)
                         .WithMany("TransferOrderHeaders")
-                        .HasForeignKey("ShipmentTypeId1");
+                        .HasForeignKey("ShipmentTypeId");
 
                     b.HasOne("Core.Domin.Branch", "ToBranch")
-                        .WithMany()
+                        .WithMany("TransferOrderHeadersTo")
                         .HasForeignKey("ToBranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Domin.TransferOrderStatus", "TransferOrderStatus")
-                        .WithMany()
-                        .HasForeignKey("TransferOrderStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Core.Domin.TransferOrderStatus", null)
                         .WithMany("TransferOrderHeaders")
-                        .HasForeignKey("TransferOrderStatusId1");
+                        .HasForeignKey("TransferOrderStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FromBranch");
 
@@ -5766,6 +5869,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Domin.Brand", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Core.Domin.DirectPurchaseOrderHeader", b =>
+                {
+                    b.Navigation("DirectPurchaseOrderDetails");
                 });
 
             modelBuilder.Entity("Core.Domin.DirectReceiptHeader", b =>

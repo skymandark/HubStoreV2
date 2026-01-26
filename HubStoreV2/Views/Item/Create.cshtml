@@ -92,6 +92,7 @@
             const brands = @Html.Raw(Json.Serialize(ViewBag.Brands));
             const itemTypes = @Html.Raw(Json.Serialize(ViewBag.ItemTypes));
             const packages = @Html.Raw(Json.Serialize(ViewBag.Packages));
+            const branches = @Html.Raw(Json.Serialize(ViewBag.Branches));
 
             $("#formContainer").dxForm({
                 formData: @Html.Raw(Json.Serialize(Model)),
@@ -106,18 +107,32 @@
                             { dataField: "ItemCode", label: { text: "كود الصنف" }, editorOptions: { stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
                             { dataField: "NameArab", label: { text: "الاسم (بالعربي)" }, editorOptions: { stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
                             { dataField: "NameEng", label: { text: "الاسم (English)" }, editorOptions: { stylingMode: "outlined" }, validationRules: [{ type: "required" }] },
-                            { 
-                                dataField: "ItemTypeId", 
-                                label: { text: "نوع الصنف" }, 
+                            {
+                                dataField: "BranchId",
+                                label: { text: "الفرع" },
                                 editorType: "dxSelectBox",
-                                editorOptions: { 
-                                    dataSource: itemTypes, 
-                                    displayExpr: "nameArab", 
+                                editorOptions: {
+                                    dataSource: branches,
+                                    displayExpr: "nameArab",
+                                    valueExpr: "branchId",
+                                    placeholder: "-- اختر الفرع --",
+                                    stylingMode: "outlined",
+                                    searchEnabled: true
+                                },
+                                validationRules: [{ type: "required" }]
+                            },
+                            {
+                                dataField: "ItemTypeId",
+                                label: { text: "نوع الصنف" },
+                                editorType: "dxSelectBox",
+                                editorOptions: {
+                                    dataSource: itemTypes,
+                                    displayExpr: "nameArab",
                                     valueExpr: "itemTypeId",
                                     placeholder: "-- اختر نوع الصنف --",
                                     stylingMode: "outlined",
                                     searchEnabled: true
-                                } 
+                                }
                             }
                         ]
                     },

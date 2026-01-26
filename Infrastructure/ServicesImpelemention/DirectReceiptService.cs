@@ -76,9 +76,8 @@ namespace Infrastructure.ServicesImpelemention
                 // Calculate totals
                 decimal totalValue = 0;
                 decimal totalVat = 0;
-                
+
                 _context.DirectReceiptHeaders.Add(header);
-                await _context.SaveChangesAsync();
 
                 // Create Details
                 foreach (var item in dto.Items)
@@ -109,7 +108,7 @@ namespace Infrastructure.ServicesImpelemention
                 header.NetTotal = totalValue + totalVat;
 
                 await _context.SaveChangesAsync();
-                
+
                 // Execute immediately for Direct Receipt
                 await ExecuteDirectReceipt(header.DirectReceiptId);
 
@@ -157,98 +156,108 @@ namespace Infrastructure.ServicesImpelemention
 
         private async Task ExecuteDirectReceipt(int id)
         {
-            // Note: This method should be called within an active transaction from CreateDirectReceipt or ApproveDirectReceipt
-            var header = await _context.DirectReceiptHeaders
-                .Include(h => h.DirectReceiptDetails)
-                .FirstOrDefaultAsync(h => h.DirectReceiptId == id);
-
-            if (header == null) throw new Exception("Receipt not found");
-            if (header.StatusId == 3) return; // 3: Executed/Completed
-
-            // Get standard Approved status for movements
-            var approvedStatus = await _context.ApprovalStatuses.FirstOrDefaultAsync(s => s.Code == "Approved");
-            var approvedStatusId = approvedStatus?.ApprovalStatusId ?? 1;
-
-            // Get a system user ID if needed, or use a dummy for now if it's required but automated
-            // In many systems, "System" or a fixed GUID is used.
-            var systemUserId = "System"; // Replace with actual System User Id if required by FK
-
-            // Create Movement for receipt
-            var movement = new Movement
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                MovementCode = await GenerateMovementCode(),
-                MovementTypeId = await GetMovementTypeId("REC"),
-                SupplierId = header.SupplierId,
-                BranchToId = header.BranchId,
-                Date = DateTime.UtcNow,
-                InternalBarcode = Guid.NewGuid().ToString("N").Substring(0, 12),
-                Notes = $"Direct Receipt {header.DirectReceiptCode}",
-                CreatedBy = "System",
-                CreatedByUserId = systemUserId,
-                CreatedAt = DateTime.UtcNow,
-                CreatedDate = DateTime.UtcNow,
-                Status = "Completed",
-                ApprovalStatusId = approvedStatusId,
-                TotalAmount = header.NetTotal
-            };
-            _context.Movements.Add(movement);
-            await _context.SaveChangesAsync();
-
-            // Create Movement Lines
-            foreach (var item in header.DirectReceiptDetails)
-            {
-                var movementLine = new MovementLine
+                try
                 {
-                    MovementId = movement.MovementId,
-                    ItemId = item.ItemId,
-                    BranchId = header.BranchId,
-                    UnitCode = "EA", // Default
-                    QtyInput = item.Quantity,
-                    ConversionUsedToBase = 1,
-                    QtyBase = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    Notes = $"Direct Receipt {header.DirectReceiptCode}",
-                    CreatedBy = "System",
-                    CreatedAt = DateTime.UtcNow,
-                    Status = "Completed"
-                };
-                _context.MovementLines.Add(movementLine);
-            }
+                    // Note: This method should be called within an active transaction from CreateDirectReceipt or ApproveDirectReceipt
+                    var header = await _context.DirectReceiptHeaders
+                        .Include(h => h.DirectReceiptDetails)
+                        .FirstOrDefaultAsync(h => h.DirectReceiptId == id);
 
-            // Create Supplier Invoice
-            var invoice = new SupplierInvoiceHeader
-            {
-                InvoiceNumber = GenerateInvoiceNumber(),
-                InvoiceDate = header.DocDate,
-                SupplierId = header.SupplierId,
-                DirectReceiptId = header.DirectReceiptId,
-                TotalAmount = header.TotalValue,
-                VatAmount = header.TotalVat,
-                NetAmount = header.NetTotal,
-                CreatedBy = "System"
-            };
-            _context.SupplierInvoiceHeaders.Add(invoice);
-            await _context.SaveChangesAsync();
+                    if (header == null) throw new Exception("Receipt not found");
+                    if (header.StatusId == 3) return; // 3: Executed/Completed
 
-            // Create Invoice Details
-            foreach (var item in header.DirectReceiptDetails)
-            {
-                var invoiceDetail = new SupplierInvoiceDetail
+                    // Get standard Approved status for movements
+                    var approvedStatus = await _context.ApprovalStatuses.FirstOrDefaultAsync(s => s.Code == "Approved");
+                    var approvedStatusId = approvedStatus?.ApprovalStatusId ?? 1;
+
+                    // Get a system user ID if needed, or use a dummy for now if it's required but automated
+                    // In many systems, "System" or a fixed GUID is used.
+                    var systemUserId = "System"; // Replace with actual System User Id if required by FK
+
+                    // Create Movement for receipt
+                    var movement = new Movement
+                    {
+                        MovementCode = await GenerateMovementCode(),
+                        MovementTypeId = await GetMovementTypeId("REC"),
+                        SupplierId = header.SupplierId,
+                        BranchToId = header.BranchId,
+                        Date = DateTime.UtcNow,
+                        InternalBarcode = Guid.NewGuid().ToString("N").Substring(0, 12),
+                        Notes = $"Direct Receipt {header.DirectReceiptCode}",
+                        CreatedBy = "System",
+                        CreatedByUserId = systemUserId,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedDate = DateTime.UtcNow,
+                        Status = "Completed",
+                        ApprovalStatusId = approvedStatusId,
+                        TotalAmount = header.NetTotal
+                    };
+                    _context.Movements.Add(movement);
+
+                    // Create Movement Lines
+                    foreach (var item in header.DirectReceiptDetails)
+                    {
+                        var movementLine = new MovementLine
+                        {
+                            MovementId = movement.MovementId,
+                            ItemId = item.ItemId,
+                            BranchId = header.BranchId,
+                            UnitCode = "EA", // Default
+                            QtyInput = item.Quantity,
+                            ConversionUsedToBase = 1,
+                            QtyBase = item.Quantity,
+                            UnitPrice = item.UnitPrice,
+                            Notes = $"Direct Receipt {header.DirectReceiptCode}",
+                            CreatedBy = "System",
+                            CreatedAt = DateTime.UtcNow,
+                            Status = "Completed"
+                        };
+                        _context.MovementLines.Add(movementLine);
+                    }
+
+                    // Create Supplier Invoice
+                    var invoice = new SupplierInvoiceHeader
+                    {
+                        InvoiceNumber = GenerateInvoiceNumber(),
+                        InvoiceDate = header.DocDate,
+                        SupplierId = header.SupplierId,
+                        DirectReceiptId = header.DirectReceiptId,
+                        TotalAmount = header.TotalValue,
+                        VatAmount = header.TotalVat,
+                        NetAmount = header.NetTotal,
+                        CreatedBy = "System"
+                    };
+                    _context.SupplierInvoiceHeaders.Add(invoice);
+
+                    // Create Invoice Details
+                    foreach (var item in header.DirectReceiptDetails)
+                    {
+                        var invoiceDetail = new SupplierInvoiceDetail
+                        {
+                            SupplierInvoiceId = invoice.SupplierInvoiceId,
+                            ItemId = item.ItemId,
+                            Quantity = item.Quantity,
+                            UnitPrice = item.UnitPrice,
+                            VatRate = item.VatRate,
+                            VatAmount = item.VatAmount,
+                            TotalValue = item.TotalValue,
+                            CreatedBy = "System"
+                        };
+                        _context.SupplierInvoiceDetails.Add(invoiceDetail);
+                    }
+
+                    header.StatusId = 3; // Executed/Completed
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch
                 {
-                    SupplierInvoiceId = invoice.SupplierInvoiceId,
-                    ItemId = item.ItemId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    VatRate = item.VatRate,
-                    VatAmount = item.VatAmount,
-                    TotalValue = item.TotalValue,
-                    CreatedBy = "System"
-                };
-                _context.SupplierInvoiceDetails.Add(invoiceDetail);
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
-
-            header.StatusId = 3; // Executed/Completed
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteDirectReceipt(int id)

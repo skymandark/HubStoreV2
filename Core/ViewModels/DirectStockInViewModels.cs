@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Core.ViewModels.StockInViewModels;
 
 namespace Core.ViewModels.DirectStockInViewModels
 {
@@ -21,9 +22,9 @@ namespace Core.ViewModels.DirectStockInViewModels
         [MaxLength(1000)]
         public string Remarks { get; set; }
 
-        public List<SupplierDto> Suppliers { get; set; } = new();
-        public List<BranchDto> Branches { get; set; } = new();
-        public List<ItemDto> Items { get; set; } = new();
+        public List<StockInViewModels.SupplierDto> Suppliers { get; set; } = new();
+        public List<StockInViewModels.BranchDto> Branches { get; set; } = new();
+        public List<StockInViewModels.ItemDto> Items { get; set; } = new();
         public List<DirectStockInDetailDto> StockInDetails { get; set; } = new();
     }
 
@@ -68,22 +69,4 @@ namespace Core.ViewModels.DirectStockInViewModels
         public decimal TotalValue { get; set; }
     }
 
-    // Common DTOs
-    public class SupplierDto
-    {
-        public int SupplierId { get; set; }
-        public string Name { get; set; }
-    }
-
-    public class BranchDto
-    {
-        public int BranchId { get; set; }
-        public string Name { get; set; }
-    }
-
-    public class ItemDto
-    {
-        public int ItemId { get; set; }
-        public string Name { get; set; }
-    }
 }

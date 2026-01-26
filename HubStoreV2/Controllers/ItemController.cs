@@ -30,12 +30,22 @@ namespace HubStoreV2.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? branchId = null)
         {
             try
             {
+                // Load branches for the dropdown
+                var branches = await _context.Branches
+                    .Where(b => b.IsActive)
+                    .Select(b => new { b.BranchId, NameArab = b.Name_Arab })
+                    .ToListAsync();
+
+                ViewBag.Branches = branches;
+                ViewBag.SelectedBranchId = branchId;
+
                 // For the elegant grid, we'll fetch a reasonable amount or implement pagination in the grid
-                var result = await _itemService.GetItemsAsync(new ItemFilterViewModel(), new PaginationViewModel { PageNumber = 1, PageSize = 1000 });
+                var filters = new ItemFilterViewModel { BranchId = branchId };
+                var result = await _itemService.GetItemsAsync(filters, new PaginationViewModel { PageNumber = 1, PageSize = 1000 });
                 return View(result.Data);
             }
             catch (Exception ex)
@@ -143,6 +153,13 @@ namespace HubStoreV2.Controllers
                 await LoadLookups();
                 return View(dto);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetItemBalance(int itemId, int branchId)
+        {
+            // Placeholder: Returning dummy value for now, similar to TransferOrder
+            return Json(new { balance = 150 });
         }
 
         private async Task LoadLookups()

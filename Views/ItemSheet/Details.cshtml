@@ -1,0 +1,185 @@
+@model List<Core.ViewModels.InventoryViewModels.ItemTransactionViewModel>
+@{
+    ViewData["Title"] = "طباعة كشف حركة صنف";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Company Header -->
+    <div class="text-center mb-4">
+        <h3>@ViewBag.CompanyInfo?.CompanyName</h3>
+        <p class="mb-1">@ViewBag.CompanyInfo?.Address</p>
+        <p class="mb-1">هاتف: @ViewBag.CompanyInfo?.Phone | فاكس: @ViewBag.CompanyInfo?.Fax</p>
+        <p class="mb-1">البريد الإلكتروني: @ViewBag.CompanyInfo?.Email</p>
+        <hr>
+        <h4>كشف حركة صنف</h4>
+    </div>
+
+    <!-- Report Info -->
+    <div class="row mb-3">
+        <div class="col-6">
+            <table class="table table-sm table-borderless">
+                <tr>
+                    <td><strong>الصنف:</strong></td>
+                    <td>@ViewBag.Item?.ItemCode - @ViewBag.Item?.ItemName</td>
+                </tr>
+                <tr>
+                    <td><strong>المخزن:</strong></td>
+                    <td>@ViewBag.Branch?.BranchCode - @ViewBag.Branch?.Name</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-6">
+            <table class="table table-sm table-borderless">
+                <tr>
+                    <td><strong>من تاريخ:</strong></td>
+                    <td>@ViewBag.FromDate.ToString("yyyy-MM-dd")</td>
+                </tr>
+                <tr>
+                    <td><strong>إلى تاريخ:</strong></td>
+                    <td>@ViewBag.ToDate.ToString("yyyy-MM-dd")</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <table class="table table-bordered table-sm">
+        <thead class="thead-dark">
+            <tr>
+                <th class="text-center">التاريخ</th>
+                <th class="text-center">نوع الحركة</th>
+                <th class="text-center">رقم الحركة</th>
+                <th class="text-center">البيان</th>
+                <th class="text-center">كمية واردة</th>
+                <th class="text-center">كمية منصرفة</th>
+                <th class="text-center">الرصيد</th>
+                <th class="text-center">السعر</th>
+                <th class="text-center">الوحدة</th>
+                <th class="text-center">المستخدم</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var transaction in Model)
+                {
+                    <tr>
+                        <td class="text-center">@transaction.DocDate.ToString("yyyy-MM-dd")</td>
+                        <td>@transaction.TransactionType</td>
+                        <td class="text-center">@transaction.BaseId</td>
+                        <td>@transaction.Remarks</td>
+                        <td class="text-center">
+                            @(transaction.InQuantity.HasValue ? transaction.InQuantity.Value.ToString("N2") : "")
+                        </td>
+                        <td class="text-center">
+                            @(transaction.OutQuantity.HasValue ? transaction.OutQuantity.Value.ToString("N2") : "")
+                        </td>
+                        <td class="text-center">@transaction.Balance.ToString("N2")</td>
+                        <td class="text-center">@transaction.Price.ToString("N2")</td>
+                        <td class="text-center">@transaction.ItemPackageName</td>
+                        <td class="text-center">@transaction.UserData</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="10" class="text-center">لا توجد حركات في الفترة المحددة</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Summary -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <table class="table table-bordered table-sm">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="text-center">الرصيد الافتتاحي</th>
+                            <th class="text-center">إجمالي الوارد</th>
+                            <th class="text-center">إجمالي المنصرف</th>
+                            <th class="text-center">الرصيد النهائي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center">@Model.First().OpenBalance.ToString("N2")</td>
+                            <td class="text-center">@Model.Where(x => x.InQuantity.HasValue).Sum(x => x.InQuantity.Value).ToString("N2")</td>
+                            <td class="text-center">@Model.Where(x => x.OutQuantity.HasValue).Sum(x => x.OutQuantity.Value).ToString("N2")</td>
+                            <td class="text-center">@Model.Last().Balance.ToString("N2")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- Footer -->
+    <div class="row mt-5">
+        <div class="col-4">
+            <div class="border-top pt-2 text-center">
+                <small>المستخدم</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="border-top pt-2 text-center">
+                <small>المراجع</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="border-top pt-2 text-center">
+                <small>المدير</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Footer -->
+    <div class="text-center mt-3">
+        <small class="text-muted">
+            تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") | 
+            نظام إدارة المخزون HubStore V2
+        </small>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            font-size: 12px;
+        }
+        
+        .table {
+            font-size: 11px;
+        }
+        
+        .table th {
+            background-color: #f8f9fa !important;
+            -webkit-print-color-adjust: exact;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    }
+    
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6;
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    .thead-dark th {
+        background-color: #343a40;
+        color: white;
+        border-color: #454d55;
+    }
+</style>

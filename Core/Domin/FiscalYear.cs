@@ -35,5 +35,6 @@ namespace Core.Domin
         public string CreatedBy { get; set; }
 
         public virtual ICollection<OpeningBalance> OpeningBalances { get; set; }
+        public string YearName { get; set; }
     }
 }

@@ -32,5 +32,6 @@ namespace Core.Domin
 
         [MaxLength(100)]
         public string CreatedBy { get; set; }
+        public int Percentage { get; set; }
     }
 }

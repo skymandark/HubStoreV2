@@ -1,0 +1,271 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "تقرير أرصدة المخزون - تفاصيل";
+    Layout = null; // No layout for printing
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.2.5/css/dx.light.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+            margin: 20px;
+            background: white;
+            color: #2c3e50;
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 3px solid #34495e;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .company-info {
+            margin-bottom: 20px;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        .report-title {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .filters-summary {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 8px;
+            text-align: right;
+        }
+
+        th {
+            background-color: #34495e;
+            color: #ecf0f1;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .summary-row {
+            background-color: #ecf0f1 !important;
+            font-weight: bold;
+        }
+
+        .summary-row td {
+            border-top: 2px solid #34495e;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .no-print {
+            display: none;
+        }
+
+        @@media print {
+            body {
+                margin: 0;
+                font-size: 11px;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 4px;
+            }
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            background: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-button no-print">
+        <i class="fas fa-print"></i> طباعة
+    </button>
+
+    <div class="report-header">
+        <div class="company-info">
+            <div class="company-name">@Model.CompanyName</div>
+            <div class="report-title">تقرير أرصدة المخزون</div>
+        </div>
+
+        <div class="report-meta">
+            <div>تاريخ التقرير: @Model.ReportDate.ToString("yyyy-MM-dd HH:mm")</div>
+            <div>نوع التقرير: @(Model.IsSummary ? "مجمع" : "تفصيلي")</div>
+        </div>
+    </div>
+
+    <div class="filters-summary">
+        <h6><i class="fas fa-filter"></i> معايير التقرير</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>المخازن:</strong>
+                @if (Model.BranchIds != null && Model.BranchIds.Length > 0)
+                {
+                    var branches = string.Join(", ", Model.BranchIds);
+                    <span>@branches</span>
+                }
+            </div>
+            <div class="col-md-6">
+                <strong>المورد:</strong>
+                @if (Model.VendorId.HasValue)
+                {
+                    <span>@Model.VendorId</span>
+                }
+                else
+                {
+                    <span>جميع الموردين</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>معرف الصنف</th>
+                <th>كود الصنف</th>
+                <th>اسم الصنف</th>
+                <th>الصنف الرئيسي</th>
+                <th>الصنف الفرعي</th>
+                <th>العلامة التجارية</th>
+                <th>نوع الصنف</th>
+                <th>وحدة القياس</th>
+                <th>القسم</th>
+                <th>الكمية الافتتاحية</th>
+                <th>الرصيد الحالي</th>
+                <th>سعر التكلفة</th>
+                <th>سعر البيع</th>
+                <th>قيمة التكلفة</th>
+                <th>المخزن</th>
+                <th>المورد</th>
+                <th>تاريخ المخزون</th>
+                <th>تاريخ الانتهاء</th>
+                <th>رقم الدفعة</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                decimal totalOpenQuantity = 0;
+                decimal totalBalanceQuantity = 0;
+                decimal totalCostValue = 0;
+                int itemCount = 0;
+            }
+
+            @foreach (var item in Model.ReportData)
+            {
+                totalOpenQuantity += item.OpenQuantity;
+                totalBalanceQuantity += item.BalanceQuantity;
+                totalCostValue += item.CostValue;
+                itemCount++;
+            <tr>
+                <td>@item.ItemId</td>
+                <td>@item.ItemCode</td>
+                <td>@item.ItemName</td>
+                <td>@item.MainItemName</td>
+                <td>@item.SubItemName</td>
+                <td>@item.BrandName</td>
+                <td>@item.ItemTypeName</td>
+                <td>@item.PackageName</td>
+                <td>@item.SectionName</td>
+                <td>@item.OpenQuantity.ToString("N2")</td>
+                <td>@item.BalanceQuantity.ToString("N2")</td>
+                <td>@(item.CostPrice?.ToString("N2") ?? "0.00")</td>
+                <td>@(item.ConsumerPrice?.ToString("N2") ?? "0.00")</td>
+                <td>@item.CostValue.ToString("N2")</td>
+                <td>@item.BranchName</td>
+                <td>@item.VendorName</td>
+                <td>@(item.StockDate?.ToString("yyyy-MM-dd") ?? "")</td>
+                <td>@(item.ExpireDate?.ToString("yyyy-MM-dd") ?? "")</td>
+                <td>@item.BatchNumber</td>
+            </tr>
+            }
+
+            <!-- Summary Row -->
+            <tr class="summary-row">
+                <td colspan="9" style="text-align: center; font-weight: bold;">
+                    الإجمالي (@itemCount صنف)
+                </td>
+                <td>@totalOpenQuantity.ToString("N2")</td>
+                <td>@totalBalanceQuantity.ToString("N2")</td>
+                <td colspan="2"></td>
+                <td>@totalCostValue.ToString("N2")</td>
+                <td colspan="5"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="report-footer" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #bdc3c7; text-align: center; color: #7f8c8d; font-size: 12px;">
+        <p>تم إنشاء هذا التقرير بواسطة نظام HubStore ERP في @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</p>
+        <p>جميع الحقوق محفوظة © @DateTime.Now.Year</p>
+    </div>
+
+    <script>
+        // Auto print when page loads (optional)
+        // window.onload = function() {
+        //     window.print();
+        // };
+    </script>
+</body>
+</html>

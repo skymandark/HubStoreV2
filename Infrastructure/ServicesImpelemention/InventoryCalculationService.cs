@@ -57,45 +57,57 @@ namespace HubStoreV2.Services.InventoryServices
                     .FirstOrDefaultAsync();
 
                 decimal balanceQtyBase = openingBalance?.OpeningQuantityBase ?? 0;
-                decimal balanceCost = openingBalance?.CostValue ?? 0;
+                decimal balanceCost = openingBalance?.CostPrice ?? 0;
 
-                // Get all movements for this item/branch up to asOfDate
-                var movements = await _context.MovementLines
-                    .Where(ml => ml.ItemId == itemId && 
-                           ml.BranchId == branchId &&
-                           _context.Movements
-                               .Where(m => m.MovementId == ml.MovementId && m.Date <= asOfDate)
-                               .Any())
-                    .Include(ml => ml.Movement)
+                // Get inventory layers for this item/branch up to asOfDate
+                var layers = await _context.InventoryLayers
+                    .Where(il => il.ItemId == itemId &&
+                           il.BranchId == branchId &&
+                           il.ReceiptDate <= asOfDate &&
+                           !il.IsDeleted)
+                    .OrderBy(il => il.ReceiptDate)
                     .ToListAsync();
 
-                // Calculate impact from movements
-                foreach (var movement in movements)
+                // Calculate remaining quantities on the fly using FIFO allocation (new technique)
+                var layerBalances = new List<(decimal Remaining, decimal Cost)>();
+
+                // Get all issuances ordered by date
+                var issuances = await _context.MovementLines
+                    .Where(ml => ml.ItemId == itemId && ml.BranchId == branchId &&
+                           ml.Movement.Date <= asOfDate &&
+                           (ml.Movement.MovementType.Code.Contains("ISSUE") ||
+                            ml.Movement.MovementType.Code.Contains("SALE")))
+                    .Include(ml => ml.Movement)
+                    .ThenInclude(m => m.MovementType)
+                    .OrderBy(ml => ml.Movement.Date)
+                    .ToListAsync();
+
+                // Initialize remaining quantities for each layer
+                var layerRemainings = layers.ToDictionary(l => l.InventoryLayerId, l => l.QuantityRemaining);
+
+                // Allocate issuances to layers in FIFO order
+                foreach (var issuance in issuances)
                 {
-                    // Get movement type to determine if it's inbound or outbound
-                    var movementType = await _context.MovementTypes
-                        .Where(mt => mt.MovementTypeId == movement.Movement.MovementTypeId)
-                        .FirstOrDefaultAsync();
-
-                    if (movementType != null)
+                    decimal qtyIssued = Math.Abs(issuance.QtyInput);
+                    foreach (var layer in layers.OrderBy(l => l.ReceiptDate))
                     {
-                        // Assuming movement type code indicates direction (IN/OUT)
-                        bool isInbound = movementType.Code.Contains("IN") || 
-                                       movementType.Code.Contains("RECEIPT") ||
-                                       movementType.Code.Contains("OPENING");
-
-                        if (isInbound)
+                        if (qtyIssued <= 0) break;
+                        var remaining = layerRemainings[layer.InventoryLayerId];
+                        if (remaining > 0)
                         {
-                            balanceQtyBase += movement.QtyBase;
-                            balanceCost += movement.UnitPrice * movement.QtyBase;
-                        }
-                        else
-                        {
-                            balanceQtyBase -= movement.QtyBase;
-                            balanceCost -= movement.UnitPrice * movement.QtyBase;
+                            var allocated = Math.Min(qtyIssued, remaining);
+                            layerRemainings[layer.InventoryLayerId] -= allocated;
+                            qtyIssued -= allocated;
                         }
                     }
                 }
+
+                // Collect the remaining balances
+                layerBalances = layers.Select(l => (layerRemainings[l.InventoryLayerId], l.UnitCost)).ToList();
+
+                // Calculate total balance
+                balanceQtyBase = layerBalances.Sum(l => l.Remaining);
+                balanceCost = layerBalances.Sum(l => l.Remaining * l.Cost);
 
                 // Calculate unit price
                 var unitPrice = balanceQtyBase > 0 ? balanceCost / balanceQtyBase : 0;
@@ -152,7 +164,7 @@ namespace HubStoreV2.Services.InventoryServices
                     BranchName = openingBalance.Branch.Name,
                     FiscalYear = openingBalance.FiscalYear,
                     OpeningQuantityBase = openingBalance.OpeningQuantityBase,
-                    CostValue = openingBalance.CostValue,
+                    CostValue = openingBalance.CostPrice,
                     CreatedDate = openingBalance.CreatedDate,
                     CreatedBy = openingBalance.CreatedBy
                 };

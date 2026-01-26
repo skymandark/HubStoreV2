@@ -1,0 +1,140 @@
+@model IEnumerable<Core.ViewModels.DirectPurchaseOrderViewModels.DirectPurchaseOrderListViewModel>
+@{
+    ViewData["Title"] = "طلبات الشراء المباشرة";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --primary-solid: #1e293b; 
+        --secondary-solid: #64748b;
+        --accent-solid: #3b82f6; 
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
+    .card-elegant {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+
+    .page-header-elegant {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f1f5f9 !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
+    }
+
+    .btn-elegant-primary {
+        background-color: var(--accent-solid);
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border-radius: 50px;
+    }
+
+    .btn-elegant-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        color: white;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .status-draft { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .status-approved { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="page-header-elegant d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-1"><i class="fas fa-cart-arrow-down me-2"></i> طلبات الشراء المباشرة</h1>
+            <p class="mb-0 opacity-75">إدارة طلبات الشراء المباشرة من الموردين</p>
+        </div>
+        <a href="@Url.Action("Create")" class="btn btn-elegant-primary shadow">
+            <i class="fas fa-plus me-2"></i> إنشاء طلب شراء مباشر
+        </a>
+    </div>
+
+    <div class="card card-elegant">
+        <div class="card-body p-4">
+            <div id="ordersGrid"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            const orders = @Html.Raw(Json.Serialize(Model));
+
+            $("#ordersGrid").dxDataGrid({
+                dataSource: orders,
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                searchPanel: { visible: true, width: 240, placeholder: "بحث..." },
+                headerFilter: { visible: true },
+                paging: { pageSize: 15 },
+                export: { enabled: true },
+                columns: [
+                    { dataField: "docCode", caption: "رقم الطلب", width: 150, cssClass: "fw-bold text-primary" },
+                    { dataField: "docDate", caption: "تاريخ الطلب", dataType: "date", format: "yyyy/MM/dd", width: 120 },
+                    { dataField: "supplierName", caption: "المورد" },
+                    { dataField: "branchName", caption: "الفرع", width: 150 },
+                    { 
+                        dataField: "netValue", 
+                        caption: "صافي القيمة", 
+                        dataType: "number", 
+                        format: "#,##0.00",
+                        width: 130,
+                        cssClass: "fw-bold"
+                    },
+                    { dataField: "createdBy", caption: "بواسطة", width: 120 },
+                    { 
+                        dataField: "statusName", 
+                        caption: "الحالة", 
+                        width: 110,
+                        cellTemplate: function(container, options) {
+                            const status = options.data.statusName;
+                            let cls = "status-draft";
+                            if (status === "Approved") cls = "status-approved";
+                            if (status === "Rejected") cls = "status-rejected";
+                            
+                            $("<span class='status-badge'>").addClass(cls).text(status).appendTo(container);
+                        }
+                    },
+                    {
+                        type: "buttons",
+                        width: 80,
+                        buttons: [{
+                            hint: "تفاصيل",
+                            icon: "info",
+                            onClick: function(e) {
+                                location.href = `@Url.Action("Details")/${e.row.data.directPurchaseOrderId}`;
+                            }
+                        }]
+                    }
+                ]
+            });
+        });
+    </script>
+}

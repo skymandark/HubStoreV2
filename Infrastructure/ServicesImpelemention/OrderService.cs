@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Domin;
 using Core.Services.OrderServices;
+using Core.Services.SettingServices;
 using Core.ViewModels;
 using Core.ViewModels.OrderViewModels;
 using Infrastructure.Data;
@@ -14,82 +15,89 @@ namespace Infrastructure.ServicesImpelemention
     public class OrderService : IOrderService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ISettingService _settingService;
 
-        public OrderService(ApplicationDbContext context)
+        public OrderService(ApplicationDbContext context, ISettingService settingService)
         {
             _context = context;
+            _settingService = settingService;
         }
 
         public async Task<OrderViewModel> CreateOrder(CreateOrderViewModel orderDto)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                // توليد كود الأمر إذا لم يكن موجوداً
-                if (string.IsNullOrEmpty(orderDto.OrderCode))
+                try
                 {
-                    orderDto.OrderCode = await GenerateOrderCode(orderDto.OrderTypeId);
-                }
-
-                var order = new Order
-                {
-                    OrderCode = orderDto.OrderCode,
-                    OrderTypeId = orderDto.OrderTypeId,
-                    SupplierId = orderDto.SupplierId,
-                    BranchFromId = orderDto.BranchFromId,
-                    BranchToId = orderDto.BranchToId,
-                    RequestedByUserId = orderDto.RequestedByUserId,
-                    RequestedDate = orderDto.RequestedDate,
-                    PriorityFlag = orderDto.PriorityFlag,
-                    SLA_DueDate = orderDto.SLA_DueDate,
-                    InternalBarcode = orderDto.InternalBarcode,
-                    ExternalBarcode = orderDto.ExternalBarcode,
-                    Notes = orderDto.Notes,
-                    CreatedBy = orderDto.CreatedBy,
-                    CreatedAt = DateTime.UtcNow,
-                    Status = "Draft"
-                };
-
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                // إضافة سطور الأمر
-                if (orderDto.Lines != null && orderDto.Lines.Any())
-                {
-                    int lineNo = 1;
-                    foreach (var lineDto in orderDto.Lines)
+                    // توليد كود الأمر إذا لم يكن موجوداً
+                    if (string.IsNullOrEmpty(orderDto.OrderCode))
                     {
-                        var line = new OrderLine
-                        {
-                            OrderId = order.OrderId,
-                            LineNo = lineNo++,
-                            ItemId = lineDto.ItemId,
-                            UnitCode = lineDto.UnitCode,
-                            QtyOrdered = lineDto.QtyOrdered,
-                            QtyReceived = 0,
-                            ConversionUsedToBase = lineDto.ConversionUsedToBase,
-                            QtyBaseOrdered = lineDto.QtyOrdered * lineDto.ConversionUsedToBase,
-                            QtyBaseReceived = 0,
-                            UnitPrice = lineDto.UnitPrice,
-                            CostValue = lineDto.QtyOrdered * lineDto.UnitPrice,
-                            TaxRate = lineDto.TaxRate,
-                            LineStatus = "Draft",
-                            Notes = lineDto.Notes,
-                            CreatedBy = lineDto.CreatedBy,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        _context.OrderLines.Add(line);
+                        orderDto.OrderCode = await GenerateOrderCode(orderDto.OrderTypeId);
                     }
+
+                    var order = new Order
+                    {
+                        OrderCode = orderDto.OrderCode,
+                        OrderTypeId = orderDto.OrderTypeId,
+                        SupplierId = orderDto.SupplierId,
+                        BranchFromId = orderDto.BranchFromId,
+                        BranchToId = orderDto.BranchToId,
+                        RequestedByUserId = orderDto.RequestedByUserId,
+                        RequestedDate = orderDto.RequestedDate,
+                        PriorityFlag = orderDto.PriorityFlag,
+                        SLA_DueDate = orderDto.SLA_DueDate,
+                        InternalBarcode = orderDto.InternalBarcode,
+                        ExternalBarcode = orderDto.ExternalBarcode,
+                        Notes = orderDto.Notes,
+                        CreatedBy = orderDto.CreatedBy,
+                        CreatedAt = DateTime.UtcNow,
+                        Status = "Draft"
+                    };
+
+                    _context.Orders.Add(order);
+
+                    // إضافة سطور الأمر
+                    if (orderDto.Lines != null && orderDto.Lines.Any())
+                    {
+                        int lineNo = 1;
+                        foreach (var lineDto in orderDto.Lines)
+                        {
+                            var line = new OrderLine
+                            {
+                                OrderId = order.OrderId,
+                                LineNo = lineNo++,
+                                ItemId = lineDto.ItemId,
+                                UnitCode = lineDto.UnitCode,
+                                QtyOrdered = lineDto.QtyOrdered,
+                                QtyReceived = 0,
+                                ConversionUsedToBase = lineDto.ConversionUsedToBase,
+                                QtyBaseOrdered = lineDto.QtyOrdered * lineDto.ConversionUsedToBase,
+                                QtyBaseReceived = 0,
+                                UnitPrice = lineDto.UnitPrice,
+                                CostValue = lineDto.QtyOrdered * lineDto.UnitPrice,
+                                TaxRate = lineDto.TaxRate,
+                                LineStatus = "Draft",
+                                Notes = lineDto.Notes,
+                                CreatedBy = lineDto.CreatedBy,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            _context.OrderLines.Add(line);
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
+
+                    // حساب الإجماليات
+                    await CalculateOrderTotals(order.OrderId);
+
+                    await transaction.CommitAsync();
+                    return await GetOrder(order.OrderId);
                 }
-
-                // حساب الإجماليات
-                await CalculateOrderTotals(order.OrderId);
-
-                return await GetOrder(order.OrderId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"خطأ في إنشاء الأمر: {ex.Message}");
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception($"خطأ في إنشاء الأمر: {ex.Message}");
+                }
             }
         }
 
@@ -317,7 +325,22 @@ namespace Infrastructure.ServicesImpelemention
                 if (!order.OrderLines.Any())
                     throw new Exception("لا يمكن إرسال أمر بدون سطور");
 
-                order.Status = "Pending";
+                // Check approval workflow mode
+                var approvalModeEnabled = await _settingService.GetApprovalWorkflowModeAsync();
+
+                if (approvalModeEnabled)
+                {
+                    // Require approvals
+                    order.Status = "Pending";
+                    order.ApprovalStatusId = 2; // PendingApproval
+                }
+                else
+                {
+                    // Auto-approve
+                    order.Status = "Approved";
+                    order.ApprovalStatusId = 1; // Approved
+                }
+
                 order.CreatedAt = DateTime.UtcNow;
                 order.CreatedBy = "System";
 

@@ -1,0 +1,652 @@
+@{
+    ViewData["Title"] = "كشف حركة الصنف";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .main-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .search-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .search-card h5 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-card h5::before {
+        content: '📋';
+        font-size: 1.5rem;
+    }
+
+    .search-card p {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+
+    .form-group label {
+        color: #34495e;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
+    }
+
+    .btn-success:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .summary-card h6 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .summary-card h6::before {
+        content: '📊';
+        font-size: 1.2rem;
+    }
+
+    .summary-item {
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-item strong {
+        color: #2c3e50;
+    }
+
+    .results-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+
+    .results-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 20px 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .results-card .card-header h6 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .results-card .card-header h6::before {
+        content: '📈';
+        font-size: 1.3rem;
+    }
+
+    .input-group-append .btn {
+        border-radius: 0 12px 12px 0;
+        border: 2px solid #e9ecef;
+        border-left: none;
+        background: #f8f9fa;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .input-group-append .btn:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .small {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .btn-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+        border: none;
+        margin: 0;
+    }
+
+    .btn-group .btn:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+
+    .btn-group .btn:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    /* DevExtreme Grid Styling */
+    .dx-datagrid {
+        border-radius: 0 0 20px 20px;
+        overflow: hidden;
+    }
+
+    .dx-datagrid-headers {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .dx-datagrid-rows .dx-row:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .dx-datagrid-rows .dx-row.dx-state-hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .loading-spinner.active {
+        display: block;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 10px;
+        }
+
+        .search-card {
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn-group .btn {
+            border-radius: 12px !important;
+            margin-bottom: 5px;
+        }
+    }
+</style>
+
+<div class="main-container">
+    <div class="search-card">
+        <h5>كشف حركة الصنف</h5>
+        <p class="text-muted mb-4">استخدم النموذج أدناه للاستعلام عن حركات الصنف وتتبع الأرصدة</p>
+        <form id="searchForm">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="itemSearch">الصنف</label>
+                        <div class="input-group">
+                            <input type="text" id="itemSearch" class="form-control" placeholder="ابحث عن صنف...">
+                            <input type="hidden" id="itemId" name="itemId" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn" id="clearItem">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">يمكن البحث بالكود أو اسم الصنف</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="branchSearch">المخزن</label>
+                        <div class="input-group">
+                            <input type="text" id="branchSearch" class="form-control" placeholder="ابحث عن مخزن...">
+                            <input type="hidden" id="branchId" name="branchId" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn" id="clearBranch">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">يمكن البحث بالكود أو اسم المخزن</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="fromDate">من تاريخ</label>
+                        <input type="date" id="fromDate" name="fromDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="toDate">إلى تاريخ</label>
+                        <input type="date" id="toDate" name="toDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div class="btn-group w-100">
+                            <button type="button" id="searchBtn" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                بحث
+                            </button>
+                            <button type="button" id="printBtn" class="btn btn-success" disabled>
+                                <i class="fas fa-print"></i>
+                                طباعة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="summaryInfo" class="summary-card" style="display: none;">
+        <h6>معلومات التقرير</h6>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="summary-item">
+                    <strong>الصنف:</strong> <span id="summaryItem"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-item">
+                    <strong>المخزن:</strong> <span id="summaryBranch"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-item">
+                    <strong>الرصيد الافتتاحي:</strong> <span id="summaryOpeningBalance"></span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-item">
+                    <strong>الرصيد النهائي:</strong> <span id="summaryClosingBalance"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-card" id="resultsCard" style="display: none;">
+        <div class="card-header">
+            <h6>
+                <i class="fas fa-list"></i>
+                تفاصيل الحركات
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>جاري تحميل البيانات...</p>
+            </div>
+            <div id="transactionsGrid"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Set default dates
+            var today = new Date();
+            var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            $('#fromDate').val(firstDay.toISOString().split('T')[0]);
+            $('#toDate').val(today.toISOString().split('T')[0]);
+
+            // Initialize autocomplete for items
+            $('#itemSearch').autocomplete({
+                source: function(request, response) {
+                    $.get('/ItemSheet/GetItemName', { term: request.term }, function(data) {
+                        response($.map(data, function(item) {
+                            return {
+                                label: item.itemCode + ' - ' + item.itemName,
+                                value: item.itemName,
+                                id: item.itemId,
+                                code: item.itemCode
+                            };
+                        }));
+                    });
+                },
+                select: function(event, ui) {
+                    $('#itemId').val(ui.item.id);
+                    $('#itemSearch').val(ui.item.label);
+                    return false;
+                },
+                minLength: 2
+            });
+
+            // Initialize autocomplete for branches
+            $('#branchSearch').autocomplete({
+                source: function(request, response) {
+                    $.get('/ItemSheet/GetBranchName', { term: request.term }, function(data) {
+                        response($.map(data, function(branch) {
+                            return {
+                                label: branch.code + ' - ' + branch.name,
+                                value: branch.name,
+                                id: branch.branchId,
+                                code: branch.code
+                            };
+                        }));
+                    });
+                },
+                select: function(event, ui) {
+                    $('#branchId').val(ui.item.id);
+                    $('#branchSearch').val(ui.item.label);
+                    return false;
+                },
+                minLength: 2
+            });
+
+            // Clear buttons
+            $('#clearItem').click(function() {
+                $('#itemSearch').val('');
+                $('#itemId').val('');
+            });
+
+            $('#clearBranch').click(function() {
+                $('#branchSearch').val('');
+                $('#branchId').val('');
+            });
+
+            // Search button
+            $('#searchBtn').click(function() {
+                if (!$('#searchForm')[0].checkValidity()) {
+                    $('#searchForm')[0].reportValidity();
+                    return;
+                }
+
+                var itemId = $('#itemId').val();
+                var branchId = $('#branchId').val();
+                var fromDate = $('#fromDate').val();
+                var toDate = $('#toDate').val();
+
+                // Show loading
+                $('#loadingSpinner').addClass('active');
+                $('#transactionsGrid').hide();
+
+                // Get opening balance
+                $.get('/ItemSheet/GetItemOpenBalance', {
+                    itemId: itemId,
+                    branchId: branchId,
+                    fromDate: fromDate
+                }, function(data) {
+                    if (data.success) {
+                        $('#summaryOpeningBalance').text(data.data.toFixed(2));
+                    }
+                });
+
+                // Update summary info
+                $('#summaryItem').text($('#itemSearch').val());
+                $('#summaryBranch').text($('#branchSearch').val());
+                $('#summaryInfo').show();
+
+                // Load transactions
+                loadTransactions();
+            });
+
+            // Print button
+            $('#printBtn').click(function() {
+                var itemId = $('#itemId').val();
+                var branchId = $('#branchId').val();
+                var fromDate = $('#fromDate').val();
+                var toDate = $('#toDate').val();
+
+                var url = '/ItemSheet/Details?itemId=' + itemId + '&branchId=' + branchId + 
+                         '&fromDate=' + fromDate + '&toDate=' + toDate;
+                window.open(url, '_blank');
+            });
+
+            function loadTransactions() {
+                var itemId = $('#itemId').val();
+                var branchId = $('#branchId').val();
+                var fromDate = $('#fromDate').val();
+                var toDate = $('#toDate').val();
+
+                $.get('/ItemSheet/GetTransactions', {
+                    itemId: itemId,
+                    branchId: branchId,
+                    fromDate: fromDate,
+                    toDate: toDate
+                }, function(data) {
+                    // Hide loading
+                    $('#loadingSpinner').removeClass('active');
+                    $('#transactionsGrid').show();
+
+                    if (data.success) {
+                        $('#transactionsGrid').dxDataGrid({
+                            dataSource: data.data,
+                            columns: [
+                                { 
+                                    dataField: 'docDate', 
+                                    caption: 'التاريخ', 
+                                    dataType: 'date', 
+                                    format: 'yyyy-MM-dd',
+                                    width: 120
+                                },
+                                { 
+                                    dataField: 'transactionType', 
+                                    caption: 'نوع الحركة',
+                                    width: 150
+                                },
+                                { 
+                                    dataField: 'baseId', 
+                                    caption: 'رقم الحركة',
+                                    width: 100
+                                },
+                                { 
+                                    dataField: 'remarks', 
+                                    caption: 'البيان'
+                                },
+                                { 
+                                    dataField: 'inQuantity', 
+                                    caption: 'كمية واردة',
+                                    format: { type: 'fixedPoint', precision: 2 },
+                                    width: 120,
+                                    cellTemplate: function(container, options) {
+                                        if (options.value && options.value > 0) {
+                                            container.text(options.value.toFixed(2));
+                                            container.css('color', '#27ae60');
+                                            container.css('font-weight', '600');
+                                        }
+                                    }
+                                },
+                                { 
+                                    dataField: 'outQuantity', 
+                                    caption: 'كمية منصرفة',
+                                    format: { type: 'fixedPoint', precision: 2 },
+                                    width: 120,
+                                    cellTemplate: function(container, options) {
+                                        if (options.value && options.value > 0) {
+                                            container.text(options.value.toFixed(2));
+                                            container.css('color', '#e74c3c');
+                                            container.css('font-weight', '600');
+                                        }
+                                    }
+                                },
+                                { 
+                                    dataField: 'balance', 
+                                    caption: 'الرصيد',
+                                    format: { type: 'fixedPoint', precision: 2 },
+                                    width: 120,
+                                    cellTemplate: function(container, options) {
+                                        container.text(options.value.toFixed(2));
+                                        container.css('color', '#2c3e50');
+                                        container.css('font-weight', '700');
+                                    }
+                                },
+                                { 
+                                    dataField: 'price', 
+                                    caption: 'السعر', 
+                                    format: { type: 'fixedPoint', precision: 2 },
+                                    width: 100
+                                },
+                                { 
+                                    dataField: 'itemPackageName', 
+                                    caption: 'الوحدة',
+                                    width: 80
+                                },
+                                { 
+                                    dataField: 'userData', 
+                                    caption: 'المستخدم',
+                                    width: 120
+                                },
+                                { 
+                                    dataField: 'entryDate', 
+                                    caption: 'تاريخ الإدخال', 
+                                    dataType: 'date', 
+                                    format: 'yyyy-MM-dd HH:mm',
+                                    width: 150
+                                }
+                            ],
+                            paging: {
+                                pageSize: 15
+                            },
+                            pager: {
+                                showPageSizeSelector: true,
+                                allowedPageSizes: [10, 15, 25, 50],
+                                showInfo: true,
+                                showNavigationButtons: true
+                            },
+                            showRowLines: true,
+                            showBorders: true,
+                            filterRow: {
+                                visible: true,
+                                applyFilter: 'auto'
+                            },
+                            headerFilter: {
+                                visible: true
+                            },
+                            columnAutoWidth: true,
+                            height: 500,
+                            rtlEnabled: true,
+                            wordWrapEnabled: true,
+                            onContentReady: function(e) {
+                                $('#summaryClosingBalance').text(
+                                    data.data.length > 0 ? 
+                                    data.data[data.data.length - 1].balance.toFixed(2) : 
+                                    '0.00'
+                                );
+                            },
+                            rowAlternationEnabled: true,
+                            scrolling: {
+                                mode: 'standard'
+                            }
+                        });
+
+                        $('#resultsCard').show();
+                        $('#printBtn').prop('disabled', false);
+                    } else {
+                        alert('حدث خطأ: ' + data.message);
+                    }
+                });
+            }
+        });
+    </script>
+}

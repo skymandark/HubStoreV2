@@ -46,9 +46,26 @@ namespace Core.Services.SettingServices
 
         public async Task<bool> GetApprovalWorkflowModeAsync()
         {
-            // TODO: Implement proper retrieval from settings
-            // For now, return true for Approval Mode
-            return true; // Enable Approval Workflow = TRUE
+            if (_context == null)
+            {
+                // Fallback to configuration or default
+                var configValue = _configuration["SystemSettings:UseApprovalSystem"];
+                if (bool.TryParse(configValue, out var configMode))
+                {
+                    return configMode;
+                }
+                return true;
+            }
+
+            var setting = await _context.Set<SystemSetting>()
+                .FirstOrDefaultAsync(s => s.SettingKey == "ApprovalWorkflowMode");
+
+            if (setting != null && bool.TryParse(setting.SettingValue, out var mode))
+            {
+                return mode;
+            }
+
+            return true; // Default to true if not set
         }
     }
 }

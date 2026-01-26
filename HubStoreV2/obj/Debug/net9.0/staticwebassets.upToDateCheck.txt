@@ -28,6 +28,7 @@ C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
+C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\js\auth.js
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\favicon.ico
@@ -46,6 +47,7 @@ C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\jquery-validation\dist\jquery.validate.js
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
+C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\js\download.js
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
 C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\wwwroot\css\site.css
@@ -64,6 +66,8 @@ C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV
 wwwroot\css\CustomTheme.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\js\auth.js
+wwwroot\js\download.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css
 wwwroot\lib\bootstrap\dist\css\bootstrap.css.map

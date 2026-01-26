@@ -11,13 +11,6 @@ namespace Core.Domin
         ReturnIssue
     }
 
-    public enum TransactionType
-    {
-        Sale,
-        Return,
-        StockOut
-    }
-
     public class StockOutReturnHeader
     {
         [Key]
@@ -29,7 +22,7 @@ namespace Core.Domin
         [MaxLength(50)]
         public string DocCode { get; set; } // Receipt ID
 
-        public TransactionType TransactionType { get; set; } = TransactionType.Return;
+        public int TransactionType { get; set; } = 12;
 
         public int? ReturnOrderId { get; set; } // Order ID
 

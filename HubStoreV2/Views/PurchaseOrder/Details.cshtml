@@ -5,176 +5,204 @@
 }
 
 <style>
+    :root {
+        --primary-solid: #0f172a;
+        --accent-solid: #6366f1;
+        --bg-soft: #f8fafc;
+        --border-soft: #e2e8f0;
+    }
+
     .premium-card {
         border: none;
         border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.03);
         background: #fff;
         margin-bottom: 24px;
+        border: 1px solid var(--border-soft);
     }
 
-    .detail-header-gradient {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    .detail-header-premium {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: white;
         padding: 40px;
-        border-radius: 20px 20px 0 0;
-        margin-bottom: -20px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
-    .info-label { color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-    .info-value { color: #1e293b; font-size: 1.05rem; font-weight: 700; }
+    .info-label { color: #64748b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .info-value { color: #1e293b; font-size: 1rem; font-weight: 600; }
 
-    .status-banner {
-        padding: 8px 16px;
+    .status-badge {
+        padding: 6px 16px;
         border-radius: 50px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
         gap: 8px;
     }
 
-    .banner-draft { background: #f1f5f9; color: #475569; }
-    .banner-submitted { background: #e0f2fe; color: #0369a1; }
-    .banner-approved { background: #dcfce7; color: #15803d; }
+    .badge-draft { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+    .badge-submitted { background: #e0f2fe; color: #0369a1; }
+    .badge-approved { background: #dcfce7; color: #15803d; }
 
-    .item-grid-header { background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
-    .footer-summary { background: #f8fafc; border-radius: 15px; padding: 25px; border: 1px solid #e2e8f0; }
+    .premium-table thead {
+        background: #f1f5f9;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .premium-table th {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        padding: 16px;
+    }
+
+    .premium-table td { padding: 16px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+
+    .summary-total {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
 
-<div class="container-fluid py-4 animate__animated animate__fadeIn">
+<div class="container-fluid py-4">
     <!-- Header Area -->
-    <div class="detail-header-gradient d-flex justify-content-between align-items-center">
+    <div class="detail-header-premium d-flex justify-content-between align-items-center">
         <div>
             <div class="d-flex align-items-center gap-3 mb-2">
-                <h1 class="fw-bold mb-0">طلب شراء #@Model.PurchaseOrderCode</h1>
+                <h1 class="fw-extrabold mb-0">طلب شراء #@Model.PurchaseOrderCode</h1>
                 @{
-                    var statusCls = "banner-draft";
+                    var statusCls = "badge-draft";
                     var statusTxt = "مسودة";
                     switch(Model.Status) {
-                        case "Submitted": statusCls = "banner-submitted"; statusTxt = "تحت المراجعة"; break;
-                        case "Approved": statusCls = "banner-approved"; statusTxt = "معتمد"; break;
+                        case "Submitted": statusCls = "badge-submitted"; statusTxt = "تحت المراجعة"; break;
+                        case "Approved": statusCls = "badge-approved"; statusTxt = "معتمد"; break;
                     }
                 }
-                <div class="status-banner @statusCls">
-                    <i class="fas fa-circle fs-xs"></i> @statusTxt
+                <div class="status-badge @statusCls">
+                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i> @statusTxt
                 </div>
             </div>
-            <p class="mb-0 opacity-75">تاريخ الطلب: @Model.DocDate.ToString("dd MMMM yyyy")</p>
+            <p class="mb-0 opacity-75 fw-medium">التاريخ: @Model.DocDate.ToString("dd MMMM yyyy")</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="@Url.Action("Index")" class="btn btn-outline-light px-4 rounded-pill">العودة للقائمة</a>
-            <a href="@Url.Action("Edit", new { id = Model.PurchaseOrderId })" class="btn btn-primary px-4 rounded-pill shadow">تعديل الطلب</a>
+        <div class="d-flex gap-3">
+            <a href="@Url.Action("Index")" class="btn btn-outline-light px-4 rounded-12 fw-bold">العودة</a>
+            <a href="@Url.Action("Edit", new { id = Model.PurchaseOrderId })" class="btn btn-light px-4 rounded-12 fw-bold text-dark shadow-sm">تعديل</a>
         </div>
     </div>
 
-    <div class="row g-4 mt-1">
-        <!-- Main Info Cards -->
+    <div class="row g-4">
         <div class="col-lg-8">
             <div class="card premium-card">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">بيانات المورد والجهة</h5>
-                    <div class="row g-4">
+                <div class="card-body p-4 p-lg-5">
+                    <h5 class="fw-bold mb-4 text-slate-800">بيانات العملية</h5>
+                    <div class="row g-4 mb-5">
                         <div class="col-md-4">
                             <div class="info-label">المورد</div>
                             <div class="info-value">@Model.SupplierName</div>
                         </div>
                         <div class="col-md-4">
-                            <div class="info-label">رقم الفرع</div>
+                            <div class="info-label">الفرع</div>
                             <div class="info-value">@Model.BranchName</div>
                         </div>
                         <div class="col-md-4">
                             <div class="info-label">المرجع</div>
-                            <div class="info-value">@(Model.Reference ?? "---")</div>
+                            <div class="info-value text-slate-400">@(Model.Reference ?? "---")</div>
                         </div>
                         <div class="col-md-4">
-                            <div class="info-label">مندوب المورد</div>
-                            <div class="info-value">@(Model.SupplierDelegate ?? "---")</div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="info-label">تاريخ التسليم</div>
+                            <div class="info-label">تاريخ التسليم المتوقع</div>
                             <div class="info-value">@(Model.DeliveryDate?.ToString("dd/MM/yyyy") ?? "---")</div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Items Table -->
-            <div class="card premium-card overflow-hidden">
-                <div class="card-header bg-white p-4 border-0">
-                    <h5 class="fw-bold mb-0">تفاصيل الأصناف</h5>
-                </div>
-                <div class="table-responsive">
-                    <table class="table mb-0">
-                        <thead class="item-grid-header">
-                            <tr>
-                                <th class="ps-4">الصنف</th>
-                                <th class="text-center">الكمية</th>
-                                <th class="text-center">السعر</th>
-                                <th class="text-center">خصم %</th>
-                                <th class="text-end pe-4">الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.PurchaseOrderDetails)
-                            {
+                    <h5 class="fw-bold mb-4 text-slate-800">الأصناف المطلوبة</h5>
+                    <div class="table-responsive rounded-12 border overflow-hidden">
+                        <table class="table premium-table mb-0">
+                            <thead>
                                 <tr>
-                                    <td class="ps-4 fw-bold text-primary">@item.ItemName</td>
-                                    <td class="text-center">@item.Quantity</td>
-                                    <td class="text-center">@item.Price.ToString("N2")</td>
-                                    <td class="text-center">@item.MainDiscountPercent%</td>
-                                    <td class="text-end pe-4 fw-bold">@item.NetValue.ToString("N2")</td>
+                                    <th>الصنف</th>
+                                    <th class="text-center">الكمية</th>
+                                    <th class="text-center">السعر</th>
+                                    <th class="text-center">الخصم %</th>
+                                    <th class="text-end">الإجمالي (شامل الضريبة)</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.PurchaseOrderDetails)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-slate-900">@item.ItemName</div>
+                                            <div class="small text-slate-400">Package: @(item.ItemPackageId > 0 ? "Unit" : "Default")</div>
+                                        </td>
+                                        <td class="text-center fw-semibold">@item.Quantity</td>
+                                        <td class="text-center">@item.Price.ToString("N2")</td>
+                                        <td class="text-center text-danger">-@item.MainDiscountPercent%</td>
+                                        <td class="text-end fw-bold text-indigo-600">@item.NetValue.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar Summary -->
         <div class="col-lg-4">
-            <div class="card premium-card">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 text-dark">ملخص القيم</h5>
-                    @{
-                        var totalDiscount = Model.PurchaseOrderDetails?.Sum(d => d.MainDiscountValue) ?? 0;
-                        var totalVat = Model.PurchaseOrderDetails?.Sum(d => d.VatValue) ?? 0;
-                        var netValue = Model.PurchaseOrderDetails?.Sum(d => d.NetValue) ?? 0;
-                    }
-                    <div class="footer-summary">
-                        <div class="d-flex justify-content-between mb-3 text-muted">
-                            <span>إجمالي القيمة:</span>
-                            <span>@Model.TotalValue.ToString("N2")</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 text-muted">
-                            <span>إجمالي الخصم:</span>
-                            <span>@totalDiscount.ToString("N2")</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 text-muted">
-                            <span>الضريبة (VAT):</span>
-                            <span>@totalVat.ToString("N2")</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold fs-5">الإجمالي النهائي:</span>
-                            <span class="fw-bold fs-3 text-primary">@netValue.ToString("N2")</span>
+            <div class="card premium-card border-indigo-100" style="background: #fdfdff;">
+                <div class="card-body p-4 p-lg-5">
+                    <h5 class="fw-extrabold mb-4 text-indigo-900">ملخص مالي</h5>
+                    
+                    <div class="summary-item">
+                        <span class="text-slate-500">إجمالي الأصناف:</span>
+                        <span class="fw-bold">@Model.PurchaseOrderDetails.Count</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="text-slate-500">القيمة الإجمالية:</span>
+                        <span class="fw-bold">@Model.TotalValue.ToString("N2")</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="text-slate-500">الخصومات:</span>
+                        <span class="fw-bold text-danger">(@Model.PurchaseOrderDetails.Sum(x => x.MainDiscountValue).ToString("N2"))</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="text-slate-500">ضريبة القيمة المضافة:</span>
+                        <span class="fw-bold">@Model.PurchaseOrderDetails.Sum(x => x.VatValue).ToString("N2")</span>
+                    </div>
+
+                    <div class="summary-total">
+                        <span class="fs-5 fw-bold text-slate-700">الصافي النهائي</span>
+                        <div class="text-end">
+                            <div class="fs-2 fw-extrabold text-indigo-600">@Model.PurchaseOrderDetails.Sum(x => x.NetValue).ToString("N2")</div>
+                            <div class="small text-slate-400 fw-medium">ريال سعودي</div>
                         </div>
                     </div>
-                    
+
                     @if (!string.IsNullOrEmpty(Model.Remarks))
                     {
-                        <div class="mt-4 pt-3 border-top">
-                            <div class="info-label">ملاحظات</div>
-                            <p class="small text-muted mb-0">@Model.Remarks</p>
+                        <div class="mt-5 p-3 bg-slate-50 rounded-12 border">
+                            <div class="info-label mb-2">ملاحظات</div>
+                            <p class="small text-slate-600 mb-0">@Model.Remarks</p>
                         </div>
                     }
 
-                    <div class="mt-4 d-grid gap-2">
-                        <button class="btn btn-success py-3 fw-bold rounded-15" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>طباعة الطلب
-                        </button>
-                    </div>
+                    <button class="btn btn-dark w-100 py-3 rounded-12 fw-bold mt-5 shadow-lg" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i> طباعة كشف الطلب
+                    </button>
                 </div>
             </div>
         </div>

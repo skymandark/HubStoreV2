@@ -1,0 +1,219 @@
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HubStore ERP</title>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.2.5/css/dx.light.css" />
+</head>
+<body>
+    <div style="padding: 50px; max-width: 400px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2>تسجيل الدخول</h2>
+            <p>مرحباً بك في نظام HubStore ERP</p>
+        </div>
+
+        <div id="loginForm">
+            <div style="margin-bottom: 20px;">
+                <div>البريد الإلكتروني</div>
+                <div id="emailTextBox"></div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div>كلمة المرور</div>
+                <div id="passwordTextBox"></div>
+            </div>
+
+            <div id="rememberMeCheckbox" style="margin-bottom: 20px;"></div>
+
+            <div id="loginButton" style="margin-bottom: 20px;"></div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0; border-top: 1px solid #ddd; padding-top: 20px;">
+            <span style="background: white; padding: 0 10px;">أو</span>
+        </div>
+
+        <div style="background: #f5f5f5; padding: 20px; border-radius: 4px;">
+            <div style="margin-bottom: 15px;">
+                <div>تسجيل الدخول برمز PIN</div>
+                <div id="pinTextBox"></div>
+            </div>
+            <div id="pinLoginButton"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <p>ليس لديك حساب؟ <a href="/Auth/RegisterDX">إنشاء حساب جديد</a></p>
+        </div>
+    </div>
+
+    <script src="https://cdn3.devexpress.com/jslib/23.2.5/js/dx.all.js"></script>
+    <script>
+        $(function() {
+            // Initialize DevExtreme components
+            initializeComponents();
+
+            // Form submission
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                login();
+            });
+        });
+
+        function initializeComponents() {
+            // Email TextBox
+            $("#emailTextBox").dxTextBox({
+                placeholder: "أدخل بريدك الإلكتروني",
+                mode: "email",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    email = e.value;
+                }
+            });
+
+            // Password TextBox
+            $("#passwordTextBox").dxTextBox({
+                placeholder: "أدخل كلمة المرور",
+                mode: "password",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    password = e.value;
+                }
+            });
+
+            // Remember Me Checkbox
+            $("#rememberMeCheckbox").dxCheckBox({
+                text: "تذكرني",
+                value: false,
+                onValueChanged: function(e) {
+                    rememberMe = e.value;
+                }
+            });
+
+            // Login Button
+            $("#loginButton").dxButton({
+                text: "تسجيل الدخول",
+                type: "success",
+                stylingMode: "contained",
+                width: "100%",
+                onClick: function(e) {
+                    login();
+                }
+            });
+
+            // PIN TextBox
+            $("#pinTextBox").dxTextBox({
+                placeholder: "أدخل رمز PIN",
+                mask: "0000",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    pinCode = e.value;
+                }
+            });
+
+            // PIN Login Button
+            $("#pinLoginButton").dxButton({
+                text: "دخول برمز PIN",
+                type: "default",
+                stylingMode: "contained",
+                width: "100%",
+                onClick: function(e) {
+                    loginWithPin();
+                }
+            });
+        }
+
+        // Global variables
+        let email = "";
+        let password = "";
+        let rememberMe = false;
+        let pinCode = "";
+
+        async function login() {
+            const emailInstance = $("#emailTextBox").dxTextBox("instance");
+            const passwordInstance = $("#passwordTextBox").dxTextBox("instance");
+            const rememberInstance = $("#rememberMeCheckbox").dxCheckBox("instance");
+
+            email = emailInstance.option("value");
+            password = passwordInstance.option("value");
+            rememberMe = rememberInstance.option("value");
+
+            if (!email || !password) {
+                DevExpress.ui.notify("الرجاء إدخال البريد الإلكتروني وكلمة المرور", "error", 3000);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        rememberMe: rememberMe
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.succeeded) {
+                    DevExpress.ui.notify('تم تسجيل الدخول بنجاح، جاري التوجيه...', 'success', 3000);
+                    setTimeout(() => {
+                        window.location.href = '/Home/Index';
+                    }, 1500);
+                } else {
+                    DevExpress.ui.notify(result.message || 'فشل تسجيل الدخول', 'error', 3000);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                DevExpress.ui.notify('حدث خطأ أثناء تسجيل الدخول', 'error', 3000);
+            }
+        }
+
+        async function loginWithPin() {
+            const pinInstance = $("#pinTextBox").dxTextBox("instance");
+            pinCode = pinInstance.option("value");
+
+            if (!pinCode || pinCode.length !== 4) {
+                DevExpress.ui.notify('الرجاء إدخال رمز PIN مكون من 4 أرقام', 'error', 3000);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login-with-pin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        pinCode: pinCode
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.succeeded) {
+                    DevExpress.ui.notify('تم تسجيل الدخول بنجاح، جاري التوجيه...', 'success', 3000);
+                    setTimeout(() => {
+                        window.location.href = '/Home/Index';
+                    }, 1500);
+                } else {
+                    DevExpress.ui.notify(result.message || 'فشل تسجيل الدخول برمز PIN', 'error', 3000);
+                }
+            } catch (error) {
+                console.error('PIN login error:', error);
+                DevExpress.ui.notify('حدث خطأ أثناء تسجيل الدخول برمز PIN', 'error', 3000);
+            }
+        }
+    </script>
+</body>
+</html>

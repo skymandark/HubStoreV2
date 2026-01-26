@@ -4,10 +4,14 @@ using Core.Services.ConversionServices;
 using Core.Services.InventoryServices;
 using Core.Services.MovementServices;
 using Core.Services.OrderServices;
+using Core.Services.ReportingServices;
+using Core.Services.SettingServices;
+using Core.Services;
 
 using HubStoreV2.Services.ConversionServices;
 using HubStoreV2.Services.InventoryServices;
 using Infrastructure.Data;
+using Infrastructure.DataSeeds;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Core.Services.AuditServices;
@@ -61,9 +65,21 @@ builder.Services.AddScoped<IItemUnitService, ItemUnitService>();
 builder.Services.AddScoped<IUnitConversionService, UnitConversionService>();
 builder.Services.AddScoped<IAuditTrailService, AuditTrailService>();
 builder.Services.AddScoped<IAttemptLogService, AttemptLogService>();
+builder.Services.AddScoped<ISettingService, SettingService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+// Register Reporting Services
+builder.Services.AddScoped<IInventoryReportService, InventoryReportService>();
+
 // Register Inventory Services
+builder.Services.AddScoped<Core.Services.InventoryServices.IInventoryCalculationService, HubStoreV2.Services.InventoryServices.InventoryCalculationService>();
+builder.Services.AddScoped<IItemBalanceService, ItemBalanceService>();
+
+// Register Branch Service
+builder.Services.AddScoped<IBranchService, BranchService>();
+
+// Register System Utility Service
+builder.Services.AddScoped<ISystemUtilityService, SystemUtilityService>();
 
 // Register Purchase Order Services
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
@@ -71,7 +87,11 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IStockInService, StockInService>();
 builder.Services.AddScoped<ITransferOrderServiceNew, TransferOrderServiceNew>();
 builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
+builder.Services.AddScoped<IDirectPurchaseOrderService, DirectPurchaseOrderService>();
 //builder.Services.AddScoped<IStockOutReturnService, StockOutReturnService>();
+
+// Register Attachment Services
+builder.Services.AddScoped<Core.Services.AttachmentServices.IAttachmentService, HubStoreV2.Services.AttachmentService>();
 
 
 //builder.Services
@@ -83,6 +103,13 @@ builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
 
 
 var app = builder.Build();
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DbInitializer.Initialize(context);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

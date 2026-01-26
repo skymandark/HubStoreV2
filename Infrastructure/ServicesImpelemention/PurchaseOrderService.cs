@@ -251,36 +251,47 @@ namespace Infrastructure.ServicesImpelemention
 
         public async Task<int> CreatePurchaseOrder(PurchaseOrderRequestDto dto)
         {
-            var header = new PurchaseOrderHeader
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                PurchaseOrderCode = "PO-" + DateTime.Now.Ticks, // Simplified Code Gen
-                DocDate = dto.DocDate,
-                SupplierId = dto.SupplierId,
-                BranchId = dto.BranchId,
-                Notes = dto.Remarks,
-                Status = PurchaseOrderStatus.Draft,
-                CreatedBy = "System", // User usually passed in args
-                CreatedDate = DateTime.UtcNow
-            };
-
-            _context.PurchaseOrderHeaders.Add(header);
-            await _context.SaveChangesAsync();
-
-            foreach (var d in dto.PurchaseOrderDetails)
-            {
-                var detail = new PurchaseOrderDetail
+                try
                 {
-                    PurchaseOrderId = header.PurchaseOrderId,
-                    ItemId = d.ItemId,
-                    OrderedQuantity = d.Quantity,
-                    Price = d.Price,
-                    NetValue = d.TotalValue
-                };
-                _context.PurchaseOrderDetails.Add(detail);
-            }
+                    var header = new PurchaseOrderHeader
+                    {
+                        PurchaseOrderCode = "PO-" + DateTime.Now.Ticks, // Simplified Code Gen
+                        DocDate = dto.DocDate,
+                        SupplierId = dto.SupplierId,
+                        BranchId = dto.BranchId,
+                        Notes = dto.Remarks,
+                        Status = PurchaseOrderStatus.Draft,
+                        CreatedBy = "System", // User usually passed in args
+                        CreatedDate = DateTime.UtcNow
+                    };
 
-            await _context.SaveChangesAsync();
-            return header.PurchaseOrderId;
+                    _context.PurchaseOrderHeaders.Add(header);
+
+                    foreach (var d in dto.PurchaseOrderDetails)
+                    {
+                        var detail = new PurchaseOrderDetail
+                        {
+                            PurchaseOrderId = header.PurchaseOrderId,
+                            ItemId = d.ItemId,
+                            OrderedQuantity = d.Quantity,
+                            Price = d.Price,
+                            NetValue = d.TotalValue
+                        };
+                        _context.PurchaseOrderDetails.Add(detail);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return header.PurchaseOrderId;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
 
         public async Task UpdatePurchaseOrder(PurchaseOrderRequestDto dto)

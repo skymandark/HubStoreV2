@@ -28,7 +28,7 @@ namespace Core.Domin
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal CostValue { get; set; }
+        public decimal CostPrice { get; set; }
 
         [Required]
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

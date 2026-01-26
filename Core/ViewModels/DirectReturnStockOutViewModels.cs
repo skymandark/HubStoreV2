@@ -9,7 +9,7 @@ namespace Core.ViewModels.DirectReturnStockOutViewModels
         public int StockOutReturnId { get; set; }
         public ReceiptTypeStockOut ReceiptType { get; set; }
         public string DocCode { get; set; }
-        public TransactionType TransactionType { get; set; }
+        public int TransactionType { get; set; }
         public int? ReturnOrderId { get; set; }
         public int? ClientId { get; set; }
         public int? SupplierId { get; set; }

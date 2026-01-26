@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Core.Domin;
+using Core.Services.SettingServices;
 using Core.ViewModels.MovementViewModels;
 using Core.ViewModels;
 using Infrastructure.Data;
@@ -14,10 +15,12 @@ namespace Infrastructure.ServicesImpelemention
     public class MovementService : IMovementService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ISettingService _settingService;
 
-        public MovementService(ApplicationDbContext context)
+        public MovementService(ApplicationDbContext context, ISettingService settingService)
         {
             _context = context;
+            _settingService = settingService;
         }
 
         public async Task<MovementViewModel> CreateMovement(CreateMovementViewModel movementDto)
@@ -282,8 +285,22 @@ namespace Infrastructure.ServicesImpelemention
             if (!movement.MovementLines.Any())
                 throw new Exception("لا يمكن إرسال حركة بدون سطور");
 
-            // تغيير حالة الحركة إلى "في انتظار الموافقة"
-            movement.Status = "Pending";
+            // Check approval workflow mode
+            var approvalModeEnabled = await _settingService.GetApprovalWorkflowModeAsync();
+
+            if (approvalModeEnabled)
+            {
+                // Require approvals
+                movement.Status = "Pending";
+                movement.ApprovalStatusId = 2; // PendingApproval
+            }
+            else
+            {
+                // Auto-approve
+                movement.Status = "Approved";
+                movement.ApprovalStatusId = 1; // Approved
+            }
+
             movement.CreatedAt = DateTime.UtcNow;
             movement.CreatedBy = "System";
 

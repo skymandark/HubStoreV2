@@ -17,6 +17,8 @@ namespace Core.ViewModels.ItemViewModels
         public string InternalBarcode { get; set; }
         public string NameArab { get; set; }
         public string NameEng { get; set; }
+        public int BranchId { get; set; }
+        public string BranchName { get; set; }
         public int SectionId { get; set; }
         public string SectionName { get; set; }
         public int MainItemId { get; set; }
@@ -76,6 +78,7 @@ namespace Core.ViewModels.ItemViewModels
         public string ItemCode { get; set; }
         public string NameArab { get; set; }
         public string NameEng { get; set; }
+        public int BranchId { get; set; }
         public int SectionId { get; set; }
         public int MainItemId { get; set; }
         public int SubItemId { get; set; }
@@ -141,5 +144,6 @@ namespace Core.ViewModels.ItemViewModels
         public bool? IsActive { get; set; }
         public bool? IsParent { get; set; }
         public string Barcode { get; set; }
+        public int? BranchId { get; set; }
     }
 }

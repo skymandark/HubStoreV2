@@ -1,0 +1,338 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "إعدادات النظام";
+}
+
+<div class="page-header">
+    <h1><i class="fas fa-cogs"></i> إعدادات النظام</h1>
+    <p>إدارة إعدادات النظام العامة والتكوينات الأساسية</p>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sliders-h"></i> إعدادات النظام الأساسية
+            </div>
+            <div class="card-body">
+                <form method="post" action="@Url.Action("UpdateApprovalWorkflow")">
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="useApprovalSystem" name="useApprovalSystem"
+                                   value="true" @(Model.ApprovalWorkflowMode ? "checked" : "")>
+                            <label class="form-check-label" for="useApprovalSystem">
+                                <strong>تفعيل نظام الموافقات</strong>
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            عند تفعيل هذا الخيار، ستتطلب جميع العمليات موافقة من المسؤولين قبل التنفيذ
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> حفظ الإعدادات
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-list"></i> جميع إعدادات النظام
+            </div>
+            <div class="card-body">
+                <div id="systemSettingsGrid"></div>
+
+                <script>
+                    $(function() {
+                        $("#systemSettingsGrid").dxDataGrid({
+                            dataSource: @Html.Raw(Json.Serialize(Model.SystemSettings)),
+                            columns: [
+                                { dataField: "SettingKey", caption: "مفتاح الإعداد", width: 200 },
+                                { dataField: "SettingValue", caption: "القيمة", width: 200 },
+                                { dataField: "Description", caption: "الوصف", width: 300 },
+                                {
+                                    dataField: "CreatedDate",
+                                    caption: "تاريخ الإنشاء",
+                                    width: 150,
+                                    dataType: "datetime",
+                                    format: "yyyy-MM-dd HH:mm"
+                                },
+                                {
+                                    dataField: "ModifiedDate",
+                                    caption: "تاريخ التعديل",
+                                    width: 150,
+                                    dataType: "datetime",
+                                    format: "yyyy-MM-dd HH:mm"
+                                }
+                            ],
+                            showBorders: true,
+                            showRowLines: true,
+                            showColumnLines: true,
+                            rowAlternationEnabled: true,
+                            columnHidingEnabled: true,
+                            allowColumnReordering: true,
+                            allowColumnResizing: true,
+                            paging: { enabled: true, pageSize: 10 },
+                            pager: {
+                                showPageSizeSelector: true,
+                                allowedPageSizes: [5, 10, 20],
+                                showInfo: true,
+                                showNavigationButtons: true
+                            },
+                            sorting: { mode: "multiple" },
+                            filterRow: { visible: true },
+                            headerFilter: { visible: true },
+                            searchPanel: { visible: true, placeholder: "البحث..." },
+                            toolbar: {
+                                items: [
+                                    "searchPanel",
+                                    {
+                                        name: "exportButton",
+                                        widget: "dxButton",
+                                        options: { icon: "export" }
+                                    }
+                                ]
+                            },
+                            export: { enabled: true, allowExportSelectedData: false }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> معلومات الإعدادات
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-lightbulb"></i> نصائح للإعدادات</h6>
+                    <ul class="mb-0">
+                        <li>تأكد من حفظ الإعدادات بعد التعديل</li>
+                        <li>قد تتطلب بعض الإعدادات إعادة تشغيل النظام</li>
+                        <li>استشر المدير الفني قبل تغيير إعدادات حساسة</li>
+                    </ul>
+                </div>
+
+                <div class="mt-3">
+                    <h6><i class="fas fa-cog"></i> إعدادات متقدمة</h6>
+                    <p class="text-muted small">
+                        للإعدادات المتقدمة والتخصيصات الإضافية، يرجى التواصل مع فريق الدعم الفني.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-history"></i> سجل التغييرات
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6>تم تحديث نظام الموافقات</h6>
+                            <small class="text-muted">@DateTime.Now.ToString("yyyy-MM-dd HH:mm")</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ألوان رمادية أنيقة مع أسود داكن */
+    :root {
+        --primary-gray: #2c3e50;
+        --dark-gray: #34495e;
+        --medium-gray: #7f8c8d;
+        --light-gray: #ecf0f1;
+        --accent-gray: #95a5a6;
+        --text-dark: #2c3e50;
+        --text-light: #ecf0f1;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: #ecf0f1;
+        border: none;
+    }
+
+    .card {
+        border: 1px solid #bdc3c7;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.1);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        color: #ecf0f1;
+        border-bottom: 1px solid #7f8c8d;
+    }
+
+    .form-check-input:checked {
+        background-color: #34495e;
+        border-color: #34495e;
+    }
+
+    .form-check-input:focus {
+        border-color: #95a5a6;
+        box-shadow: 0 0 0 0.2rem rgba(52, 73, 94, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        border-color: #34495e;
+        color: #ecf0f1;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        border-color: #2c3e50;
+        color: #ecf0f1;
+        transform: translateY(-1px);
+    }
+
+    .timeline {
+        position: relative;
+        padding-right: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        right: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #bdc3c7;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        right: 7px;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #bdc3c7;
+        background: #34495e;
+    }
+
+    .timeline-content {
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-right: 25px;
+        border: 1px solid #bdc3c7;
+    }
+
+    .timeline-content h6 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d5dbdb, #eaeded);
+        border-color: #a9a9a9;
+        color: #2c3e50;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #ecf0f1, #d5dbdb);
+        border-color: #bdc3c7;
+        color: #2c3e50;
+    }
+
+    .table th {
+        background-color: #34495e;
+        color: #ecf0f1;
+        border-color: #7f8c8d;
+    }
+
+    .table td {
+        border-color: #bdc3c7;
+    }
+
+    .form-control:focus {
+        border-color: #95a5a6;
+        box-shadow: 0 0 0 0.2rem rgba(149, 165, 166, 0.25);
+    }
+
+    /* تخصيص ألوان DevExtreme DataGrid */
+    .dx-datagrid-headers {
+        background-color: #34495e !important;
+        color: #ecf0f1 !important;
+    }
+
+    .dx-datagrid-headers .dx-header-row {
+        background-color: #34495e !important;
+    }
+
+    .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
+        background-color: #34495e !important;
+        color: #ecf0f1 !important;
+        border-color: #7f8c8d !important;
+    }
+
+    .dx-datagrid .dx-row-alt > td {
+        background-color: #f8f9fa !important;
+    }
+
+    .dx-datagrid .dx-row > td {
+        border-color: #dee2e6 !important;
+    }
+
+    .dx-pager {
+        background-color: #ecf0f1 !important;
+        border-color: #bdc3c7 !important;
+    }
+
+    /* تخصيص ألوان البحث والفلترة */
+    .dx-texteditor-input {
+        border-color: #bdc3c7 !important;
+    }
+
+    .dx-texteditor-input:focus {
+        border-color: #95a5a6 !important;
+        box-shadow: 0 0 0 0.2rem rgba(149, 165, 166, 0.25) !important;
+    }
+
+    /* تخصيص ألوان الأزرار */
+    .dx-button {
+        background-color: #34495e !important;
+        border-color: #34495e !important;
+        color: #ecf0f1 !important;
+    }
+
+    .dx-button:hover {
+        background-color: #2c3e50 !important;
+        border-color: #2c3e50 !important;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DevExtreme components if needed
+        $('#systemSettingsGrid').dxDataGrid('instance');
+    });
+</script>

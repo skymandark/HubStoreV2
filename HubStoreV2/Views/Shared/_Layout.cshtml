@@ -490,6 +490,20 @@
             color: var(--success-color);
         }
 
+        /* Global UI Tweaks */
+        /* Aggressively hide the red curved arrow (revert) in grids */
+        .dx-link-revert, 
+        .dx-icon-revert, 
+        .dx-datagrid-revert-button,
+        .dx-datagrid .dx-link-revert,
+        .dx-command-edit .dx-link-revert { 
+            display: none !important; 
+            width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            visibility: hidden !important;
+        } 
+
         .footer {
             background: rgba(44, 62, 80, 0.9);
             backdrop-filter: blur(10px);
@@ -602,6 +616,10 @@
                     <i class="fas fa-plus"></i>
                     <span>إنشاء طلب شراء</span>
                 </div>
+                <div class="menu-item" onclick="navigateTo('DirectPurchaseOrder', 'Index')" title="إدارة طلبات الشراء المباشرة">
+                    <i class="fas fa-cart-arrow-down"></i>
+                    <span>طلب شراء مباشر</span>
+                </div>
                 <div class="menu-item" onclick="navigateTo('StockIn', 'Create')" title="استلام من أمر شراء">
                     <i class="fas fa-truck-loading"></i>
                     <span>استلام من أمر شراء</span>
@@ -615,7 +633,7 @@
 
             <!-- Returns Section -->
             <div class="menu-item" onclick="toggleSubmenu(this)" title="إدارة عمليات الإرجاع والصرف">
-                <i class="fas fa-undo"></i>
+                <i class="fas fa-exchange-alt"></i>
                 <span>الإرجاع</span>
                 <i class="fas fa-chevron-down" style="margin-right: auto;"></i>
             </div>
@@ -638,6 +656,12 @@
                 </div>
             </div>
 
+            <!-- Stock Out Requests Section -->
+            <div class="menu-item" onclick="navigateTo('StockOutRequest', 'Index')" title="إدارة طلبات إذن الصرف">
+                <i class="fas fa-file-export"></i>
+                <span>طلبات إذن الصرف</span>
+            </div>
+
             <!-- Inventory/Transfers Section -->
             <div class="menu-item" onclick="toggleSubmenu(this)" title="إدارة طلبات التحويل بين الفروع">
                 <i class="fas fa-exchange-alt"></i>
@@ -655,7 +679,38 @@
                 </div>
             </div>
 
-            <!-- Admin/Settings hidden for now as requested -->
+            <!-- Reports Section -->
+            <div class="menu-item" onclick="toggleSubmenu(this)" title="التقارير والإحصائيات">
+                <i class="fas fa-chart-bar"></i>
+                <span>التقارير</span>
+                <i class="fas fa-chevron-down" style="margin-right: auto;"></i>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="navigateTo('StockReport', 'Index')" title="تقرير أرصدة المخزون">
+                    <i class="fas fa-warehouse"></i>
+                    <span>أرصدة المخزون</span>
+                </div>
+                <div class="menu-item" onclick="navigateTo('ItemSheet', 'Index')" title="كشف حركة الصنف">
+                    <i class="fas fa-file-alt"></i>
+                    <span>كشف حركة صنف</span>
+                </div>
+                <div class="menu-item" onclick="navigateTo('Home', 'Reports')" title="التقارير الأخرى">
+                    <i class="fas fa-chart-line"></i>
+                    <span>تقارير أخرى</span>
+                </div>
+            </div>
+
+            <!-- Authentication -->
+            <div class="menu-item" onclick="navigateToLogin()" title="تسجيل الدخول أو الخروج">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>تسجيل الدخول</span>
+            </div>
+
+            <!-- Settings -->
+            <div class="menu-item" onclick="navigateTo('Setting', 'Index')" title="إعدادات النظام">
+                <i class="fas fa-cogs"></i>
+                <span>الإعدادات</span>
+            </div>
 
         </div>
         </div>
@@ -723,7 +778,79 @@
             window.location.href = `/${controller}/${action}`;
         }
 
-        // Set active menu item
+        function navigateToLogin() {
+            // Check if user is logged in
+            const user = localStorage.getItem('authUser') || sessionStorage.getItem('authUser');
+            if (user) {
+                // User is logged in, show logout confirmation
+                if (confirm('هل تريد تسجيل الخروج من النظام؟')) {
+                    // Clear auth data and redirect to login
+                    localStorage.removeItem('authUser');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('authTimestamp');
+                    sessionStorage.removeItem('authUser');
+                    sessionStorage.removeItem('authToken');
+                    sessionStorage.removeItem('authTimestamp');
+                    window.location.href = '/Auth/Login';
+                }
+            } else {
+                // User is not logged in, redirect to login
+                window.location.href = '/Auth/Login';
+            }
+        }
+
+        // Branch-based item filtering functionality
+        async function loadItemsForBranch(branchId, targetSelector) {
+            if (!branchId || !targetSelector) return;
+
+            try {
+                const response = await fetch(`/api/branches/items/${branchId}`);
+                if (response.ok) {
+                    const items = await response.json();
+                    const selectElement = document.querySelector(targetSelector);
+
+                    if (selectElement) {
+                        // Clear existing options except the first one (placeholder)
+                        const firstOption = selectElement.querySelector('option:first-child');
+                        selectElement.innerHTML = '';
+                        if (firstOption) selectElement.appendChild(firstOption);
+
+                        // Add filtered items
+                        items.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.itemId;
+                            option.textContent = item.nameArab;
+                            selectElement.appendChild(option);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading items for branch:', error);
+            }
+        }
+
+        // Set up branch change listeners for forms
+        function setupBranchItemFiltering() {
+            // Find all branch selectors in forms
+            const branchSelectors = document.querySelectorAll('select[data-field="BranchId"], select[name="BranchId"]');
+
+            branchSelectors.forEach(selector => {
+                selector.addEventListener('change', function() {
+                    const branchId = this.value;
+                    const form = this.closest('form') || this.closest('.dx-form');
+
+                    if (form && branchId) {
+                        // Find item selectors in the same form
+                        const itemSelectors = form.querySelectorAll('select[data-field="ItemId"], select[name*="ItemId"]');
+                        itemSelectors.forEach(itemSelector => {
+                            loadItemsForBranch(branchId, `[name="${itemSelector.name}"]`);
+                        });
+                    }
+                });
+            });
+        }
+
+        // Set active menu item and update auth state
         document.addEventListener('DOMContentLoaded', function() {
             const currentUrl = window.location.pathname;
             const menuItems = document.querySelectorAll('.menu-item');
@@ -735,7 +862,35 @@
                     item.classList.add('active');
                 }
             });
+
+            // Update login menu item based on auth state
+            updateLoginMenuItem();
+
+            // Initialize branch filtering
+            setupBranchItemFiltering();
         });
+
+        function updateLoginMenuItem() {
+            const user = localStorage.getItem('authUser') || sessionStorage.getItem('authUser');
+            const loginMenuItem = document.querySelector('[onclick="navigateToLogin()"]');
+            
+            if (loginMenuItem) {
+                const icon = loginMenuItem.querySelector('i');
+                const text = loginMenuItem.querySelector('span');
+                
+                if (user) {
+                    // User is logged in
+                    icon.className = 'fas fa-sign-out-alt';
+                    text.textContent = 'تسجيل الخروج';
+                    loginMenuItem.setAttribute('title', 'تسجيل الخروج من النظام');
+                } else {
+                    // User is not logged in
+                    icon.className = 'fas fa-sign-in-alt';
+                    text.textContent = 'تسجيل الدخول';
+                    loginMenuItem.setAttribute('title', 'تسجيل الدخول إلى النظام');
+                }
+            }
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

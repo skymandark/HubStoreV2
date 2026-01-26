@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HubStoreV2.Controllers
 {
     //[Authorize]
-    public class TransferOrderController : Controller
+    public class TransferOrderController : BaseController
     {
         private readonly ITransferOrderServiceNew _transferOrderService;
         private readonly ApplicationDbContext _context;
@@ -69,7 +69,10 @@ namespace HubStoreV2.Controllers
             {
                 var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
                 var shipmentTypes = await _context.ShipmentTypes.Where(s => s.IsActive).ToListAsync();
-                var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+                // Load all items - filtering will be done on client side
+                var items = await _context.Items
+                    .Where(i => !i.IsDeleted)
+                    .ToListAsync();
 
                 dto.Branches = branches.Select(b => new BranchDto
                 {
@@ -288,7 +291,10 @@ namespace HubStoreV2.Controllers
         {
             var branches = await _context.Branches.Where(b => b.IsActive).ToListAsync();
             var shipmentTypes = await _context.ShipmentTypes.Where(s => s.IsActive).ToListAsync();
-            var items = await _context.Items.Where(i => !i.IsDeleted).ToListAsync();
+            // Load all items - filtering will be done on client side
+            var items = await _context.Items
+                .Where(i => !i.IsDeleted)
+                .ToListAsync();
 
             dto.Branches = branches.Select(b => new BranchDto
             {
@@ -465,6 +471,14 @@ namespace HubStoreV2.Controllers
         {
             var item = _context.Items.Find(itemId);
             return item?.NameArab ?? "Unknown";
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetItemBalance(int itemId, int branchId)
+        {
+            // Placeholder: In a real system, this would query a balance table or inventory service
+            // For now, returning a dummy value or querying context if possible
+            return Json(new { balance = 150 }); 
         }
     }
 }

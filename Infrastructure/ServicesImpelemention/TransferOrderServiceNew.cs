@@ -66,39 +66,51 @@ namespace Infrastructure.ServicesImpelemention
 
         public async Task<int> CreateTransferOrder(TransferOrderRequestDto dto)
         {
-            var header = new TransferOrderHeader
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                TransferOrderCode = GenerateCode(),
-                DocDate = dto.DocDate,
-                EntryDate = dto.EntryDate,
-                FromBranchId = dto.FromBranchId,
-                ToBranchId = dto.ToBranchId,
-                ShipmentTypeId = dto.ShipmentTypeId,
-                Reference = dto.Reference,
-                Notes = dto.Remarks,
-                TransferOrderStatusId = 1, // Draft
-                CreatedBy = "System"
-            };
-
-            _context.TransferOrderHeaders.Add(header);
-            await _context.SaveChangesAsync();
-
-            foreach (var detail in dto.TransferOrderDetails)
-            {
-                var tod = new TransferOrderDetail
+                try
                 {
-                    TransferOrderId = header.TransferOrderId,
-                    ItemId = detail.ItemId,
-                    Qty = detail.RequestedQty,
-                    Notes = detail.Notes,
-                    CreatedBy = "System"
-                };
-                _context.TransferOrderDetails.Add(tod);
-            }
+                    var header = new TransferOrderHeader
+                    {
+                        TransferOrderCode = GenerateCode(),
+                        DocDate = dto.DocDate,
+                        EntryDate = dto.EntryDate,
+                        FromBranchId = dto.FromBranchId,
+                        ToBranchId = dto.ToBranchId,
+                        ShipmentTypeId = dto.ShipmentTypeId,
+                        Reference = dto.Reference,
+                        Notes = dto.Remarks,
+                        TransferOrderStatusId = 1, // Draft
+                        CreatedBy = "System"
+                    };
 
-            await _context.SaveChangesAsync();
-            return header.TransferOrderId;
+                    _context.TransferOrderHeaders.Add(header);
+
+                    foreach (var detail in dto.TransferOrderDetails)
+                    {
+                        var tod = new TransferOrderDetail
+                        {
+                            TransferOrderId = header.TransferOrderId,
+                            ItemId = detail.ItemId,
+                            Qty = detail.RequestedQty,
+                            Notes = detail.Notes,
+                            CreatedBy = "System"
+                        };
+                        _context.TransferOrderDetails.Add(tod);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return header.TransferOrderId;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
+        
 
         public async Task UpdateTransferOrder(TransferOrderRequestDto dto)
         {
@@ -221,62 +233,76 @@ namespace Infrastructure.ServicesImpelemention
 
         public async Task ExecuteTransferOrder(int id, List<TransferOrderDetailDto> details, string user)
         {
-            var header = await _context.TransferOrderHeaders
-                .Include(h => h.TransferOrderDetails)
-                .Include(h => h.StockOutHeaders).ThenInclude(so => so.StockOutDetails)
-                .FirstOrDefaultAsync(h => h.TransferOrderId == id);
-
-            if (header == null) throw new Exception("Transfer order not found");
-            
-            if (header.TransferOrderStatusId != 2)
-                throw new Exception("Transfer Order must be approved before execution");
-
-            // Creation of StockOut
-            var stockOut = new StockOutHeader
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                DocCode = "SO-TO-" + header.TransferOrderCode + "-" + DateTime.Now.Ticks,
-                DocDate = DateTime.UtcNow,
-                BranchId = header.FromBranchId,
-                TransferOrderId = header.TransferOrderId,
-                Status = 2, // Executed
-                TransactionTypeId = 2, // Transfer Out
-                CreatedBy = user,
-                Remarks = "Generated from Transfer Order " + header.TransferOrderCode
-            };
-            _context.StockOutHeaders.Add(stockOut);
-            await _context.SaveChangesAsync();
-            
-            foreach (var inputDetail in details)
-            {
-                 var orderDetail = header.TransferOrderDetails.FirstOrDefault(d => d.ItemId == inputDetail.ItemId);
-                 if (orderDetail == null) throw new Exception($"Item {inputDetail.ItemId} is not in the Transfer Order");
+                try
+                {
+                    var header = await _context.TransferOrderHeaders
+                        .Include(h => h.TransferOrderDetails)
+                        .Include(h => h.StockOutHeaders).ThenInclude(so => so.StockOutDetails)
+                        .FirstOrDefaultAsync(h => h.TransferOrderId == id);
 
-                 var previouslyShipped = header.StockOutHeaders
-                    .Where(so => so.Status == 2) // Executed
-                    .SelectMany(so => so.StockOutDetails)
-                    .Where(d => d.ItemId == inputDetail.ItemId)
-                    .Sum(d => d.Qty);
+                    if (header == null) throw new Exception("Transfer order not found");
 
-                 if (previouslyShipped + inputDetail.RequestedQty > orderDetail.Qty)
-                    throw new Exception($"Cannot ship {inputDetail.RequestedQty} of Item {inputDetail.ItemId}. Requested: {orderDetail.Qty}, Already Shipped: {previouslyShipped}");
+                    if (header.TransferOrderStatusId != 2)
+                        throw new Exception("Transfer Order must be approved before execution");
 
-                 var stockOutDetail = new StockOutDetail
-                 {
-                     StockOutId = stockOut.StockOutId,
-                     ItemId = inputDetail.ItemId,
-                     Qty = inputDetail.RequestedQty,
-                     BatchNo = inputDetail.BatchNo,
-                     ExpiryDate = inputDetail.ExpiryDate,
-                     CreatedBy = user,
-                     Price = 0,
-                     TotalValue = 0
-                 };
-                 _context.StockOutDetails.Add(stockOutDetail);
+                    // Creation of StockOut
+                    var stockOut = new StockOutHeader
+                    {
+                        DocCode = "SO-TO-" + header.TransferOrderCode + "-" + DateTime.Now.Ticks,
+                        DocDate = DateTime.UtcNow,
+                        BranchId = header.FromBranchId,
+                        TransferOrderId = header.TransferOrderId,
+                        Status = 2, // Executed
+                        TransactionTypeId = 2, // Transfer Out
+                        CreatedBy = user,
+                        Remarks = "Generated from Transfer Order " + header.TransferOrderCode
+                    };
+                    _context.StockOutHeaders.Add(stockOut);
+
+                    foreach (var inputDetail in details)
+                    {
+                         var orderDetail = header.TransferOrderDetails.FirstOrDefault(d => d.ItemId == inputDetail.ItemId);
+                         if (orderDetail == null) throw new Exception($"Item {inputDetail.ItemId} is not in the Transfer Order");
+
+                         var previouslyShipped = header.StockOutHeaders
+                            .Where(so => so.Status == 2) // Executed
+                            .SelectMany(so => so.StockOutDetails)
+                            .Where(d => d.ItemId == inputDetail.ItemId)
+                            .Sum(d => d.Qty);
+
+                         if (previouslyShipped + inputDetail.RequestedQty > orderDetail.Qty)
+                            throw new Exception($"Cannot ship {inputDetail.RequestedQty} of Item {inputDetail.ItemId}. Requested: {orderDetail.Qty}, Already Shipped: {previouslyShipped}");
+
+                         var stockOutDetail = new StockOutDetail
+                         {
+                             StockOutId = stockOut.StockOutId,
+                             ItemId = inputDetail.ItemId,
+                             Qty = inputDetail.RequestedQty,
+                             BatchNo = inputDetail.BatchNo,
+                             ExpiryDate = inputDetail.ExpiryDate,
+                             CreatedBy = user,
+                             Price = 0,
+                             TotalValue = 0
+                         };
+                         _context.StockOutDetails.Add(stockOutDetail);
+                    }
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
-            await _context.SaveChangesAsync();
         }
-
-        public async Task ReceiveTransferOrder(int id, List<TransferOrderDetailDto> details, string user)
+public async Task ReceiveTransferOrder(int id, List<TransferOrderDetailDto> details, string user)
+{
+    using (var transaction = await _context.Database.BeginTransactionAsync())
+    {
+        try
         {
              var header = await _context.TransferOrderHeaders
                 .Include(h => h.TransferOrderDetails)
@@ -285,7 +311,7 @@ namespace Infrastructure.ServicesImpelemention
                 .FirstOrDefaultAsync(h => h.TransferOrderId == id);
 
             if (header == null) throw new Exception("Transfer order not found");
-            
+
             if (header.TransferOrderStatusId != 2)
                 throw new Exception("Transfer Order must be approved before receiving");
 
@@ -302,7 +328,6 @@ namespace Infrastructure.ServicesImpelemention
                 SupplierId = null
             };
             _context.StockInHeaders.Add(stockIn);
-            await _context.SaveChangesAsync();
 
             foreach (var inputDetail in details)
             {
@@ -317,7 +342,7 @@ namespace Infrastructure.ServicesImpelemention
                     .SelectMany(si => si.StockInDetails)
                     .Where(d => d.ItemId == inputDetail.ItemId)
                     .Sum(d => d.Qty);
-                
+
                 if (previouslyReceived + inputDetail.RequestedQty > totalShipped)
                     throw new Exception($"Cannot receive {inputDetail.RequestedQty} of Item {inputDetail.ItemId}. Total Shipped: {totalShipped}, Already Received: {previouslyReceived}");
 
@@ -334,9 +359,18 @@ namespace Infrastructure.ServicesImpelemention
                 };
                 _context.StockInDetails.Add(stockInDetail);
             }
-            
+
+
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+}
 
         private string GenerateCode()
         {

@@ -27,6 +27,21 @@ namespace Core.Domin
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalValue { get; set; }
 
+        [Column(TypeName = "decimal(18,6)")]
+        public decimal BonusQuantity { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal ConsumerPrice { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal VatRate { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal VatAmount { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal NetValue { get; set; }
+
         [MaxLength(50)]
         public string BatchNo { get; set; }
 

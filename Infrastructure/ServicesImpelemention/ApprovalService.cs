@@ -45,6 +45,12 @@ namespace Infrastructure.Services
                 if (!updateResult.IsSuccess)
                     return updateResult;
 
+                // إذا كانت حركة صادرة، قم بتنفيذها (استهلاك الطبقات)
+                if (documentType == "Movement")
+                {
+                    await ExecuteMovementIfOutboundAsync(documentId);
+                }
+
                 // تسجيل في سجل الموافقات
                 await CreateApprovalHistoryAsync(documentId, documentType, "Approved", userId, note, true);
 
@@ -538,6 +544,58 @@ namespace Infrastructure.Services
             }
 
             return result;
+        }
+
+        private async Task ExecuteMovementIfOutboundAsync(int movementId)
+        {
+            var movement = await _context.Movements
+                .Include(m => m.MovementLines)
+                .Include(m => m.MovementType)
+                .FirstOrDefaultAsync(m => m.MovementId == movementId);
+
+            if (movement == null) return;
+
+            // Check if it's an outbound movement (OUT)
+            bool isOutbound = movement.MovementType?.Code.Contains("OUT") == true ||
+                             movement.MovementType?.Code.Contains("ISSUE") == true ||
+                             movement.MovementType?.Code.Contains("SALE") == true;
+
+            if (!isOutbound) return;
+
+            // Consume inventory layers FIFO
+            foreach (var line in movement.MovementLines)
+            {
+                decimal qtyToConsume = Math.Abs(line.QtyInput);
+                if (qtyToConsume <= 0) continue;
+
+                var layers = await _context.InventoryLayers
+                    .Where(il => il.ItemId == line.ItemId &&
+                           il.BranchId == line.BranchId &&
+                           il.QuantityRemaining > 0 &&
+                           !il.IsDeleted)
+                    .OrderBy(il => il.ReceiptDate)
+                    .ToListAsync();
+
+                foreach (var layer in layers)
+                {
+                    if (qtyToConsume <= 0) break;
+
+                    decimal consumeQty = Math.Min(qtyToConsume, layer.QuantityRemaining);
+                    layer.QuantityRemaining -= consumeQty;
+                    qtyToConsume -= consumeQty;
+                }
+
+                // If not enough stock, this should have been validated earlier
+                if (qtyToConsume > 0)
+                {
+                    _logger.LogWarning($"Insufficient stock for item {line.ItemId} in movement {movementId}");
+                }
+            }
+
+            // Update movement status to Completed
+            movement.Status = "Completed";
+
+            await _context.SaveChangesAsync();
         }
 
         #endregion

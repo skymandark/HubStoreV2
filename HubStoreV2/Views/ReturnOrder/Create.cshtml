@@ -273,59 +273,11 @@
 
         <!-- Line Items -->
         <div class="card">
-            <div class="card-header">
-                <i class="fas fa-list"></i> تفاصيل الأصناف المرجعة
-                <button type="button" class="btn btn-success btn-sm float-end" onclick="addItem()">
-                    <i class="fas fa-plus"></i> إضافة صنف
-                </button>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-list"></i> تفاصيل الأصناف المرجعة</span>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table" id="itemsTable">
-                        <thead>
-                            <tr>
-                                <th>الصنف</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>القيمة الإجمالية</th>
-                                <th>رقم التشغيلة</th>
-                                <th>تاريخ الصلاحية</th>
-                                <th>سبب الإرجاع</th>
-                                <th>الملاحظات</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="itemsTableBody">
-                            @if (Model.ReturnOrderDetails != null && Model.ReturnOrderDetails.Any())
-                            {
-                                foreach (var detail in Model.ReturnOrderDetails)
-                                {
-                                    <tr>
-                                        <td>
-                                            <select name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].ItemId" class="form-select item-select">
-                                                <option value="">اختر الصنف</option>
-                                                <!-- Items would be populated from ViewBag or Model -->
-                                            </select>
-                                        </td>
-                                        <td><input name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].Qty" type="number" step="0.01" class="form-control quantity" value="@detail.Qty" /></td>
-                                        <td><input name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].Price" type="number" step="0.01" class="form-control price" value="@detail.Price" /></td>
-                                        <td><input name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].TotalValue" type="number" step="0.01" class="form-control total-value" value="@detail.TotalValue" readonly /></td>
-                                        <td><input name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].BatchNo" type="text" class="form-control" value="@detail.BatchNo" /></td>
-                                        <td><input name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].ExpiryDate" type="date" class="form-control" value="@detail.ExpiryDate?.ToString("yyyy-MM-dd")" /></td>
-                                        <td>
-                                            <select name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].ReturnReasonId" class="form-select">
-                                                <option value="">اختر السبب</option>
-                                                <!-- Return reasons would be populated from ViewBag or Model -->
-                                            </select>
-                                        </td>
-                                        <td><input name="ReturnOrderDetails[@(detail.ReturnOrderDetailId - 1)].Notes" type="text" class="form-control" value="@detail.Notes" /></td>
-                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">حذف</button></td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                <div id="itemsGrid" class="rounded border overflow-hidden"></div>
             </div>
         </div>
 
@@ -338,7 +290,7 @@
                 <div class="summary-section">
                     <div class="summary-row">
                         <span class="summary-label">إجمالي القيمة</span>
-                        <span class="summary-value" id="totalValue">0.00</span>
+                        <span class="summary-value" id="totalValueDisplay">0.00</span>
                     </div>
                 </div>
             </div>
@@ -356,94 +308,89 @@
     </form>
 </div>
 
-<script>
-    let itemIndex = @((Model.ReturnOrderDetails?.Count ?? 0) + 1);
+@section Scripts {
+    <script>
+        $(function() {
+            const items = @Html.Raw(Json.Serialize(ViewBag.Items ?? new List<object>()));
+            const reasons = @Html.Raw(Json.Serialize(ViewBag.ReturnReasons ?? new List<object>()));
+            const initialDetails = @Html.Raw(Json.Serialize(Model.ReturnOrderDetails ?? new List<Core.ViewModels.ReturnOrderViewModels.ReturnOrderDetailDto>()));
 
-    function toggleReturnType() {
-        const returnType = document.querySelector('[asp-for="ReturnType"]').value;
-        const supplierSection = document.getElementById('supplierSection');
-        const clientSection = document.getElementById('clientSection');
+            const grid = $("#itemsGrid").dxDataGrid({
+                dataSource: initialDetails,
+                rtlEnabled: true,
+                showBorders: false,
+                rowAlternationEnabled: true,
+                editing: {
+                    mode: "cell",
+                    allowAdding: true,
+                    allowUpdating: true,
+                    allowDeleting: true,
+                    useIcons: true
+                },
+                columns: [
+                    { dataField: "itemId", caption: "الصنف", lookup: { dataSource: items, valueExpr: "itemId", displayExpr: "nameArab" }, width: "30%" },
+                    { dataField: "availableStock", caption: "الرصيد", dataType: "number", allowEditing: false, width: 100, alignment: "center", cssClass: "text-muted fw-bold" },
+                    { dataField: "qty", caption: "الكمية", dataType: "number", width: 100, alignment: "center" },
+                    { dataField: "price", caption: "السعر", dataType: "number", format: "#,##0.00", width: 120 },
+                    { dataField: "totalValue", caption: "الإجمالي", dataType: "number", format: "#,##0.00", allowEditing: false,
+                      calculateCellValue: (data) => (data.qty || 0) * (data.price || 0) },
+                    { dataField: "returnReasonId", caption: "السبب", lookup: { dataSource: reasons, valueExpr: "id", displayExpr: "name" } },
+                    { dataField: "batchNo", caption: "الوجبة" },
+                    { dataField: "expiryDate", caption: "الصلاحية", dataType: "date" }
+                ],
+                onCellValueChanged: function(e) {
+                    if (e.column.dataField === "itemId") {
+                        const branchId = $("#BranchId").val();
+                        if (e.data.itemId && branchId) {
+                            $.post("@Url.Action("GetItemBalance", "Item")", { itemId: e.data.itemId, branchId: branchId }, function(res) {
+                                e.component.cellValue(e.row.rowIndex, "availableStock", res.balance);
+                            });
+                        }
+                    }
+                    calculateTotal();
+                },
+                onRowInserted: () => calculateTotal(),
+                onRowRemoved: () => calculateTotal(),
+                onContentReady: () => calculateTotal()
+            }).dxDataGrid("instance");
 
-        if (returnType === '0') { // SupplierReturn
-            supplierSection.style.display = 'block';
-            clientSection.style.display = 'none';
-        } else if (returnType === '1') { // CustomerReturn
-            supplierSection.style.display = 'none';
-            clientSection.style.display = 'block';
-        } else {
-            supplierSection.style.display = 'none';
-            clientSection.style.display = 'none';
+            function calculateTotal() {
+                const data = grid.option("dataSource") || [];
+                let total = 0;
+                data.forEach(item => {
+                    total += (item.qty || 0) * (item.price || 0);
+                });
+                $("#totalValueDisplay").text(total.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+            }
+
+            $("#returnOrderForm").on("submit", function() {
+                const data = grid.option("dataSource");
+                if (!data || data.length === 0) {
+                    DevExpress.ui.notify("يجب إضافة صنف واحد على الأقل", "error");
+                    return false;
+                }
+
+                data.forEach((item, i) => {
+                    $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].ItemId`).val(item.itemId).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].Qty`).val(item.qty).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].Price`).val(item.price).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].TotalValue`).val((item.qty || 0) * (item.price || 0)).appendTo(this);
+                    $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].BatchNo`).val(item.batchNo || "").appendTo(this);
+                    if (item.expiryDate) {
+                        $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].ExpiryDate`).val(new Date(item.expiryDate).toISOString()).appendTo(this);
+                    }
+                    $("<input>").attr("type", "hidden").attr("name", `ReturnOrderDetails[${i}].ReturnReasonId`).val(item.returnReasonId || "").appendTo(this);
+                });
+
+                return true;
+            });
+        });
+
+        function toggleReturnType() {
+            const returnType = $("#ReturnType").val();
+            if (returnType === "0") { $("#supplierSection").show(); $("#clientSection").hide(); }
+            else if (returnType === "1") { $("#supplierSection").hide(); $("#clientSection").show(); }
+            else { $("#supplierSection, #clientSection").hide(); }
         }
-    }
-
-    function addItem() {
-        const tbody = document.getElementById('itemsTableBody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                <select name="ReturnOrderDetails[${itemIndex - 1}].ItemId" class="form-select item-select">
-                    <option value="">اختر الصنف</option>
-                    <!-- Items would be populated from ViewBag or Model -->
-                </select>
-            </td>
-            <td><input name="ReturnOrderDetails[${itemIndex - 1}].Qty" type="number" step="0.01" class="form-control quantity" /></td>
-            <td><input name="ReturnOrderDetails[${itemIndex - 1}].Price" type="number" step="0.01" class="form-control price" /></td>
-            <td><input name="ReturnOrderDetails[${itemIndex - 1}].TotalValue" type="number" step="0.01" class="form-control total-value" readonly /></td>
-            <td><input name="ReturnOrderDetails[${itemIndex - 1}].BatchNo" type="text" class="form-control" /></td>
-            <td><input name="ReturnOrderDetails[${itemIndex - 1}].ExpiryDate" type="date" class="form-control" /></td>
-            <td>
-                <select name="ReturnOrderDetails[${itemIndex - 1}].ReturnReasonId" class="form-select">
-                    <option value="">اختر السبب</option>
-                    <!-- Return reasons would be populated from ViewBag or Model -->
-                </select>
-            </td>
-            <td><input name="ReturnOrderDetails[${itemIndex - 1}].Notes" type="text" class="form-control" /></td>
-            <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">حذف</button></td>
-        `;
-        tbody.appendChild(row);
-        itemIndex++;
-        attachEventListeners();
-    }
-
-    function removeItem(button) {
-        button.closest('tr').remove();
-        calculateTotals();
-    }
-
-    function attachEventListeners() {
-        document.querySelectorAll('.quantity, .price').forEach(input => {
-            input.addEventListener('input', calculateRow);
-        });
-    }
-
-    function calculateRow() {
-        const row = this.closest('tr');
-        const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-        const price = parseFloat(row.querySelector('.price').value) || 0;
-
-        const totalValue = quantity * price;
-
-        row.querySelector('.total-value').value = totalValue.toFixed(2);
-
-        calculateTotals();
-    }
-
-    function calculateTotals() {
-        let totalValue = 0;
-
-        document.querySelectorAll('#itemsTableBody tr').forEach(row => {
-            const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-            const price = parseFloat(row.querySelector('.price').value) || 0;
-
-            totalValue += quantity * price;
-        });
-
-        document.getElementById('totalValue').textContent = totalValue.toFixed(2);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        attachEventListeners();
-        calculateTotals();
-        toggleReturnType(); // Initialize based on current selection
-    });
-</script>
+    </script>
+}

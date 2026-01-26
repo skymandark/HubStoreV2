@@ -231,6 +231,8 @@
                         },
                         validationRules: [{ type: "required" }]
                     },
+                    { dataField: "availableStock", caption: "الرصيد", dataType: "number", allowEditing: false, 
+                      width: 100, alignment: "center", cssClass: "text-muted fw-bold" },
                     {
                         dataField: "qty",
                         caption: "الكمية",
@@ -274,7 +276,17 @@
                 onRowInserted: () => calculateTotals(),
                 onRowUpdated: () => calculateTotals(),
                 onRowRemoved: () => calculateTotals(),
-                onContentReady: () => calculateTotals()
+                onContentReady: () => calculateTotals(),
+                onCellValueChanged: function(e) {
+                    if (e.column.dataField === "itemId") {
+                        const branchId = headerForm.option("formData").BranchId;
+                        if (e.data.itemId && branchId) {
+                            $.post("@Url.Action("GetItemBalance", "Item")", { itemId: e.data.itemId, branchId: branchId }, function(res) {
+                                e.component.cellValue(e.row.rowIndex, "availableStock", res.balance);
+                            });
+                        }
+                    }
+                }
             }).dxDataGrid("instance");
 
             // 3. Remarks Form

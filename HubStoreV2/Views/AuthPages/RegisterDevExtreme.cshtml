@@ -1,0 +1,639 @@
+@{
+    ViewData["Title"] = "إنشاء حساب جديد";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HubStore ERP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.2.5/css/dx.light.css" />
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --secondary-color: #4a5568;
+            --accent-color: #3182ce;
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            direction: rtl;
+            padding: 20px 0;
+        }
+
+        .register-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 48px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .register-header h2 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.75rem;
+        }
+
+        .register-header p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .register-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .register-logo i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .dx-texteditor {
+            border-radius: 8px !important;
+            border: 1px solid var(--border-color) !important;
+            background: var(--card-bg) !important;
+        }
+
+        .dx-texteditor.dx-state-focused {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
+        }
+
+        .dx-texteditor-input {
+            color: var(--text-primary) !important;
+            font-size: 0.95rem !important;
+        }
+
+        .dx-placeholder {
+            color: var(--text-secondary) !important;
+        }
+
+        .dx-checkbox {
+            margin: 16px 0;
+        }
+
+        .dx-checkbox-text {
+            color: var(--text-secondary) !important;
+            font-size: 0.875rem !important;
+        }
+
+        .dx-button {
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+            font-size: 0.95rem !important;
+            padding: 12px 24px !important;
+        }
+
+        .dx-button-mode-contained.dx-button-success {
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .dx-button-mode-contained.dx-button-success:hover {
+            background: #000000 !important;
+            border-color: #000000 !important;
+        }
+
+        .dx-progressbar {
+            height: 4px !important;
+            border-radius: 2px !important;
+            margin-top: 8px !important;
+        }
+
+        .dx-progressbar-container {
+            background: var(--border-color) !important;
+        }
+
+        .dx-progressbar-range {
+            border-radius: 2px !important;
+        }
+
+        .dx-progressbar-status-low {
+            background: var(--danger-color) !important;
+        }
+
+        .dx-progressbar-status-medium {
+            background: #ed8936 !important;
+        }
+
+        .dx-progressbar-status-high {
+            background: var(--success-color) !important;
+        }
+
+        .dx-toast {
+            border-radius: 8px !important;
+            font-size: 0.875rem !important;
+        }
+
+        .dx-toast-success {
+            background: rgba(72, 187, 120, 0.1) !important;
+            color: var(--success-color) !important;
+            border: 1px solid rgba(72, 187, 120, 0.2) !important;
+        }
+
+        .dx-toast-error {
+            background: rgba(245, 101, 101, 0.1) !important;
+            color: var(--danger-color) !important;
+            border: 1px solid rgba(245, 101, 101, 0.2) !important;
+        }
+
+        .dx-toast-info {
+            background: rgba(49, 130, 206, 0.1) !important;
+            color: var(--accent-color) !important;
+            border: 1px solid rgba(49, 130, 206, 0.2) !important;
+        }
+
+        .dx-validationgroup {
+            margin-bottom: 20px;
+        }
+
+        .dx-validator {
+            display: block;
+        }
+
+        .dx-overlay-wrapper.dx-invalid {
+            border-color: var(--danger-color) !important;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .login-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .login-link a:hover {
+            color: #2c5282;
+            text-decoration: underline;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            z-index: 1000;
+        }
+
+        media (max-width: 768px) {
+            .register-container {
+                margin: 20px;
+                padding: 32px 24px;
+            }
+            
+            .register-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-group.full-width {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <div class="register-logo">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2>إنشاء حساب جديد</h2>
+            <p>انضم إلى نظام HubStore ERP</p>
+        </div>
+
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">البريد الإلكتروني *</div>
+                    <div id="emailTextBox"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">اسم المستخدم</div>
+                    <div id="userNameTextBox"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">كلمة المرور *</div>
+                    <div id="passwordTextBox"></div>
+                    <div id="passwordStrengthBar"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">تأكيد كلمة المرور *</div>
+                    <div id="confirmPasswordTextBox"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">رقم الهاتف</div>
+                    <div id="phoneNumberTextBox"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">رقم الموظف</div>
+                    <div id="employeeIdNumberBox"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">رمز PIN</div>
+                    <div id="pinCodeTextBox"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">&nbsp;</div>
+                    <div id="isAdminCheckbox"></div>
+                </div>
+            </div>
+
+            <div id="registerButton"></div>
+        </form>
+
+        <div class="login-link">
+            <p>لديك حساب بالفعل؟ <a href="/Auth/Login">تسجيل الدخول</a></p>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="dx-loadindicator"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn3.devexpress.com/jslib/23.2.5/js/dx.all.js"></script>
+    <script>
+        $(function() {
+            // Initialize DevExtreme components
+            initializeComponents();
+
+            // Form submission
+            $('#registerForm').on('submit', function(e) {
+                e.preventDefault();
+                register();
+            });
+        });
+
+        function initializeComponents() {
+            // Email TextBox with validation
+            $("#emailTextBox").dxTextBox({
+                placeholder: "example@domain.com",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    email = e.value;
+                    validateEmail();
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "البريد الإلكتروني مطلوب"
+                }, {
+                    type: "email",
+                    message: "الرجاء إدخال بريد إلكتروني صحيح"
+                }]
+            });
+
+            // Username TextBox
+            $("#userNameTextBox").dxTextBox({
+                placeholder: "اختر اسم مستخدم",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    userName = e.value;
+                }
+            });
+
+            // Password TextBox
+            $("#passwordTextBox").dxTextBox({
+                placeholder: "أدخل كلمة المرور",
+                mode: "password",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    password = e.value;
+                    updatePasswordStrength(e.value);
+                    validatePasswordMatch();
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "كلمة المرور مطلوبة"
+                }, {
+                    type: "stringLength",
+                    min: 6,
+                    message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل"
+                }]
+            });
+
+            // Password Strength Bar
+            $("#passwordStrengthBar").dxProgressBar({
+                min: 0,
+                max: 100,
+                value: 0,
+                statusFormat: function(value) {
+                    if (value <= 33) return "ضعيفة";
+                    if (value <= 66) return "متوسطة";
+                    return "قوية";
+                }
+            });
+
+            // Confirm Password TextBox
+            $("#confirmPasswordTextBox").dxTextBox({
+                placeholder: "أعد إدخال كلمة المرور",
+                mode: "password",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    confirmPassword = e.value;
+                    validatePasswordMatch();
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "تأكيد كلمة المرور مطلوب"
+                }, {
+                    type: "compare",
+                    comparisonTarget: function() {
+                        return password;
+                    },
+                    comparisonType: "=",
+                    message: "كلمات المرور غير متطابقة"
+                }]
+            });
+
+            // Phone Number TextBox
+            $("#phoneNumberTextBox").dxTextBox({
+                placeholder: "05xxxxxxxx",
+                stylingMode: "outlined",
+                showClearButton: true,
+                mask: "0000000000",
+                onValueChanged: function(e) {
+                    phoneNumber = e.value;
+                }
+            });
+
+            // Employee ID NumberBox
+            $("#employeeIdNumberBox").dxNumberBox({
+                placeholder: "رقم الموظف (اختياري)",
+                stylingMode: "outlined",
+                showClearButton: true,
+                format: "#",
+                onValueChanged: function(e) {
+                    employeeId = e.value;
+                }
+            });
+
+            // PIN Code TextBox
+            $("#pinCodeTextBox").dxTextBox({
+                placeholder: "4 أرقام",
+                mask: "0000",
+                stylingMode: "outlined",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    pinCode = e.value;
+                }
+            });
+
+            // Is Admin Checkbox
+            $("#isAdminCheckbox").dxCheckBox({
+                text: "مسؤول نظام",
+                value: false,
+                onValueChanged: function(e) {
+                    isAdmin = e.value;
+                }
+            });
+
+            // Register Button
+            $("#registerButton").dxButton({
+                text: "إنشاء الحساب",
+                type: "success",
+                stylingMode: "contained",
+                width: "100%",
+                onClick: function(e) {
+                    register();
+                }
+            });
+
+            // Loading Indicator
+            $(".dx-loadindicator").dxLoadIndicator({
+                visible: true
+            });
+
+            // Validation Group
+            DevExpress.validationEngine.registerGroupForValidation("registerForm");
+        }
+
+        // Global variables
+        let email = "";
+        let userName = "";
+        let password = "";
+        let confirmPassword = "";
+        let phoneNumber = "";
+        let employeeId = null;
+        let pinCode = "";
+        let isAdmin = false;
+
+        function updatePasswordStrength(password) {
+            const strengthBar = $("#passwordStrengthBar").dxProgressBar("instance");
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+            const percentage = (strength / 4) * 100;
+            strengthBar.option("value", percentage);
+
+            if (strength <= 1) {
+                strengthBar.option("status", "low");
+            } else if (strength === 2) {
+                strengthBar.option("status", "medium");
+            } else {
+                strengthBar.option("status", "high");
+            }
+        }
+
+        function validateEmail() {
+            const emailInstance = $("#emailTextBox").dxTextBox("instance");
+            const validator = emailInstance.dxValidator("instance");
+            validator.validate();
+        }
+
+        function validatePasswordMatch() {
+            const confirmInstance = $("#confirmPasswordTextBox").dxTextBox("instance");
+            const validator = confirmInstance.dxValidator("instance");
+            validator.validate();
+        }
+
+        async function register() {
+            // Get all values
+            const emailInstance = $("#emailTextBox").dxTextBox("instance");
+            const userNameInstance = $("#userNameTextBox").dxTextBox("instance");
+            const passwordInstance = $("#passwordTextBox").dxTextBox("instance");
+            const confirmInstance = $("#confirmPasswordTextBox").dxTextBox("instance");
+            const phoneInstance = $("#phoneNumberTextBox").dxTextBox("instance");
+            const employeeInstance = $("#employeeIdNumberBox").dxNumberBox("instance");
+            const pinInstance = $("#pinCodeTextBox").dxTextBox("instance");
+            const adminInstance = $("#isAdminCheckbox").dxCheckBox("instance");
+
+            email = emailInstance.option("value");
+            userName = userNameInstance.option("value") || email;
+            password = passwordInstance.option("value");
+            confirmPassword = confirmInstance.option("value");
+            phoneNumber = phoneInstance.option("value");
+            employeeId = employeeInstance.option("value");
+            pinCode = pinInstance.option("value");
+            isAdmin = adminInstance.option("value");
+
+            // Validate form
+            const validationResult = DevExpress.validationEngine.validateGroup("registerForm");
+            if (!validationResult.isValid) {
+                showToast("الرجاء تصحيح الأخطاء في النموذج", "error");
+                return;
+            }
+
+            // Additional validation
+            if (pinCode && pinCode.length !== 4) {
+                showToast('رمز PIN يجب أن يكون 4 أرقام', 'error');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        userName: userName,
+                        password: password,
+                        confirmPassword: confirmPassword,
+                        phoneNumber: phoneNumber,
+                        employeeId: employeeId,
+                        pinCode: pinCode,
+                        isAdmin: isAdmin
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.succeeded) {
+                    showToast('تم إنشاء الحساب بنجاح! جاري التوجيه لتسجيل الدخول...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/Auth/Login';
+                    }, 2000);
+                } else {
+                    const errorMessage = result.errors && result.errors.length > 0 
+                        ? result.errors.join(', ') 
+                        : result.message || 'فشل إنشاء الحساب';
+                    showToast(errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showToast('حدث خطأ أثناء إنشاء الحساب', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showLoading(show) {
+            $("#loadingOverlay").toggle(show);
+        }
+
+        function showToast(message, type = "info") {
+            const toastConfig = {
+                message: message,
+                type: type,
+                displayTime: 3000,
+                position: "top center",
+                width: 300
+            };
+
+            DevExpress.ui.notify(toastConfig);
+        }
+    </script>
+</body>
+</html>

@@ -6,276 +6,211 @@
 }
 
 <style>
-    .card {
+    :root {
+        --primary-solid: #1e293b; /* Slate 800 */
+        --accent-solid: #4f46e5; /* Indigo 600 */
+        --accent-hover: #4338ca;
+        --bg-app: #f1f5f9;
+        --border-color: #cbd5e1;
+        --success-solid: #10b981;
+    }
+
+    .premium-wrapper {
+        background-color: var(--bg-app);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .card-premium {
         border: none;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #eee;
-        font-weight: 600;
-        padding: 15px 20px;
+
+    .card-header-solid {
+        background-color: var(--primary-solid);
+        color: white;
+        padding: 2rem 2.5rem;
     }
-    .form-label {
-        font-weight: 600;
-        color: #555;
+
+    .card-header-solid h2 { font-weight: 800; letter-spacing: -0.025em; }
+
+    .grid-section-title {
+        color: var(--primary-solid);
+        font-weight: 700;
+        border-left: 4px solid var(--accent-solid);
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
     }
-    .table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
+
+    .btn-premium-save {
+        background-color: var(--accent-solid);
+        border: none;
+        padding: 0.8rem 2.5rem;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .btn-premium-save:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-2px);
+    }
+
+    .dx-datagrid-headers {
+        background-color: #f8fafc !important;
+        color: var(--primary-solid) !important;
+        font-weight: 700 !important;
     }
 </style>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2>
-            <i class="fas @(isEdit ? "fa-edit" : "fa-plus-circle")"></i>
-            @ViewData["Title"]
-            @if(isEdit)
-            {
-                <span class="text-muted fs-6">#@Model.TransferOrderId</span>
-            }
-        </h2>
+<div class="premium-wrapper">
+    <div class="card card-premium">
+        <div class="card-header-solid d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1"><i class="fas fa-random me-3"></i> طلب نقل بضاعة</h2>
+                <p class="mb-0 text-slate-400 opacity-75">إدارة عمليات تحويل المخزون بين فروع الشركة</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="@Url.Action("Index")" class="btn btn-outline-light px-4 rounded-pill">إلغاء</a>
+                <button type="button" class="btn btn-premium-save text-white shadow" onclick="submitForm()">
+                    <i class="fas fa-check-circle me-2"></i> حفظ الطلب
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body p-4 p-lg-5 bg-white">
+            <form id="transferForm" asp-action="@(Model.TransferOrderId > 0 ? "Update" : "Create")" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="TransferOrderId" />
+
+                <div class="mb-5">
+                    <h5 class="grid-section-title">المعلومات الأساسية للمستند</h5>
+                    <div id="headerForm"></div>
+                </div>
+
+                <div class="mt-5">
+                    <h5 class="grid-section-title">تفاصيل الأصناف المحولة</h5>
+                    <div class="rounded-3 border overflow-hidden">
+                        <div id="itemsGrid"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<form asp-action="@(isEdit ? "Update" : "Create")" method="post" id="transferOrderForm">
-    @Html.AntiForgeryToken()
-    @if(isEdit)
-    {
-        <input type="hidden" asp-for="TransferOrderId" />
-    }
-
-    <!-- Header Info -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-info-circle"></i> المعلومات الأساسية
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label asp-for="DocDate" class="form-label">التاريخ</label>
-                    <input asp-for="DocDate" type="date" class="form-control" />
-                    <span asp-validation-for="DocDate" class="text-danger"></span>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="Reference" class="form-label">المرجع</label>
-                    <input asp-for="Reference" class="form-control" placeholder="اختياري" />
-                    <span asp-validation-for="Reference" class="text-danger"></span>
-                </div>
-                <div class="col-md-3">
-                    <label asp-for="ShipmentTypeId" class="form-label">طريقة الشحن</label>
-                    <select asp-for="ShipmentTypeId" class="form-select" asp-items="@(new SelectList(Model.ShipmentTypes, "ShipmentTypeId", "Name"))">
-                        <option value="">-- اختر --</option>
-                    </select>
-                    <span asp-validation-for="ShipmentTypeId" class="text-danger"></span>
-                </div>
-                <div class="col-md-12"></div>
-
-                <div class="col-md-4">
-                    <label asp-for="FromBranchId" class="form-label">من فرع (المصدر)</label>
-                    <select asp-for="FromBranchId" class="form-select" asp-items="@(new SelectList(Model.Branches, "BranchId", "Name"))">
-                        <option value="">-- اختر --</option>
-                    </select>
-                    <span asp-validation-for="FromBranchId" class="text-danger"></span>
-                </div>
-                <div class="col-md-4">
-                    <label asp-for="ToBranchId" class="form-label">إلى فرع (الوجهة)</label>
-                    <select asp-for="ToBranchId" class="form-select" asp-items="@(new SelectList(Model.Branches, "BranchId", "Name"))">
-                        <option value="">-- اختر --</option>
-                    </select>
-                    <span asp-validation-for="ToBranchId" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-12">
-                    <label asp-for="Remarks" class="form-label">ملاحظات</label>
-                    <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Items Section -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-boxes"></i> الأصناف</span>
-        </div>
-        <div class="card-body">
-            <!-- Add Item Utility -->
-            <div class="row g-3 align-items-end mb-4 bg-light p-3 rounded border">
-                <div class="col-md-6">
-                    <label class="form-label">الصنف</label>
-                    <select id="itemSelect" class="form-select">
-                        <option value="">-- اختر صنف للإضافة --</option>
-                        @foreach (var item in Model.AvailableItems)
-                        {
-                            <option value="@item.ItemId" data-price="@item.ConsumerPrice">@item.ItemNameEng</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">الكمية</label>
-                    <input type="number" id="itemQty" class="form-control" min="1" value="1" />
-                </div>
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-success w-100" id="btnAddItem">
-                        <i class="fas fa-plus"></i> إضافة
-                    </button>
-                </div>
-            </div>
-
-            <!-- Items Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped" id="itemsTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>الصنف</th>
-                            <th style="width: 150px;">الكمية</th>
-                            <th style="width: 100px;">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.SelectedItems != null)
-                        {
-                            for (int i = 0; i < Model.SelectedItems.Count; i++)
-                            {
-                                var item = Model.SelectedItems[i];
-                                <tr data-index="@i">
-                                    <td>@(i + 1)</td>
-                                    <td>
-                                        <input type="hidden" name="SelectedItems[@i].ItemId" value="@item.ItemId" class="item-id" />
-                                        <input type="hidden" name="SelectedItems[@i].TempOrder" value="@(i + 1)" />
-                                        @item.ItemNameEng
-                                        <!-- Fallback name if missing in DTO re-rendere -->
-                                        @if(string.IsNullOrEmpty(item.ItemNameEng)) { <span class="text-danger">(Name missing)</span> }
-                                    </td>
-                                    <td>
-                                        <input type="number" name="SelectedItems[@i].Quantity" value="@item.Quantity" class="form-control form-control-sm item-qty" min="1" step="0.01" />
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-danger btn-sm btn-remove"><i class="fas fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-                <div id="emptyMessage" class="alert alert-info text-center" style="@(Model.SelectedItems != null && Model.SelectedItems.Any() ? "display:none" : "")">
-                    لا توجد أصناف مضافة بعد.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="row">
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary btn-lg px-5">
-                <i class="fas fa-save"></i> حفظ الطلب
-            </button>
-            <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg px-5 ms-2">
-                إلغاء
-            </a>
-        </div>
-    </div>
-</form>
-
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script>
-        $(document).ready(function () {
-            let itemIndex = @(Model.SelectedItems?.Count ?? 0);
+        $(function () {
+            const branches = @Html.Raw(Json.Serialize(Model.Branches));
+            const shipmentTypes = @Html.Raw(Json.Serialize(Model.ShipmentTypes));
+            const initialDetails = @Html.Raw(Json.Serialize(Model.SelectedItems ?? new List<Core.ViewModels.TransferOrderViewModels.SelectedItemDto>()));
+            const availableItems = @Html.Raw(Json.Serialize(Model.AvailableItems));
 
-            $('#btnAddItem').click(function () {
-                const itemId = $('#itemSelect').val();
-                const itemName = $('#itemSelect option:selected').text();
-                const qty = parseFloat($('#itemQty').val());
+            var headerForm = $("#headerForm").dxForm({
+                formData: @Html.Raw(Json.Serialize(Model)),
+                rtlEnabled: true,
+                colCount: 3,
+                labelMode: "floating",
+                items: [
+                    { dataField: "FromBranchId", label: { text: "من فرع (المصدر)" }, editorType: "dxSelectBox",
+                      editorOptions: { dataSource: branches, valueExpr: "branchId", displayExpr: "name", onValueChanged: refreshGridItems },
+                      validationRules: [{ type: "required" }] },
+                    { dataField: "ToBranchId", label: { text: "إلى فرع (الوجهة)" }, editorType: "dxSelectBox",
+                      editorOptions: { dataSource: branches, valueExpr: "branchId", displayExpr: "name" },
+                      validationRules: [{ type: "required" }, { type: "custom", validationCallback: validateBranches, message: "لا يمكن النقل لنفس الفرع" }] },
+                    { dataField: "DocDate", label: { text: "تاريخ الطلب" }, editorType: "dxDateBox", validationRules: [{ type: "required" }] },
+                    { dataField: "ShipmentTypeId", label: { text: "طريقة الشحن" }, editorType: "dxSelectBox",
+                      editorOptions: { dataSource: shipmentTypes, valueExpr: "shipmentTypeId", displayExpr: "name" } },
+                    { dataField: "Reference", label: { text: "رقم المرجع" } },
+                    { dataField: "Remarks", label: { text: "ملاحظات إضافية" }, editorType: "dxTextArea", colSpan: 3, editorOptions: { height: 80 } }
+                ]
+            }).dxForm("instance");
 
-                if (!itemId) {
-                    alert('الرجاء اختيار صنف');
-                    return;
-                }
-                if (!qty || qty <= 0) {
-                    alert('الرجاء إدخال كمية صحيحة');
-                    return;
-                }
-
-                // Check duplicate
-                let exists = false;
-                $('.item-id').each(function () {
-                    if ($(this).val() == itemId) {
-                        alert('هذا الصنف مضاف بالفعل');
-                        exists = true;
-                        return false;
+            var grid = $("#itemsGrid").dxDataGrid({
+                dataSource: initialDetails,
+                rtlEnabled: true,
+                showBorders: false,
+                rowAlternationEnabled: true,
+                editing: {
+                    mode: "cell",
+                    allowUpdating: true,
+                    allowAdding: true,
+                    allowDeleting: true,
+                    newRowPosition: "last",
+                    useIcons: true
+                },
+                columns: [
+                    { dataField: "itemId", caption: "الصنف", validationRules: [{ type: "required" }],
+                      lookup: { dataSource: availableItems, valueExpr: "itemId", displayExpr: "itemNameEng" }, width: "40%" },
+                    { dataField: "availableStock", caption: "الرصيد المتاح", dataType: "number", allowEditing: false, 
+                      cssClass: "text-muted fw-bold", width: "20%", alignment: "center" },
+                    { dataField: "quantity", caption: "الكمية المطلوبة", dataType: "number", validationRules: [{ type: "required" }], alignment: "center" }
+                ],
+                onCellValueChanged: function(e) {
+                    if (e.column.dataField === "itemId" || e.column.dataField === "quantity") {
+                        const fromBranchId = headerForm.getEditor("FromBranchId").option("value");
+                        if (e.data.itemId && fromBranchId) {
+                            $.post("@Url.Action("GetItemBalance")", { itemId: e.data.itemId, branchId: fromBranchId }, function(res) {
+                                e.component.cellValue(e.row.rowIndex, "availableStock", res.balance);
+                                if (e.data.quantity > res.balance) {
+                                    DevExpress.ui.notify("تنبيه: الكمية المطلوبة تتجاوز الرصيد المتاح (" + res.balance + ")", "warning", 4000);
+                                }
+                            });
+                        }
                     }
-                });
-                if (exists) return;
-
-                // Add Row
-                const newRow = `
-                    <tr data-index="${itemIndex}">
-                        <td>${itemIndex + 1}</td>
-                        <td>
-                            <input type="hidden" name="SelectedItems[${itemIndex}].ItemId" value="${itemId}" class="item-id" />
-                            <input type="hidden" name="SelectedItems[${itemIndex}].TempOrder" value="${itemIndex + 1}" />
-                            ${itemName}
-                        </td>
-                        <td>
-                            <input type="number" name="SelectedItems[${itemIndex}].Quantity" value="${qty}" class="form-control form-control-sm item-qty" min="1" step="0.01" />
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-danger btn-sm btn-remove"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-
-                $('#itemsTable tbody').append(newRow);
-                $('#emptyMessage').hide();
-                itemIndex++;
-
-                // Reset inputs
-                $('#itemSelect').val('');
-                $('#itemQty').val(1);
-            });
-
-            // Remove Item
-            $(document).on('click', '.btn-remove', function () {
-                $(this).closest('tr').remove();
-                if ($('#itemsTable tbody tr').length === 0) {
-                    $('#emptyMessage').show();
+                },
+                toolbar: {
+                    items: [{
+                        location: "before",
+                        widget: "dxButton",
+                        options: { text: "إضافة صنف للطلب", icon: "add", type: "default", stylingMode: "contained", onClick: function() { grid.addRow(); } }
+                    }]
                 }
-                // Re-index could be added here if needed, but MVC model binder handles non-sequential indices if configured or we just leave gaps. 
-                // Default MVC binder with list index needs sequential 0,1,2... usually. 
-                // To be safe, let's re-index on submit or just re-index now.
-                reindexRows();
-            });
+            }).dxDataGrid("instance");
 
-            function reindexRows() {
-                itemIndex = 0;
-                $('#itemsTable tbody tr').each(function () {
-                    const row = $(this);
-                    row.find('td:first').text(itemIndex + 1);
-                    row.find('input[name^="SelectedItems"]').each(function () {
-                        const name = $(this).attr('name');
-                        const newName = name.replace(/\[\d+\]/, `[${itemIndex}]`);
-                        $(this).attr('name', newName);
-                    });
-                    itemIndex++;
-                });
+            function validateBranches(e) {
+                return e.value !== headerForm.getEditor("FromBranchId").option("value");
             }
 
-            $('#transferOrderForm').on('submit', function() {
-                 if ($('#itemsTable tbody tr').length === 0) {
-                     alert('يجب إضافة صنف واحد على الأقل');
-                     return false;
-                 }
-                 reindexRows(); // Ensure indices are sequential before submit
-                 return true;
-            });
+            function refreshGridItems() {
+                // Future logic: filter available items based on fromBranch stock
+                grid.refresh();
+            }
+
+            window.submitForm = function() {
+                if (!headerForm.validate().isValid) {
+                    DevExpress.ui.notify("يرجى إكمال البيانات الأساسية", "error", 3000);
+                    return;
+                }
+
+                var itemsData = grid.option("dataSource");
+                if (!itemsData || itemsData.length === 0) {
+                    DevExpress.ui.notify("يجب إضافة صنف واحد على الأقل للطلب", "error", 3000);
+                    return;
+                }
+
+                const form = $("#transferForm");
+                
+                // Append header data
+                const formData = headerForm.option("formData");
+                $.each(formData, function(key, value) {
+                    if (value !== null && value !== undefined) {
+                        $('<input>').attr('type', 'hidden').attr('name', key).val(value).appendTo(form);
+                    }
+                });
+
+                // Append grid items
+                itemsData.forEach((item, index) => {
+                    $('<input>').attr('type', 'hidden').attr('name', `SelectedItems[${index}].ItemId`).val(item.itemId).appendTo(form);
+                    $('<input>').attr('type', 'hidden').attr('name', `SelectedItems[${index}].Quantity`).val(item.quantity).appendTo(form);
+                    $('<input>').attr('type', 'hidden').attr('name', `SelectedItems[${index}].TempOrder`).val(index + 1).appendTo(form);
+                });
+
+                form.submit();
+            };
         });
     </script>
 }

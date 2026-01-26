@@ -62,6 +62,7 @@ namespace Core.Services.ItemServices
                     ItemName = itemDto.NameArab, // Use NameArab as the main ItemName for now
                     NameArab = itemDto.NameArab,
                     NameEng = itemDto.NameEng,
+                    BranchId = itemDto.BranchId,
                     SectionId = itemDto.SectionId,
                     MainItemId = itemDto.MainItemId,
                     SubItemId = itemDto.SubItemId,
@@ -174,7 +175,7 @@ namespace Core.Services.ItemServices
         /// <summary>
         /// Gets paginated list of items with filters
         /// </summary>
-        public async Task<PaginatedResult<ItemViewModel>> GetItemsAsync(ItemFilterViewModel filters, PaginationViewModel pagination)
+        public async Task<PaginatedResult<ItemViewModel>> GetItemsAsync(ItemFilterViewModel filters, PaginationViewModel pagination, int? defaultBranchId = null)
         {
             try
             {
@@ -198,6 +199,12 @@ namespace Core.Services.ItemServices
                 if (!string.IsNullOrEmpty(filters.Barcode))
                     query = query.Where(i => i.InternalBarcode.Contains(filters.Barcode) || i.ExternalBarcode.Contains(filters.Barcode));
 
+                // Apply branch filter - use explicit filter if provided, otherwise use default branch
+                if (filters.BranchId.HasValue)
+                    query = query.Where(i => i.BranchId == filters.BranchId.Value);
+                else if (defaultBranchId.HasValue)
+                    query = query.Where(i => i.BranchId == defaultBranchId.Value);
+
                 var totalCount = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalCount / (double)pagination.PageSize);
 
@@ -206,6 +213,7 @@ namespace Core.Services.ItemServices
                     .Skip((pagination.PageNumber - 1) * pagination.PageSize)
                     .Take(pagination.PageSize)
                     .Include(i => i.ItemUnits)
+                    .Include(i => i.Branch)
                     .Include(i => i.Section)
                     .Include(i => i.MainItem)
                     .Include(i => i.SubItem)
@@ -425,6 +433,8 @@ namespace Core.Services.ItemServices
                 ItemName = item.ItemName,
                 NameArab = item.NameArab,
                 NameEng = item.NameEng,
+                BranchId = item.BranchId,
+                BranchName = item.Branch?.Name_Arab,
                 SectionId = item.SectionId,
                 SectionName = item.Section?.NameArab,
                 MainItemId = item.MainItemId,
@@ -465,6 +475,40 @@ namespace Core.Services.ItemServices
                 ItemName = item.ItemName,
                 ChildItems = childItems
             };
+        }
+
+        public async Task<ItemViewModel> GetItemById(int itemId)
+        {
+            var item = await _context.Items
+                .Where(i => i.ItemId == itemId && !i.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (item == null)
+                throw new InvalidOperationException($"Item with ID {itemId} not found.");
+
+            return MapToViewModel(item);
+        }
+
+        public async Task<List<ItemViewModel>> SearchItemsByName(string term)
+        {
+            var items = await _context.Items
+                .Where(i => !i.IsDeleted && i.IsActive &&
+                       (i.ItemName.Contains(term) || i.ItemCode.Contains(term)))
+                .Take(20) // Limit results for performance
+                .ToListAsync();
+
+            return items.Select(MapToViewModel).ToList();
+        }
+
+        public async Task<List<ItemViewModel>> SearchItemsByCode(string term)
+        {
+            var items = await _context.Items
+                .Where(i => !i.IsDeleted && i.IsActive &&
+                       (i.ItemCode.Contains(term) || i.ItemName.Contains(term)))
+                .Take(20) // Limit results for performance
+                .ToListAsync();
+
+            return items.Select(MapToViewModel).ToList();
         }
     }
 }

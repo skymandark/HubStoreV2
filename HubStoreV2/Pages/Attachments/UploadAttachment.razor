@@ -1,0 +1,102 @@
+@using Core.ViewModels
+@inject HttpClient Http
+
+<h4>رفع مرفق جديد</h4>
+
+<EditForm Model="UploadModel" OnValidSubmit="HandleUpload">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="file">اختر ملف:</label>
+        <InputFile id="file" OnChange="HandleFileSelected" class="form-control" />
+        @if (SelectedFile != null)
+        {
+            <small>@SelectedFile.Name (@SelectedFile.Size bytes)</small>
+        }
+    </div>
+
+    <div class="form-group">
+        <label for="description">وصف (اختياري):</label>
+        <InputText id="description" @bind-Value="UploadModel.Description" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@IsUploading">
+        @if (IsUploading)
+        {
+            <span>جاري الرفع...</span>
+        }
+        else
+        {
+            <span>رفع الملف</span>
+        }
+    </button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-info mt-3">@Message</div>
+}
+
+@code {
+    [Parameter] public string EntityType { get; set; }
+    [Parameter] public int EntityId { get; set; }
+    [Parameter] public EventCallback OnUploadSuccess { get; set; }
+
+    private UploadAttachmentViewModel UploadModel { get; set; } = new();
+    private Microsoft.AspNetCore.Components.Forms.IBrowserFile SelectedFile { get; set; }
+    private bool IsUploading { get; set; } = false;
+    private string Message { get; set; } = string.Empty;
+
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        SelectedFile = e.File;
+    }
+
+    private async Task HandleUpload()
+    {
+        if (SelectedFile == null)
+        {
+            Message = "يرجى اختيار ملف.";
+            return;
+        }
+
+        IsUploading = true;
+        Message = string.Empty;
+
+        try
+        {
+            var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(SelectedFile.OpenReadStream());
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(SelectedFile.ContentType);
+            content.Add(fileContent, "file", SelectedFile.Name);
+            content.Add(new StringContent(EntityType), "entityType");
+            content.Add(new StringContent(EntityId.ToString()), "entityId");
+            if (!string.IsNullOrEmpty(UploadModel.Description))
+            {
+                content.Add(new StringContent(UploadModel.Description), "description");
+            }
+
+            var response = await Http.PostAsync("api/attachment/upload", content);
+            if (response.IsSuccessStatusCode)
+            {
+                Message = "تم رفع الملف بنجاح.";
+                UploadModel = new UploadAttachmentViewModel(); // Reset
+                SelectedFile = null;
+                await OnUploadSuccess.InvokeAsync();
+            }
+            else
+            {
+                Message = "فشل في رفع الملف.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = $"خطأ: {ex.Message}";
+        }
+        finally
+        {
+            IsUploading = false;
+        }
+    }
+}
