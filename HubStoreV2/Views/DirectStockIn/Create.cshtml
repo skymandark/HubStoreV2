@@ -270,7 +270,6 @@
                         },
                         cssClass: "fw-bold text-dark"
                     },
-                    { dataField: "batchNo", caption: "رقم الوجبة", width: 120 },
                     { dataField: "expiryDate", caption: "تاريخ الصلاحية", dataType: "date", width: 120 }
                 ],
                 onRowInserted: () => calculateTotals(),
@@ -342,7 +341,6 @@
                     $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Price`).val(item.price).appendTo(this);
                     $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].Discount`).val(item.discount || 0).appendTo(this);
                     $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].TotalValue`).val((item.qty * item.price) * (1 - ((item.discount || 0) / 100))).appendTo(this);
-                    $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].BatchNo`).val(item.batchNo || "").appendTo(this);
                     if (item.expiryDate) {
                         $("<input>").attr("type", "hidden").attr("name", `StockInDetails[${i}].ExpiryDate`).val(item.expiryDate.toISOString()).appendTo(this);
                     }

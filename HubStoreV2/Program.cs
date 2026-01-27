@@ -7,15 +7,18 @@ using Core.Services.OrderServices;
 using Core.Services.ReportingServices;
 using Core.Services.SettingServices;
 using Core.Services;
+using Core.Services.AuthServices;
 
 using HubStoreV2.Services.ConversionServices;
 using HubStoreV2.Services.InventoryServices;
 using Infrastructure.Data;
 using Infrastructure.DataSeeds;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Core.Services.AuditServices;
 using Infrastructure.ServicesImpelemention;
+using Infrastructure.ServicesImpelemention.AuthServices;
 //using Core.Domin.IdentityData;
 //using Repository;
 //using Repository;
@@ -32,11 +35,13 @@ builder.Services.AddDevExpressBlazor(configure => configure.BootstrapVersion = D
 
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("HubStore")
     )
 );
+
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -56,6 +61,19 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+});
 
 // Register Item Services
 builder.Services.AddScoped<IItemService, ItemService>();
@@ -88,7 +106,8 @@ builder.Services.AddScoped<IStockInService, StockInService>();
 builder.Services.AddScoped<ITransferOrderServiceNew, TransferOrderServiceNew>();
 builder.Services.AddScoped<IReturnOrderService, ReturnOrderService>();
 builder.Services.AddScoped<IDirectPurchaseOrderService, DirectPurchaseOrderService>();
-//builder.Services.AddScoped<IStockOutReturnService, StockOutReturnService>();
+builder.Services.AddScoped<IStockOutReturnService, StockOutReturnService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register Attachment Services
 builder.Services.AddScoped<Core.Services.AttachmentServices.IAttachmentService, HubStoreV2.Services.AttachmentService>();
@@ -109,6 +128,22 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     DbInitializer.Initialize(context);
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+    var adminUsers = await userManager.Users.Where(u => u.IsAdmin).ToListAsync();
+    foreach (var adminUser in adminUsers)
+    {
+        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.

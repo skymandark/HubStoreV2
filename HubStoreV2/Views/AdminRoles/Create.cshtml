@@ -1,0 +1,30 @@
+@model Core.ViewModels.Admin.AdminRoleCreateVm
+@{
+    ViewData["Title"] = "إضافة Role";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <h3 class="mb-3">إضافة Role</h3>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="Create">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label">اسم Role</label>
+                    <input class="form-control" asp-for="Name" />
+                    <span class="text-danger" asp-validation-for="Name"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">حفظ</button>
+                <a class="btn btn-secondary" href="@Url.Action("Index")">رجوع</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

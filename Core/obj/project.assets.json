@@ -4762,11 +4762,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\HubStoreV2\\NewHubStore\\Core\\Core.csproj",
+      "projectUniqueName": "C:\\Users\\Ab.abdelsattar\\Source\\Repos\\HubStoreV2\\Core\\Core.csproj",
       "projectName": "Core",
-      "projectPath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\HubStoreV2\\NewHubStore\\Core\\Core.csproj",
+      "projectPath": "C:\\Users\\Ab.abdelsattar\\Source\\Repos\\HubStoreV2\\Core\\Core.csproj",
       "packagesPath": "C:\\Users\\Ab.abdelsattar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Ab.abdelsattar\\source\\repos\\HubStoreV2\\HubStoreV2\\NewHubStore\\Core\\obj\\",
+      "outputPath": "C:\\Users\\Ab.abdelsattar\\Source\\Repos\\HubStoreV2\\Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

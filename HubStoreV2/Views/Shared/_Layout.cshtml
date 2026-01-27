@@ -589,6 +589,24 @@
                 <span>لوحة التحكم</span>
             </div>
 
+            <!-- Approvals Dashboard -->
+            <div class="menu-item" onclick="navigateTo('Approvals', 'Index')" title="شاشة الموافقات الموحدة">
+                <i class="fas fa-check-shield"></i>
+                <span class="notification-badge" style="display:none;" id="approvalTotalBadge">0</span>
+                <span>الموافقات</span>
+            </div>
+
+            <div data-admin-only style="display:none;">
+                <div class="menu-item" onclick="navigateTo('AdminUsers', 'Index')" title="إدارة المستخدمين">
+                    <i class="fas fa-users"></i>
+                    <span>المستخدمين</span>
+                </div>
+                <div class="menu-item" onclick="navigateTo('AdminRoles', 'Index')" title="إدارة الأدوار">
+                    <i class="fas fa-id-badge"></i>
+                    <span>الأدوار</span>
+                </div>
+            </div>
+
             <!-- Suppliers Section -->
             <div class="menu-item" onclick="navigateTo('Supplier', 'Index')" title="إدارة الموردين">
                 <i class="fas fa-truck-field"></i>
@@ -730,8 +748,12 @@
                     <div class="user-avatar">
                         <i class="fas fa-user"></i>
                     </div>
-                    <span>المستخدم</span>
+                    <span>@((User?.Identity?.IsAuthenticated ?? false) ? User.Identity!.Name : "المستخدم")</span>
                 </div>
+                <button type="button" class="btn btn-link p-0 ms-3" onclick="navigateToLogin()" style="text-decoration:none; color: inherit;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="ms-1">خروج</span>
+                </button>
             </div>
         </div>
 

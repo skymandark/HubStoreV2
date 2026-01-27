@@ -8,6 +8,7 @@ using Core.ViewModels.OrderViewModels;
 using Core.ViewModels.PurchaseOrderViewModels;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Core.Services.SettingServices;
 
 namespace Infrastructure.ServicesImpelemention
 {
@@ -15,10 +16,13 @@ namespace Infrastructure.ServicesImpelemention
     {
         private readonly ApplicationDbContext _context;
         private readonly IOrderService _orderService;
-        public PurchaseOrderService(ApplicationDbContext context, IOrderService orderService)
+        private readonly ISettingService _settingService;
+
+        public PurchaseOrderService(ApplicationDbContext context, IOrderService orderService, ISettingService settingService)
         {
             _context = context;
             _orderService = orderService;
+            _settingService = settingService;
         }
 
         public async Task<OrderViewModel> CreatePO(CreatePurchaseOrderViewModel poDto)
@@ -266,6 +270,15 @@ namespace Infrastructure.ServicesImpelemention
                         CreatedBy = "System", // User usually passed in args
                         CreatedDate = DateTime.UtcNow
                     };
+
+                    // Check Approval Workflow Setting
+                    bool useApproval = await _settingService.GetApprovalWorkflowModeAsync();
+                    if (!useApproval)
+                    {
+                        header.Status = PurchaseOrderStatus.Approved;
+                        header.ApprovedBy = "System (Auto)"; // Or the creator if available
+                        header.ApprovedDate = DateTime.UtcNow;
+                    }
 
                     _context.PurchaseOrderHeaders.Add(header);
 

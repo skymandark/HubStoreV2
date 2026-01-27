@@ -1,0 +1,132 @@
+@model Core.ViewModels.ApprovalViewModels.ApprovalDashboardVm
+@{
+    ViewData["Title"] = "شاشة الموافقات الموحدة";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        --accent-color: #6366f1;
+        --bg-soft: #f8fafc;
+    }
+
+    .approvals-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    #approvalAccordion .ui-accordion-header {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        margin-top: 10px;
+        padding: 15px 20px;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    #approvalAccordion .ui-accordion-header.ui-state-active {
+        background: #f1f5f9;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+        border-color: var(--accent-color);
+    }
+
+    #approvalAccordion .ui-accordion-content {
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
+        padding: 20px;
+        background: #fff;
+    }
+
+    .type-badge {
+        background: var(--accent-color);
+        color: white;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-right: 15px;
+    }
+
+    .type-icon {
+        margin-left: 15px;
+        width: 30px;
+        text-align: center;
+        color: var(--accent-color);
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="approvals-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1">شاشة الموافقات الموحدة</h2>
+            <p class="mb-0 opacity-75">إدارة واعتماد الطلبات المعلقة عبر النظام</p>
+        </div>
+        <div class="text-end">
+            <span class="fs-4 fw-bold">@Model.ApprovalTypes.Sum(x => x.PendingCount)</span>
+            <div class="small opacity-75">إجمالي المعلق</div>
+        </div>
+    </div>
+
+    <div id="approvalAccordion">
+        @foreach (var type in Model.ApprovalTypes)
+        {
+            <h3 data-type-id="@type.ApproveDefId">
+                <span class="type-icon"><i class="fas @type.Icon"></i></span>
+                <span class="flex-grow-1">@type.Name</span>
+                @if (type.PendingCount > 0)
+                {
+                    <span class="type-badge">@type.PendingCount معلق</span>
+                }
+            </h3>
+            <div id="content-@type.ApproveDefId">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script>
+        $(function () {
+            $("#approvalAccordion").accordion({
+                heightStyle: "content",
+                collapsible: true,
+                active: false,
+                activate: function (event, ui) {
+                    var typeId = ui.newHeader.data("type-id");
+                    if (typeId) {
+                        loadComponent(typeId);
+                    }
+                }
+            });
+
+            // Initial load for the first one if needed, or wait for user to click
+        });
+
+        function loadComponent(typeId) {
+            var container = $("#content-" + typeId);
+            // Load component via AJAX
+            $.get("/Approvals/GetGridComponent?typeId=" + typeId, function (data) {
+                container.html(data);
+            });
+        }
+    </script>
+}

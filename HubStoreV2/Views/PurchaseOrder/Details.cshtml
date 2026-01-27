@@ -91,7 +91,35 @@
                     switch(Model.Status) {
                         case "Submitted": statusCls = "badge-submitted"; statusTxt = "تحت المراجعة"; break;
                         case "Approved": statusCls = "badge-approved"; statusTxt = "معتمد"; break;
+                        case "Rejected": statusCls = "badge-danger bg-danger text-white"; statusTxt = "مرفوض"; break;
                     }
+
+// ... existing code ...
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-20 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="rejectModalLabel">سبب الرفض</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Reject" method="post">
+                <div class="modal-body py-4">
+                    <input type="hidden" name="id" value="@Model.PurchaseOrderId" />
+                    <div class="mb-3">
+                        <label for="reason" class="form-label fw-bold">الرجاء ذكر سبب الرفض:</label>
+                        <textarea class="form-control rounded-12 border-soft" id="reason" name="reason" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light px-4 rounded-12 fw-bold" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-danger px-4 rounded-12 fw-bold">تأكيد الرفض</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
                 }
                 <div class="status-badge @statusCls">
                     <i class="fas fa-circle" style="font-size: 0.5rem;"></i> @statusTxt
@@ -101,7 +129,25 @@
         </div>
         <div class="d-flex gap-3">
             <a href="@Url.Action("Index")" class="btn btn-outline-light px-4 rounded-12 fw-bold">العودة</a>
-            <a href="@Url.Action("Edit", new { id = Model.PurchaseOrderId })" class="btn btn-light px-4 rounded-12 fw-bold text-dark shadow-sm">تعديل</a>
+            
+            @if (Model.Status == "Draft")
+            {
+                <a href="@Url.Action("Edit", new { id = Model.PurchaseOrderId })" class="btn btn-light px-4 rounded-12 fw-bold text-dark shadow-sm">تعديل</a>
+                <form asp-action="SubmitForApproval" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.PurchaseOrderId" />
+                    <button type="submit" class="btn btn-primary px-4 rounded-12 fw-bold shadow-sm">إرسال للموافقة</button>
+                </form>
+            }
+            
+            @if (Model.Status == "Submitted")
+            {
+                <form asp-action="Approve" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.PurchaseOrderId" />
+                    <button type="submit" class="btn btn-success px-4 rounded-12 fw-bold shadow-sm">موافقة</button>
+                </form>
+                
+                <button type="button" class="btn btn-danger px-4 rounded-12 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">رفض</button>
+            }
         </div>
     </div>
 

@@ -1,0 +1,362 @@
+@using System.Linq
+@model IEnumerable<Core.ViewModels.Admin.AdminUserListVm>
+@{
+    ViewData["Title"] = "إدارة المستخدمين";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var now = DateTimeOffset.UtcNow;
+    var users = (Model ?? Enumerable.Empty<Core.ViewModels.Admin.AdminUserListVm>()).ToList();
+    var totalUsers = users.Count;
+    var lockedUsers = users.Count(u => u.LockoutEnd.HasValue && u.LockoutEnd.Value > now);
+    var activeUsers = totalUsers - lockedUsers;
+}
+
+<style>
+    .admin-users-page {
+        --au-bg: #f6f8fb;
+        --au-card: #ffffff;
+        --au-text: #1f2937;
+        --au-muted: #6b7280;
+        --au-border: #e5e7eb;
+        --au-head: #f3f4f6;
+        --au-row-hover: #f9fafb;
+    }
+
+    .admin-users-page .au-shell {
+        background: var(--au-bg);
+        border: 1px solid var(--au-border);
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .admin-users-page .au-title {
+        color: var(--au-text);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .admin-users-page .au-subtitle {
+        color: var(--au-muted);
+        margin-top: 4px;
+        font-size: 0.95rem;
+    }
+
+    .admin-users-page .au-stats {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .admin-users-page .au-stat {
+        background: var(--au-card);
+        border: 1px solid var(--au-border);
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: var(--au-text);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .admin-users-page .au-stat span {
+        color: var(--au-muted);
+        font-weight: 600;
+        margin-right: 6px;
+    }
+
+    .admin-users-page .au-card {
+        background: var(--au-card);
+        border: 1px solid var(--au-border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+    }
+
+    .admin-users-page .card:hover {
+        transform: none;
+    }
+
+    .admin-users-page .au-card .card-body {
+        padding: 0;
+    }
+
+    .admin-users-page .au-toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 14px 14px;
+        border-bottom: 1px solid var(--au-border);
+        background: linear-gradient(180deg, #fff 0%, #fbfbfc 100%);
+    }
+
+    .admin-users-page .au-toolbar .form-control,
+    .admin-users-page .au-toolbar .form-select {
+        border-radius: 10px;
+        border-color: var(--au-border);
+        padding: 10px 12px;
+    }
+
+    .admin-users-page .au-btn {
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .admin-users-page .au-btn.au-btn-light {
+        background: #ffffff;
+        border: 1px solid var(--au-border);
+        color: var(--au-text);
+    }
+
+    .admin-users-page .au-table {
+        margin: 0;
+    }
+
+    .admin-users-page .au-table thead th {
+        background: var(--au-head);
+        color: var(--au-muted);
+        font-weight: 800;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--au-border);
+        padding: 12px 14px;
+        white-space: nowrap;
+    }
+
+    .admin-users-page .au-table tbody td {
+        padding: 14px 14px;
+        border-top: 1px solid var(--au-border);
+        vertical-align: middle;
+        color: var(--au-text);
+    }
+
+    .admin-users-page .au-table tbody tr:hover {
+        background: var(--au-row-hover);
+    }
+
+    .admin-users-page .au-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .admin-users-page .btn.btn-sm {
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .admin-users-page .au-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .admin-users-page .au-badge {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-weight: 800;
+        font-size: 0.8rem;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .admin-users-page .au-badge.au-badge-success {
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #a7f3d0;
+    }
+
+    .admin-users-page .au-badge.au-badge-danger {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+    }
+
+    .admin-users-page .au-badge.au-badge-role {
+        background: #eff6ff;
+        color: #1e40af;
+        border-color: #bfdbfe;
+        font-weight: 800;
+    }
+
+    .admin-users-page .au-empty {
+        padding: 26px 14px;
+        text-align: center;
+        color: var(--au-muted);
+    }
+</style>
+
+<div class="container-fluid py-4 admin-users-page">
+    <div class="au-shell">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+            <div>
+                <h3 class="au-title">إدارة المستخدمين</h3>
+                <div class="au-subtitle">عرض وإدارة المستخدمين والأدوار وحالة الحساب</div>
+            </div>
+
+            <div class="au-stats">
+                <div class="au-stat"><span>الإجمالي</span>@totalUsers</div>
+                <div class="au-stat"><span>نشط</span>@activeUsers</div>
+                <div class="au-stat"><span>موقوف</span>@lockedUsers</div>
+            </div>
+        </div>
+
+        <div class="card au-card">
+            <div class="card-body">
+                <div class="au-toolbar">
+                    <div class="flex-grow-1" style="min-width: 240px;">
+                        <input id="adminUsersSearch" type="search" class="form-control" placeholder="بحث بالاسم أو البريد أو الموبايل أو الدور" autocomplete="off" />
+                    </div>
+
+                    <div style="min-width: 160px;">
+                        <select id="adminUsersStatus" class="form-select">
+                            <option value="all" selected>كل الحالات</option>
+                            <option value="active">نشط</option>
+                            <option value="locked">موقوف</option>
+                        </select>
+                    </div>
+
+                    <a class="btn au-btn au-btn-light" href="@Url.Action("Index")">تحديث</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table au-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>اسم المستخدم</th>
+                                <th>البريد</th>
+                                <th>موبايل</th>
+                                <th>أدوار</th>
+                                <th>حالة</th>
+                                <th style="width: 280px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTbody">
+                            @if (!users.Any())
+                            {
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="au-empty">لا يوجد مستخدمين للعرض</div>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var u in users)
+                                {
+                                    var isLocked = u.LockoutEnd.HasValue && u.LockoutEnd.Value > now;
+                                    var statusKey = isLocked ? "locked" : "active";
+                                    var searchText = string.Join(" ", new[]
+                                    {
+                                        u.UserName,
+                                        u.Email,
+                                        u.PhoneNumber,
+                                        string.Join(" ", u.Roles ?? new List<string>())
+                                    }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+                                    <tr data-status="@statusKey" data-search="@searchText">
+                                        <td class="fw-bold">@u.UserName</td>
+                                        <td>@u.Email</td>
+                                        <td>@(string.IsNullOrWhiteSpace(u.PhoneNumber) ? "-" : u.PhoneNumber)</td>
+                                        <td>
+                                            <div class="au-badges">
+                                                @if (u.Roles == null || u.Roles.Count == 0)
+                                                {
+                                                    <span class="au-badge au-badge-role">بدون</span>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var r in u.Roles)
+                                                    {
+                                                        <span class="au-badge au-badge-role">@r</span>
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (isLocked)
+                                            {
+                                                <span class="au-badge au-badge-danger">موقوف</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="au-badge au-badge-success">نشط</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="au-actions">
+                                                <a class="btn btn-sm btn-primary" href="@Url.Action("Edit", new { id = u.Id })">تعديل</a>
+                                                <a class="btn btn-sm btn-secondary" href="@Url.Action("Roles", new { id = u.Id })">الأدوار</a>
+
+                                                @if (isLocked)
+                                                {
+                                                    <form method="post" action="@Url.Action("Unlock")" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@u.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-success">فك الإيقاف</button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <form method="post" action="@Url.Action("Lock")" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@u.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-warning">إيقاف</button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        function normalize(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        function applyFilter() {
+            var search = normalize(document.getElementById('adminUsersSearch').value);
+            var status = document.getElementById('adminUsersStatus').value;
+            var rows = document.querySelectorAll('#adminUsersTbody tr[data-search]');
+
+            rows.forEach(function (row) {
+                var rowSearch = normalize(row.getAttribute('data-search'));
+                var rowStatus = row.getAttribute('data-status');
+
+                var matchesSearch = !search || rowSearch.indexOf(search) !== -1;
+                var matchesStatus = (status === 'all') || (rowStatus === status);
+
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var searchInput = document.getElementById('adminUsersSearch');
+            var statusSelect = document.getElementById('adminUsersStatus');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilter);
+            }
+            if (statusSelect) {
+                statusSelect.addEventListener('change', applyFilter);
+            }
+        });
+    })();
+</script>

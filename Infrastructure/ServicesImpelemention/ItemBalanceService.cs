@@ -37,7 +37,8 @@ namespace Infrastructure.ServicesImpelemention
                            ml.BranchId == branchId &&
                            ml.Movement.Date >= fromDate && 
                            ml.Movement.Date <= toDate &&
-                           !ml.Movement.IsDeleted)
+                           !ml.Movement.IsDeleted &&
+                           ml.Movement.ApprovalStatusId == 2)
                     .Include(ml => ml.Movement)
                         .ThenInclude(m => m.MovementType)
                     .Include(ml => ml.Item)
@@ -111,7 +112,8 @@ namespace Infrastructure.ServicesImpelemention
                     .Where(ml => ml.ItemId == itemId && 
                            ml.BranchId == branchId &&
                            ml.Movement.Date < fromDate &&
-                           !ml.Movement.IsDeleted)
+                           !ml.Movement.IsDeleted &&
+                           ml.Movement.ApprovalStatusId == 2)
                     .SumAsync(ml => ml.QtyInput);
 
                 balance += previousMovements;
@@ -145,7 +147,8 @@ namespace Infrastructure.ServicesImpelemention
                     .Where(ml => ml.ItemId == itemId && 
                            ml.BranchId == branchId &&
                            ml.Movement.Date.Date == asOfDate.Date &&
-                           !ml.Movement.IsDeleted)
+                           !ml.Movement.IsDeleted &&
+                           ml.Movement.ApprovalStatusId == 2)
                     .ToListAsync();
 
                 var totalIn = movements.Where(m => m.QtyInput > 0).Sum(m => m.QtyInput);

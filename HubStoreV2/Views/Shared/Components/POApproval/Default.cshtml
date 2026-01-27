@@ -1,0 +1,121 @@
+@{
+    var typeId = ViewBag.TypeId;
+    var gridId = $"grid-{typeId}";
+}
+
+<div class="approval-component-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-slate-700">طلبات الشراء المعلقة</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm rounded-8" onclick="refreshGrid(@typeId)">
+                <i class="fas fa-sync-alt me-1"></i> إعادة البحث
+            </button>
+            <button class="btn btn-success btn-sm rounded-8 px-3" onclick="processBatch(@typeId, 1)">
+                <i class="fas fa-check-double me-1"></i> موافقة المحدد
+            </button>
+            <button class="btn btn-danger btn-sm rounded-8 px-3" onclick="showRejectModalBatch(@typeId)">
+                <i class="fas fa-times-circle me-1"></i> رفض المحدد
+            </button>
+        </div>
+    </div>
+
+    <div id="@gridId"></div>
+</div>
+
+<script>
+    $(function() {
+        $("#@gridId").dxDataGrid({
+            dataSource: {
+                load: function() {
+                    return $.getJSON("/Approvals/GetStepData?approveDefId=@typeId");
+                }
+            },
+            selection: {
+                mode: "multiple",
+                showCheckBoxesMode: "always"
+            },
+            editing: {
+                mode: "batch",
+                allowUpdating: true
+            },
+            columns: [
+                { dataField: "requestId", caption: "ID", width: 70, allowEditing: false },
+                { dataField: "reference", caption: "رقم الطلب", width: 130, allowEditing: false },
+                { dataField: "partyName", caption: "المورد", allowEditing: false },
+                { dataField: "branchName", caption: "الفرع", width: 120, allowEditing: false },
+                { dataField: "docDate", caption: "التاريخ", width: 110, dataType: "date", allowEditing: false },
+                { dataField: "totalValue", caption: "الإجمالي", width: 120, format: "#,##0.00", allowEditing: false },
+                { 
+                    caption: "التفاصيل", 
+                    width: 100,
+                    cellTemplate: function(container, options) {
+                        $('<button class="btn btn-sm btn-link">')
+                            .append($('<i class="fas fa-eye">'))
+                            .on('click', function() { window.open('/PurchaseOrder/Details/' + options.data.requestId, '_blank'); })
+                            .appendTo(container);
+                    }
+                }
+            ],
+            showBorders: true,
+            loadPanel: { enabled: true },
+            rtlEnabled: true,
+            onSelectionChanged: function(e) {
+                // Handle selection logic if needed
+            }
+        });
+    });
+
+    function refreshGrid(typeId) {
+        $("#grid-" + typeId).dxDataGrid("instance").refresh();
+    }
+
+    async function processBatch(typeId, targetStatusId, note = "") {
+        const grid = $("#grid-" + typeId).dxDataGrid("instance");
+        const selectedItems = grid.getSelectedRowsData();
+        
+        if (selectedItems.length === 0) {
+            DevExpress.ui.notify("الرجاء تحديد طلبات أولاً", "warning", 2000);
+            return;
+        }
+
+        const requestIds = selectedItems.map(x => x.requestId);
+        
+        try {
+            const response = await fetch('/Approvals/PostData', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestIds: requestIds,
+                    approveDefId: typeId,
+                    targetStatusId: targetStatusId,
+                    note: note
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                DevExpress.ui.notify(result.message, "success", 3000);
+                grid.refresh();
+                // Optionally update the accordion header count
+            } else {
+                DevExpress.ui.notify(result.message, "error", 3000);
+            }
+        } catch (error) {
+            console.error(error);
+            DevExpress.ui.notify("حدث خطأ أثناء المعالجة", "error", 3000);
+        }
+    }
+
+    function showRejectModalBatch(typeId) {
+        const grid = $("#grid-" + typeId).dxDataGrid("instance");
+        if (grid.getSelectedRowKeys().length === 0) {
+            DevExpress.ui.notify("الرجاء تحديد طلبات أولاً", "warning", 2000);
+            return;
+        }
+
+        const reason = prompt("الرجاء إدخال سبب الرفض:");
+        if (reason !== null) {
+            processBatch(typeId, 2, reason);
+        }
+    }
+</script>

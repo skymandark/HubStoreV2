@@ -17,249 +17,285 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = HubStoreV2
 build_property.RootNamespace = HubStoreV2
-build_property.ProjectDir = C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2\
+build_property.ProjectDir = C:\Users\Ab.abdelsattar\Source\Repos\HubStoreV2\HubStoreV2\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\Ab.abdelsattar\source\repos\HubStoreV2\HubStoreV2\NewHubStore\HubStoreV2
+build_property.MSBuildProjectDirectory = C:\Users\Ab.abdelsattar\Source\Repos\HubStoreV2\HubStoreV2
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/App.razor]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/App.razor]
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Pages/Attachments/AttachmentList.razor]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Pages/Attachments/AttachmentList.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXR0YWNobWVudHNcQXR0YWNobWVudExpc3QucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Pages/Attachments/Attachments.razor]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Pages/Attachments/Attachments.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXR0YWNobWVudHNcQXR0YWNobWVudHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Pages/Attachments/UploadAttachment.razor]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Pages/Attachments/UploadAttachment.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXR0YWNobWVudHNcVXBsb2FkQXR0YWNobWVudC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Shared/MainLayout.razor]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Shared/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/_Imports.razor]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Pages/Setting/Flags_Setting_Table.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Pages/Setting/Flags_Setting_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2V0dGluZ1xGbGFnc19TZXR0aW5nX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Admin/UserProfile.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AdminRoles/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Sb2xlc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AdminRoles/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Sb2xlc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AdminUsers/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Vc2Vyc1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AdminUsers/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Vc2Vyc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AdminUsers/Roles.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5Vc2Vyc1xSb2xlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Admin/UserProfile.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVXNlclByb2ZpbGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/AccessDenied.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Approvals/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwcm92YWxzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXEFjY2Vzc0RlbmllZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/ForgotPassword.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/ForgotPassword.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXEZvcmdvdFBhc3N3b3JkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/Login.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXExvZ2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/LoginDevExtreme.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/LoginDevExtreme.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXExvZ2luRGV2RXh0cmVtZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/LoginDX.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/LoginDX.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXExvZ2luRFguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/Register.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXFJlZ2lzdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/RegisterDevExtreme.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/RegisterDevExtreme.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXFJlZ2lzdGVyRGV2RXh0cmVtZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthPages/RegisterDX.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthPages/RegisterDX.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFBhZ2VzXFJlZ2lzdGVyRFguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/AuthView/Login.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/AuthView/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFZpZXdcTG9naW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Auth/AccessDenied.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Auth/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxBY2Nlc3NEZW5pZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Auth/ForgotPassword.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Auth/ForgotPassword.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxGb3Jnb3RQYXNzd29yZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Auth/Login.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Auth/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Auth/Register.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Auth/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/DirectPurchaseOrder/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/DirectPurchaseOrder/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlyZWN0UHVyY2hhc2VPcmRlclxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/DirectPurchaseOrder/Details.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/DirectPurchaseOrder/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlyZWN0UHVyY2hhc2VPcmRlclxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/DirectPurchaseOrder/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/DirectPurchaseOrder/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlyZWN0UHVyY2hhc2VPcmRlclxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/DirectStockIn/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/DirectStockIn/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlyZWN0U3RvY2tJblxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Home/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Home/Privacy.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/ItemSheet/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/ItemSheet/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSXRlbVNoZWV0XEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Item/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Item/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSXRlbVxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Item/Edit.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Item/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSXRlbVxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Item/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Item/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSXRlbVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/PurchaseOrder/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/PurchaseOrder/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VPcmRlclxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/PurchaseOrder/Details.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/PurchaseOrder/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VPcmRlclxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/PurchaseOrder/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/PurchaseOrder/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VPcmRlclxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/ReturnOrder/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/ReturnOrder/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV0dXJuT3JkZXJcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/ReturnOrder/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/ReturnOrder/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmV0dXJuT3JkZXJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Setting/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Setting/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Shared/Error.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Shared/Components/POApproval/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcUE9BcHByb3ZhbFxEZWZhdWx0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Shared/Components/StockOutReturnApproval/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcU3RvY2tPdXRSZXR1cm5BcHByb3ZhbFxEZWZhdWx0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockIn/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockIn/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tJblxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockIn/Details.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockIn/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tJblxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockIn/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockIn/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tJblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockOutRequest/DirectSave.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutRequest/DirectSave.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXF1ZXN0XERpcmVjdFNhdmUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockOutRequest/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutRequest/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXF1ZXN0XEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockOutRequest/Save.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutRequest/Save.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXF1ZXN0XFNhdmUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockOutReturn/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutReturn/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXR1cm5cQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockOutReturn/Details.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutReturn/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXR1cm5cRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockOutReturn/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutReturn/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXR1cm5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockReport/Details.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockOutReturn/Save.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tPdXRSZXR1cm5cU2F2ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockReport/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tSZXBvcnRcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/StockReport/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/StockReport/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvY2tSZXBvcnRcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Supplier/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Supplier/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VwcGxpZXJcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Supplier/Edit.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Supplier/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VwcGxpZXJcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Supplier/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Supplier/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VwcGxpZXJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/TransferOrder/Create.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/TransferOrder/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhbnNmZXJPcmRlclxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/TransferOrder/Details.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/TransferOrder/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhbnNmZXJPcmRlclxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/TransferOrder/Index.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/TransferOrder/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVHJhbnNmZXJPcmRlclxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/_ViewImports.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/_ViewStart.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Ab.abdelsattar/source/repos/HubStoreV2/HubStoreV2/NewHubStore/HubStoreV2/Views/Shared/_Layout.cshtml]
+[C:/Users/Ab.abdelsattar/Source/Repos/HubStoreV2/HubStoreV2/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-2if65m0aph

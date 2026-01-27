@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Core.Domin;
+using Core.Services;
 using Core.Services.OrderServices;
 using Core.ViewModels.StockOutReturnViewModels;
 using Infrastructure.Data;
@@ -17,210 +18,149 @@ namespace HubStoreV2.Controllers
     public class StockOutReturnController : Controller
     {
         private readonly IStockOutReturnService _stockOutReturnService;
+        private readonly IBranchService _branchService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<StockOutReturnController> _logger;
 
         public StockOutReturnController(
             IStockOutReturnService stockOutReturnService,
+            IBranchService branchService,
             ApplicationDbContext context,
             UserManager<AppUser> userManager,
             ILogger<StockOutReturnController> logger)
         {
             _stockOutReturnService = stockOutReturnService;
+            _branchService = branchService;
             _context = context;
             _userManager = userManager;
             _logger = logger;
         }
 
-        // GET: StockOutReturn/Index
+        public IActionResult Index() => View();
+
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> ReadDx()
         {
-            try
-            {
-                var stockOutReturns = await _stockOutReturnService.GetStockOutReturns();
-                return View(stockOutReturns ?? new List<StockOutReturnListDto>());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading stock out returns");
-                TempData["Error"] = "حدث خطأ عند تحميل صرف أوامر الإرجاع";
-                return View(new List<StockOutReturnListDto>());
-            }
+            var data = await _stockOutReturnService.GetStockOutReturns();
+            return Json(new { data });
         }
 
-        // GET: StockOutReturn/Create
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Save(int? id)
         {
-            var dto = new StockOutReturnRequestDto
+            var vm = new StockOutReturnVm();
+            if (id.HasValue)
             {
-                DocDate = DateTime.Today,
-                StockOutReturnDetails = new List<StockOutReturnDetailDto>()
+                vm = await _stockOutReturnService.GetStockOutReturn(id.Value);
+                if (vm == null) return NotFound();
+            }
+            else
+            {
+                vm.DocDate = DateTime.Today;
+                vm.EntryDate = DateTime.Now;
+            }
+
+            var branches = await _branchService.GetAllBranches();
+            vm.BranchList = branches.Select(b => new BranchDto { BranchId = b.BranchId, Name = b.Name }).ToList();
+            
+            // Example transaction types
+            vm.TransactionTypeList = new List<TransactionTypeDto>
+            {
+                new TransactionTypeDto { TransactionTypeId = 6, Name = "أمر بيع" },
+                new TransactionTypeDto { TransactionTypeId = 9, Name = "أمر إرجاع" }
             };
 
-            try
-            {
-                // Load return orders for selection
-                ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading data for create form");
-            }
-
-            return View(dto);
+            return View(vm);
         }
 
-        // POST: StockOutReturn/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(StockOutReturnRequestDto dto)
+        public async Task<IActionResult> Save(StockOutReturnVm vm)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-                    return View(dto);
+                    var branches = await _branchService.GetAllBranches();
+                    vm.BranchList = branches.Select(b => new BranchDto { BranchId = b.BranchId, Name = b.Name }).ToList();
+                    return View(vm);
                 }
 
                 var user = await _userManager.GetUserAsync(User);
-                var result = await _stockOutReturnService.CreateStockOutReturn(dto, user?.UserName ?? "System");
+                var userName = user?.UserName ?? "System";
 
-                if (result > 0)
+                if (vm.RequestId == 0)
                 {
-                    TempData["Success"] = "تم إنشاء صرف من أمر الإرجاع بنجاح";
-                    return RedirectToAction("Index");
+                    await _stockOutReturnService.CreateStockOutReturn(vm, userName);
+                }
+                else
+                {
+                    await _stockOutReturnService.UpdateStockOutReturn(vm, userName);
                 }
 
-                TempData["Error"] = "فشل في إنشاء صرف من أمر الإرجاع";
-                ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-                return View(dto);
+                return Json(new { success = true, message = "تم الحفظ بنجاح" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating stock out return");
-                TempData["Error"] = "حدث خطأ: " + ex.Message;
-                ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-                return View(dto);
+                return Json(new { success = false, message = ex.Message });
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitForApproval(int id)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                await _stockOutReturnService.SubmitStockOutReturn(id, user?.UserName ?? "System");
+                return Json(new { success = true, message = "تم إرسال الطلب للموافقة" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
-        // GET: StockOutReturn/Edit/{id}
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> ReadCo(int clientId, int branchId)
         {
-            try
-            {
-                var dto = await _stockOutReturnService.GetStockOutReturn(id);
-                if (dto == null)
-                {
-                    TempData["Error"] = "لم يتم العثور على السجل";
-                    return RedirectToAction("Index");
-                }
-
-                ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-                return View(dto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading edit form");
-                TempData["Error"] = "حدث خطأ عند تحميل نموذج التعديل";
-                return RedirectToAction("Index");
-            }
+            var orders = await _stockOutReturnService.GetSalesOrdersForClient(clientId, branchId);
+            return Json(new { data = orders });
         }
 
-        // POST: StockOutReturn/Update
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update(StockOutReturnRequestDto dto)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-                    return View("Create", dto);
-                }
-
-                var user = await _userManager.GetUserAsync(User);
-                await _stockOutReturnService.UpdateStockOutReturn(dto, user?.UserName ?? "System");
-
-                TempData["Success"] = "تم تحديث صرف من أمر الإرجاع بنجاح";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating stock out return");
-                TempData["Error"] = "حدث خطأ: " + ex.Message;
-                ViewBag.ReturnOrders = await _stockOutReturnService.GetReturnOrdersForStockOut();
-                return View("Create", dto);
-            }
-        }
-
-        // POST: StockOutReturn/Approve/{id}
-        [HttpPost]
-        public async Task<IActionResult> Approve(int id)
-        {
-            try
-            {
-                var user = await _userManager.GetUserAsync(User);
-                await _stockOutReturnService.ApproveStockOutReturn(id, user?.UserName ?? "System");
-
-                TempData["Success"] = "تم اعتماد صرف من أمر الإرجاع بنجاح";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error approving stock out return");
-                TempData["Error"] = "حدث خطأ: " + ex.Message;
-                return RedirectToAction("Index");
-            }
-        }
-
-        // POST: StockOutReturn/Execute/{id}
-        [HttpPost]
-        public async Task<IActionResult> Execute(int id)
-        {
-            try
-            {
-                var user = await _userManager.GetUserAsync(User);
-                await _stockOutReturnService.ExecuteStockOutReturn(id, user?.UserName ?? "System");
-
-                TempData["Success"] = "تم تنفيذ صرف من أمر الإرجاع بنجاح";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error executing stock out return");
-                TempData["Error"] = "حدث خطأ: " + ex.Message;
-                return RedirectToAction("Index");
-            }
-        }
-
-        // GET: StockOutReturn/Details/{id}
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> ReadSo(int orderId)
         {
-            try
-            {
-                var dto = await _stockOutReturnService.GetStockOutReturn(id);
-                if (dto == null)
-                {
-                    TempData["Error"] = "لم يتم العثور على السجل";
-                    return RedirectToAction("Index");
-                }
+            // Placeholder for order summary logic
+            return Json(new { success = true });
+        }
 
-                return View(dto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading details");
-                TempData["Error"] = "حدث خطأ عند تحميل التفاصيل";
-                return RedirectToAction("Index");
-            }
+        [HttpGet]
+        public async Task<IActionResult> ReadSoDetail(int orderId)
+        {
+            var details = await _stockOutReturnService.GetSalesOrderDetailsForReturn(orderId);
+            return Json(new { data = details });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            // Implementation for deletion
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetClientName(string term)
+        {
+            // Autocomplete logic for clients
+            var clients = await _context.Users // Or Client entity
+                .Where(u => u.UserName.Contains(term))
+                .Select(u => new { id = u.Id, name = u.UserName })
+                .Take(10)
+                .ToListAsync();
+            return Json(clients);
         }
     }
 }

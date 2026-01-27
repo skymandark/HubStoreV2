@@ -8,6 +8,7 @@ namespace HubStoreV2.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [AllowAnonymous]
     public class AuthController : BaseController
     {
         private readonly IAuthService _authService;
@@ -31,12 +32,13 @@ namespace HubStoreV2.Controllers
             {
                 return Ok(new 
                 { 
+                    Succeeded = true,
                     Message = result.Message,
                     User = result.User
                 });
             }
 
-            return BadRequest(new { Message = result.Message, Errors = result.Errors });
+            return BadRequest(new { Succeeded = false, Message = result.Message, Errors = result.Errors });
         }
 
         [HttpPost("login")]
@@ -44,7 +46,7 @@ namespace HubStoreV2.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new { Message = "Invalid request data", Errors = GetModelErrors() });
+                return BadRequest(new { Succeeded = false, Message = "Invalid request data", Errors = GetModelErrors() });
             }
 
             var result = await _authService.LoginAsync(request);
@@ -53,12 +55,13 @@ namespace HubStoreV2.Controllers
             {
                 return Ok(new 
                 { 
+                    Succeeded = true,
                     Message = result.Message,
                     User = result.User
                 });
             }
 
-            return Unauthorized(new { Message = result.Message });
+            return Unauthorized(new { Succeeded = false, Message = result.Message });
         }
 
         [HttpPost("login-with-pin")]
@@ -66,7 +69,7 @@ namespace HubStoreV2.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new { Message = "Invalid request data", Errors = GetModelErrors() });
+                return BadRequest(new { Succeeded = false, Message = "Invalid request data", Errors = GetModelErrors() });
             }
 
             var result = await _authService.LoginWithPinCodeAsync(request.PinCode);
@@ -75,12 +78,13 @@ namespace HubStoreV2.Controllers
             {
                 return Ok(new 
                 { 
+                    Succeeded = true,
                     Message = result.Message,
                     User = result.User
                 });
             }
 
-            return Unauthorized(new { Message = result.Message });
+            return Unauthorized(new { Succeeded = false, Message = result.Message });
         }
 
         [HttpPost("logout")]

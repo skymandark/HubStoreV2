@@ -4,8 +4,205 @@
     ViewData["Title"] = "كشف حركة الصنف";
 }
 
-<div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #2c3e50;">كشف حركة الصنف</h1>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<style>
+    .item-sheet-page {
+        --is-bg: #f6f8fb;
+        --is-card: #ffffff;
+        --is-text: #1f2937;
+        --is-muted: #6b7280;
+        --is-border: #e5e7eb;
+        --is-head: #f3f4f6;
+        --is-row-hover: #f9fafb;
+    }
+
+    .item-sheet-page .is-shell {
+        background: var(--is-bg);
+        border: 1px solid var(--is-border);
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .item-sheet-page .is-title {
+        color: var(--is-text);
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .item-sheet-page .is-subtitle {
+        color: var(--is-muted);
+        margin-top: 4px;
+        font-size: 0.95rem;
+    }
+
+    .item-sheet-page .is-card {
+        background: var(--is-card);
+        border: 1px solid var(--is-border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+    }
+
+    .item-sheet-page .card:hover {
+        transform: none;
+    }
+
+    .item-sheet-page .is-card-body {
+        padding: 14px;
+    }
+
+    .item-sheet-page label {
+        color: var(--is-muted);
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .item-sheet-page .form-control,
+    .item-sheet-page .form-select {
+        border-radius: 10px;
+        border-color: var(--is-border);
+        padding: 10px 12px;
+    }
+
+    .item-sheet-page .form-control:focus,
+    .item-sheet-page .form-select:focus {
+        border-color: rgba(102, 126, 234, 0.55);
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    }
+
+    .item-sheet-page .is-actions .btn {
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 800;
+    }
+
+    .item-sheet-page .is-table {
+        margin: 0;
+    }
+
+    .item-sheet-page .is-table thead th {
+        background: var(--is-head);
+        color: var(--is-muted);
+        font-weight: 900;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--is-border);
+        padding: 12px 14px;
+        white-space: nowrap;
+    }
+
+    .item-sheet-page .is-table tbody td {
+        padding: 12px 14px;
+        border-top: 1px solid var(--is-border);
+        vertical-align: middle;
+        color: var(--is-text);
+    }
+
+    .item-sheet-page .is-table tbody tr:hover {
+        background: var(--is-row-hover);
+    }
+
+    .item-sheet-page .ui-autocomplete {
+        max-height: 280px;
+        overflow: auto;
+        z-index: 2000;
+        border-radius: 10px;
+        border: 1px solid var(--is-border);
+        box-shadow: 0 12px 30px rgba(17, 24, 39, 0.12);
+    }
+
+    .item-sheet-page .ui-menu-item-wrapper {
+        padding: 10px 12px;
+        font-weight: 700;
+        color: var(--is-text);
+    }
+
+    .item-sheet-page .ui-state-active {
+        background: rgba(102, 126, 234, 0.10) !important;
+        border: 1px solid rgba(102, 126, 234, 0.20) !important;
+        color: var(--is-text) !important;
+        margin: 0 !important;
+    }
+
+    .item-sheet-page .is-hint {
+        color: var(--is-muted);
+        font-size: 0.85rem;
+        margin-top: 6px;
+    }
+</style>
+
+<div class="container-fluid py-4 item-sheet-page">
+    <div class="is-shell">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+            <div>
+                <h3 class="is-title">كشف حركة الصنف</h3>
+                <div class="is-subtitle">ابحث عن الصنف والمخزن ثم اختر الفترة لعرض الحركات</div>
+            </div>
+        </div>
+
+        <div class="card is-card mb-3">
+            <div class="is-card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="itemSearch">بحث الصنف</label>
+                        <input type="text" class="form-control" id="itemSearch" placeholder="اكتب كود/اسم الصنف..." autocomplete="off" />
+                        <input type="hidden" id="itemId" name="itemId" />
+                        <div class="is-hint">اختر من القائمة (لازم اختيار)</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="branchSearch">بحث المخزن</label>
+                        <input type="text" class="form-control" id="branchSearch" placeholder="اكتب كود/اسم المخزن..." autocomplete="off" />
+                        <input type="hidden" id="branchId" name="branchId" />
+                        <div class="is-hint">اختر من القائمة (لازم اختيار)</div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="fromDate">من تاريخ</label>
+                        <input type="date" class="form-control" id="fromDate" name="fromDate" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="toDate">إلى تاريخ</label>
+                        <input type="date" class="form-control" id="toDate" name="toDate" required>
+                    </div>
+
+                    <div class="col-md-2 is-actions">
+                        <label>&nbsp;</label>
+                        <button type="button" class="btn btn-primary w-100" id="loadBtn">
+                            <i class="fas fa-search"></i>
+                            عرض
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card is-card">
+            <div class="card-body p-0">
+                <div id="transactionsTable" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table is-table align-middle" id="transactionsDataTable">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>نوع الحركة</th>
+                                    <th>الكمية الواردة</th>
+                                    <th>الكمية الصادرة</th>
+                                    <th>الرصيد</th>
+                                    <th>سعر الوحدة</th>
+                                    <th>القيمة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @if (TempData["Error"] != null)
@@ -16,78 +213,66 @@
     </div>
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <div style="background-color: #d1ecf1; border: 3px solid #17a2b8; padding: 20px; margin: 10px;">
-            <div class="row">
-                <div class="col-md-3">
-                    <label style="margin-bottom: 10px;">اختر الصنف</label>
-                    <select class="form-select" id="itemId" name="itemId" required style="font-size: 16px;">
-                        <option value="">--اختر الصنف--</option>
-                        @foreach (var item in Model.Items)
-                        {
-                            <option value="@item.ItemId">@item.ItemCode - @item.ItemName</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label style="margin-bottom: 10px;">اختر المخزن</label>
-                    <select class="form-select" id="branchId" name="branchId" required style="font-size: 16px;">
-                        <option value="">--اختر المخزن--</option>
-                        @foreach (var branch in Model.Branches)
-                        {
-                            <option value="@branch.BranchId">@branch.Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label style="margin-bottom: 10px;">من تاريخ</label>
-                    <input type="date" class="form-control" id="fromDate" name="fromDate" required style="font-size: 16px;">
-                </div>
-
-                <div class="col-md-2">
-                    <label style="margin-bottom: 10px;">إلى تاريخ</label>
-                    <input type="date" class="form-control" id="toDate" name="toDate" required style="font-size: 16px;">
-                </div>
-
-                <div class="col-md-2">
-                    <label style="margin-bottom: 10px;">&nbsp;</label>
-                    <button type="button" class="btn btn-primary form-control" id="loadBtn" style="font-size: 16px;">
-                        <i class="fas fa-search"></i> عرض
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div id="transactionsTable" style="display: none;">
-            <table class="table table-striped table-bordered" id="transactionsDataTable">
-                <thead class="table-dark">
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>نوع الحركة</th>
-                        <th>الكمية الواردة</th>
-                        <th>الكمية الصادرة</th>
-                        <th>الرصيد</th>
-                        <th>سعر الوحدة</th>
-                        <th>القيمة</th>
-                    </tr>
-                </thead>
-                <tbody id="transactionsBody">
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
         $(document).ready(function () {
+            function resetItemSelection() {
+                $('#itemId').val('');
+            }
+
+            function resetBranchSelection() {
+                $('#branchId').val('');
+            }
+
+            $('#itemSearch').on('input', function () {
+                resetItemSelection();
+            });
+
+            $('#branchSearch').on('input', function () {
+                resetBranchSelection();
+            });
+
+            $('#itemSearch').autocomplete({
+                source: function (request, response) {
+                    $.get('/ItemSheet/GetItemName', { term: request.term }, function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.itemCode + ' - ' + item.itemName,
+                                value: item.itemCode + ' - ' + item.itemName,
+                                id: item.itemId
+                            };
+                        }));
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $('#itemSearch').val(ui.item.value);
+                    $('#itemId').val(ui.item.id);
+                    return false;
+                }
+            });
+
+            $('#branchSearch').autocomplete({
+                source: function (request, response) {
+                    $.get('/ItemSheet/GetBranchName', { term: request.term }, function (data) {
+                        response($.map(data, function (branch) {
+                            return {
+                                label: branch.code + ' - ' + branch.name,
+                                value: branch.code + ' - ' + branch.name,
+                                id: branch.branchId
+                            };
+                        }));
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $('#branchSearch').val(ui.item.value);
+                    $('#branchId').val(ui.item.id);
+                    return false;
+                }
+            });
+
             $('#loadBtn').click(function () {
                 var itemId = $('#itemId').val();
                 var branchId = $('#branchId').val();
@@ -95,7 +280,7 @@
                 var toDate = $('#toDate').val();
 
                 if (!itemId || !branchId || !fromDate || !toDate) {
-                    alert('يرجى ملء جميع الحقول');
+                    alert('يرجى اختيار الصنف والمخزن وتحديد الفترة');
                     return;
                 }
 

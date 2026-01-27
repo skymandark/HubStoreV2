@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HubStoreV2.Controllers
 {
+    [AllowAnonymous]
     public class AuthPagesController : Controller
     {
         [HttpGet]

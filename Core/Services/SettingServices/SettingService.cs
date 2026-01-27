@@ -15,7 +15,7 @@ namespace Core.Services.SettingServices
         private readonly IConfiguration _configuration;
         private readonly DbContext _context;
 
-        public SettingService(IConfiguration configuration, DbContext context = null)
+        public SettingService(IConfiguration configuration, DbContext context)
         {
             _configuration = configuration;
             _context = context;
@@ -46,17 +46,6 @@ namespace Core.Services.SettingServices
 
         public async Task<bool> GetApprovalWorkflowModeAsync()
         {
-            if (_context == null)
-            {
-                // Fallback to configuration or default
-                var configValue = _configuration["SystemSettings:UseApprovalSystem"];
-                if (bool.TryParse(configValue, out var configMode))
-                {
-                    return configMode;
-                }
-                return true;
-            }
-
             var setting = await _context.Set<SystemSetting>()
                 .FirstOrDefaultAsync(s => s.SettingKey == "ApprovalWorkflowMode");
 

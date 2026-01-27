@@ -1,0 +1,62 @@
+@model Core.ViewModels.Admin.AdminUserEditVm
+@{
+    ViewData["Title"] = "تعديل مستخدم";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <h3 class="mb-3">تعديل مستخدم</h3>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="Edit">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">اسم المستخدم</label>
+                        <input class="form-control" asp-for="UserName" />
+                        <span class="text-danger" asp-validation-for="UserName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">البريد</label>
+                        <input class="form-control" asp-for="Email" />
+                        <span class="text-danger" asp-validation-for="Email"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">موبايل</label>
+                        <input class="form-control" asp-for="PhoneNumber" />
+                        <span class="text-danger" asp-validation-for="PhoneNumber"></span>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" asp-for="IsAdmin" />
+                            <label class="form-check-label">Admin</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" asp-for="LockoutEnabled" />
+                            <label class="form-check-label">Lockout Enabled</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lockout End</label>
+                        <input class="form-control" asp-for="LockoutEnd" />
+                        <span class="text-danger" asp-validation-for="LockoutEnd"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                    <a class="btn btn-secondary" href="@Url.Action("Index")">رجوع</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

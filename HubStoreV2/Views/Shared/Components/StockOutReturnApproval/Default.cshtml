@@ -1,0 +1,57 @@
+@{
+    var typeId = ViewBag.TypeId;
+    var gridId = $"grid-{typeId}";
+}
+
+<div class="approval-component-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-slate-700">مرتجعات العملاء المعلقة</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm rounded-8" onclick="refreshGrid(@typeId)">
+                <i class="fas fa-sync-alt me-1"></i> إعادة البحث
+            </button>
+            <button class="btn btn-success btn-sm rounded-8 px-3" onclick="processBatch(@typeId, 1)">
+                <i class="fas fa-check-double me-1"></i> موافقة المحدد
+            </button>
+        </div>
+    </div>
+
+    <div id="@gridId"></div>
+</div>
+
+<script>
+    $(function() {
+        $("#@gridId").dxDataGrid({
+            dataSource: {
+                load: function() {
+                    return $.getJSON("/Approvals/GetStepData?approveDefId=@typeId");
+                }
+            },
+            selection: {
+                mode: "multiple",
+                showCheckBoxesMode: "always"
+            },
+            columns: [
+                { dataField: "requestId", caption: "ID", width: 70 },
+                { dataField: "reference", caption: "رقم السند", width: 130 },
+                { dataField: "partyName", caption: "العميل" },
+                { dataField: "branchName", caption: "الفرع", width: 120 },
+                { dataField: "docDate", caption: "التاريخ", width: 110, dataType: "date" },
+                { dataField: "totalValue", caption: "الإجمالي", width: 120, format: "#,##0.00" },
+                { 
+                    caption: "التفاصيل", 
+                    width: 100,
+                    cellTemplate: function(container, options) {
+                        $('<button class="btn btn-sm btn-link">')
+                            .append($('<i class="fas fa-eye">'))
+                            .on('click', function() { window.open('/StockOutReturn/Save/' + options.data.requestId, '_blank'); })
+                            .appendTo(container);
+                    }
+                }
+            ],
+            showBorders: true,
+            loadPanel: { enabled: true },
+            rtlEnabled: true
+        });
+    });
+</script>

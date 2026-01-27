@@ -1,4 +1,4 @@
-@model List<Core.ViewModels.StockOutReturnViewModels.StockOutReturnListDto>
+@model IEnumerable<Core.ViewModels.StockOutReturnViewModels.StockOutReturnListDto>
 @{
     ViewData["Title"] = "صرف أوامر الإرجاع";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,330 +6,186 @@
 
 <style>
     :root {
-        --primary-color: #2c3e50;
-        --success-color: #27ae60;
-        --danger-color: #e74c3c;
-        --warning-color: #f39c12;
-        --info-color: #3498db;
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --primary-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     }
 
-    body {
-        background-color: #f8f9fa;
-        direction: rtl;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 30px;
-        border-radius: 10px;
+    .premium-header {
+        background: var(--primary-gradient);
+        border-radius: 16px;
+        padding: 40px;
         margin-bottom: 30px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .page-header h1 {
-        margin: 0;
-        font-size: 32px;
-        font-weight: 600;
-    }
-
-    .page-header p {
-        margin: 10px 0 0 0;
-        opacity: 0.9;
-    }
-
-    .search-section {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    .btn {
-        border: none;
-        border-radius: 6px;
-        padding: 10px 20px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-success {
-        background: #27ae60;
-        color: white;
-    }
-
-    .btn-success:hover {
-        background: #229954;
-    }
-
-    .btn-info {
-        background: #3498db;
-        color: white;
-    }
-
-    .btn-info:hover {
-        background: #2980b9;
-    }
-
-    .btn-danger {
-        background: #e74c3c;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #c0392b;
-    }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
-
-    .table-container {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        position: relative;
         overflow: hidden;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
-    .table {
-        margin: 0;
+    .premium-header::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        left: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
     }
 
-    .table thead {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .premium-header h1 {
         color: white;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -1px;
     }
 
-    .table thead th {
+    .premium-header p {
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 10px;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+
+    .grid-wrapper-elegant {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-create-premium {
+        background: var(--accent-gradient);
+        color: white !important;
         border: none;
-        padding: 15px;
-        font-weight: 600;
-        text-align: right;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
     }
 
-    .table tbody tr {
-        border-bottom: 1px solid #e0e0e0;
-        transition: background-color 0.2s ease;
+    .btn-create-premium:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.23);
     }
 
-    .table tbody tr:hover {
-        background-color: #f9f9f9;
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
     }
 
-    .table tbody td {
-        padding: 15px;
-        vertical-align: middle;
-        text-align: right;
-    }
+    .status-draft { background: #f1f5f9; color: #475569; }
+    .status-approved { background: #ecfdf5; color: #059669; }
+    .status-executed { background: #eff6ff; color: #2563eb; }
+    .status-rejected { background: #fef2f2; color: #dc2626; }
 
-    .badge {
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-    }
-
-    .badge-pending {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-
-    .badge-approved {
-        background-color: #d4edda;
-        color: #155724;
-    }
-
-    .badge-executed {
-        background-color: #cce5ff;
-        color: #004085;
-    }
-
-    .badge-rejected {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 5px;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #999;
-    }
-
-    .empty-state i {
-        font-size: 48px;
-        margin-bottom: 20px;
-        color: #ddd;
-    }
-
-    .form-control, .form-select {
-        border: 2px solid #e0e0e0;
-        border-radius: 6px;
-        padding: 10px 15px;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
-
-    @@media (max-width: 768px) {
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .btn-sm {
-            width: 100%;
-        }
-    }
+    /* DX Grid Overrides */
+    .dx-datagrid { border-radius: 12px; overflow: hidden; }
+    .dx-datagrid-headers { background: #f8fafc !important; }
+    .dx-header-row { font-weight: 700; color: #1e293b; }
 </style>
 
-<div class="container-fluid mt-4 mb-5">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>
-            <i class="fas fa-share-square"></i> صرف أوامر الإرجاع
-        </h1>
-        <p>إدارة وتتبع صرف أوامر الإرجاع</p>
-    </div>
-
-    <!-- Search Section -->
-    <div class="search-section">
-        <div class="row">
-            <div class="col-md-9">
-                <input type="text" id="searchInput" class="form-control" placeholder="ابحث عن صرف أمر إرجاع...">
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="premium-header animate__animated animate__slideInDown">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-file-invoice-dollar me-3"></i>صرف أوامر الإرجاع</h1>
+                <p>إدارة وتتبع عمليات صرف بضائع المرتجعات بسهولة ودقة</p>
             </div>
-            <div class="col-md-3 text-end">
-                <a href="@Url.Action("Create", "StockOutReturn")" class="btn btn-primary w-100">
-                    <i class="fas fa-plus"></i> صرف جديد
-                </a>
-            </div>
+            <a href="@Url.Action("Save")" class="btn-create-premium">
+                <i class="fas fa-plus-circle"></i> إنشاء صرف جديد
+            </a>
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-container">
-        @if (Model != null && Model.Count > 0)
-        {
-            <div class="table-responsive">
-                <table class="table" id="stockOutReturnTable">
-                    <thead>
-                        <tr>
-                            <th>رقم الصرف</th>
-                            <th>المورد</th>
-                            <th>الفرع</th>
-                            <th>تاريخ الصرف</th>
-                            <th>الحالة</th>
-                            <th>إجمالي القيمة</th>
-                            <th>الملاحظات</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var sor in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <strong>@sor.DocCode</strong>
-                                </td>
-                                <td>@sor.SupplierName</td>
-                                <td>@sor.BranchName</td>
-                                <td>@sor.DocDate.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    @{
-                                        var badgeClass = sor.Status switch
-                                        {
-                                            "Pending" => "badge-pending",
-                                            "Approved" => "badge-approved",
-                                            "Executed" => "badge-executed",
-                                            "Rejected" => "badge-rejected",
-                                            _ => "badge-pending"
-                                        };
-                                    }
-                                    <span class="badge @badgeClass">@sor.Status</span>
-                                </td>
-                                <td>@sor.TotalValue.ToString("N2")</td>
-                                <td>@(sor.Remarks?.Length > 30 ? sor.Remarks.Substring(0, 30) + "..." : sor.Remarks)</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="@Url.Action("Details", "StockOutReturn", new { id = sor.StockOutReturnId })"
-                                           class="btn btn-info btn-sm" title="عرض">
-                                            <i class="fas fa-eye"></i> عرض
-                                        </a>
-                                        @if (sor.Status == "Pending")
-                                        {
-                                            <a href="@Url.Action("Edit", "StockOutReturn", new { id = sor.StockOutReturnId })"
-                                               class="btn btn-primary btn-sm" title="تعديل">
-                                                <i class="fas fa-edit"></i> تعديل
-                                            </a>
-                                            <form method="post" action="@Url.Action("Approve", "StockOutReturn")" style="display: inline;">
-                                                <input type="hidden" name="id" value="@sor.StockOutReturnId" />
-                                                <button type="submit" class="btn btn-success btn-sm" title="اعتماد"
-                                                        onclick="return confirm('هل تريد اعتماد هذا الصرف؟');">
-                                                    <i class="fas fa-check"></i> اعتماد
-                                                </button>
-                                            </form>
-                                        }
-                                        @if (sor.Status == "Approved")
-                                        {
-                                            <form method="post" action="@Url.Action("Execute", "StockOutReturn")" style="display: inline;">
-                                                <input type="hidden" name="id" value="@sor.StockOutReturnId" />
-                                                <button type="submit" class="btn btn-warning btn-sm" title="تنفيذ"
-                                                        onclick="return confirm('هل تريد تنفيذ هذا الصرف؟');">
-                                                    <i class="fas fa-play"></i> تنفيذ
-                                                </button>
-                                            </form>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h3>لا توجد صرف أوامر إرجاع</h3>
-                <p>لم يتم إنشاء أي صرف أوامر إرجاع حتى الآن</p>
-                <a href="@Url.Action("Create", "StockOutReturn")" class="btn btn-primary mt-3">
-                    <i class="fas fa-plus"></i> إنشاء صرف جديد
-                </a>
-            </div>
-        }
+    <div class="grid-wrapper-elegant animate__animated animate__fadeInUp animate__delay-1s">
+        <div id="gridContainer"></div>
     </div>
 </div>
 
-<script>
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        const searchText = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#stockOutReturnTable tbody tr');
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchText) ? '' : 'none';
+@section Scripts {
+    <script>
+        $(function() {
+            $("#gridContainer").dxDataGrid({
+                dataSource: {
+                    load: function() {
+                        return $.getJSON("@Url.Action("ReadDx")");
+                    }
+                },
+                rtlEnabled: true,
+                showBorders: false,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                hoverStateEnabled: true,
+                searchPanel: { visible: true, width: 280, placeholder: "بحث في الطلبات..." },
+                paging: { pageSize: 12 },
+                pager: { showPageSizeSelector: true, allowedPageSizes: [10, 20, 50], showInfo: true },
+                columns: [
+                    { 
+                        dataField: "docCode", 
+                        caption: "رقم السند", 
+                        width: 160,
+                        cellTemplate: function(container, options) {
+                            $("<div class='fw-bold text-primary'>")
+                                .append(options.value)
+                                .appendTo(container);
+                        }
+                    },
+                    { dataField: "docDate", caption: "التاريخ", dataType: "date", format: "yyyy/MM/dd", width: 140 },
+                    { dataField: "clientName", caption: "العميل", minWidth: 200 },
+                    { dataField: "branchName", caption: "الفرع", width: 150 },
+                    { 
+                        dataField: "netValue", 
+                        caption: "صافي القيمة", 
+                        dataType: "number", 
+                        format: "#,##0.00",
+                        width: 140,
+                        cssClass: "fw-bold"
+                    },
+                    { 
+                        dataField: "status", 
+                        caption: "الحالة", 
+                        width: 130,
+                        cellTemplate: function(container, options) {
+                            let cls = "status-draft", txt = "مسودة";
+                            switch(options.value) {
+                                case "1": cls = "status-approved"; txt = "معتمد"; break;
+                                case "3": cls = "status-executed"; txt = "تم الصرف"; break;
+                                case "4": cls = "status-rejected"; txt = "مرفوض"; break;
+                            }
+                            $("<span class='status-badge " + cls + "'>")
+                                .append(txt)
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        type: "buttons",
+                        width: 110,
+                        buttons: [{
+                            hint: "تعديل",
+                            icon: "edit",
+                            onClick: function(e) {
+                                window.location.href = "@Url.Action("Save")/" + e.row.data.stockOutReturnId;
+                            }
+                        }, {
+                            hint: "حذف",
+                            icon: "trash",
+                            onClick: function(e) {
+                                // Add delete confirmation
+                            }
+                        }]
+                    }
+                ]
+            });
         });
-    });
-</script>
+    </script>
+}

@@ -1,0 +1,387 @@
+@model Core.ViewModels.StockOutReturnViewModels.StockOutReturnVm
+@{
+    ViewData["Title"] = (Model.RequestId == 0 ? "إنشاء" : "تعديل") + " صرف أمر إرجاع";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --primary-gradient: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        --accent-color: #8b5cf6;
+    }
+
+    .premium-card {
+        border: none;
+        border-radius: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--glass-border);
+    }
+
+    .premium-form-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 35px 40px;
+        border-radius: 20px 20px 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-form-header::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .summary-glass {
+        background: rgba(248, 250, 252, 0.8);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .total-title { color: #64748b; font-size: 0.9rem; font-weight: 600; }
+    .total-amount { color: #1e293b; font-size: 1.6rem; font-weight: 800; }
+    .total-net { color: #4338ca; font-size: 2.2rem; font-weight: 900; }
+
+    .btn-action-premium {
+        padding: 12px 35px;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-save-vibrant {
+        background: white;
+        color: #4338ca;
+        border: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-save-vibrant:hover {
+        background: #f8fafc;
+        transform: translateY(-3px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* DX Grid customizations */
+    .grid-container-vibrant { border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+</style>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <form id="sorForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="RequestId" name="RequestId" value="@Model.RequestId" />
+
+        <div class="premium-card">
+            <div class="premium-form-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-1 fw-900"><i class="fas fa-file-export me-3"></i>@ViewData["Title"]</h1>
+                    <p class="mb-0 opacity-75">إتمام عملية صرف المرتجعات بدقة وسرعة</p>
+                </div>
+                <div class="d-flex gap-3">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-light btn-action-premium border-2">رجوع</a>
+                    <button type="submit" class="btn btn-save-vibrant btn-action-premium">حفظ البيانات</button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- Section Header -->
+                    <div class="col-12 animate__animated animate__fadeInLeft">
+                        <div class="p-3 bg-light rounded-3 mb-3 d-flex align-items-center border-start border-4 border-indigo">
+                            <i class="fas fa-info-circle text-indigo me-3 fs-4"></i>
+                            <h5 class="mb-0 fw-bold">البيانات الأساسية للطلب</h5>
+                        </div>
+                        <div id="headerForm"></div>
+                    </div>
+
+                    <!-- Grid Section -->
+                    <div class="col-12 mt-5 animate__animated animate__fadeInUp">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-indigo"><i class="fas fa-box-open me-2"></i>الأصناف المختارة</h5>
+                            <button type="button" id="btnLoadSO" class="btn btn-indigo rounded-pill px-4 btn-sm shadow-sm">
+                                <i class="fas fa-search-plus me-2"></i>جلب من أمر بيع
+                            </button>
+                        </div>
+                        <div id="itemsGrid" class="grid-container-vibrant shadow-sm"></div>
+                    </div>
+
+                    <!-- Footer Summary Section -->
+                    <div class="col-12 mt-5">
+                        <div class="row g-4">
+                            <div class="col-lg-8 animate__animated animate__fadeInLeft">
+                                <div class="h-100">
+                                    <div id="remarksForm"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 animate__animated animate__fadeInRight">
+                                <div class="summary-glass">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="total-title">إجمالي البضاعة</span>
+                                        <span id="txtTotal" class="total-amount">0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="total-title">قيمة الضريبة</span>
+                                        <span id="txtVat" class="total-amount">0.00</span>
+                                    </div>
+                                    <div class="pt-4 border-top mt-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold fs-5 text-dark">صافي القيمة النهائية</span>
+                                            <span id="txtNet" class="total-net">0.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="soPopup"></div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            const branches = @Html.Raw(Json.Serialize(Model.BranchList));
+            const transactionTypes = @Html.Raw(Json.Serialize(Model.TransactionTypeList));
+            const initialDetails = @Html.Raw(Json.Serialize(Model.StockOutReturnDetails));
+
+            const headerForm = $("#headerForm").dxForm({
+                rtlEnabled: true,
+                colCount: 3,
+                labelMode: "floating",
+                formData: {
+                    TransactionTypeId: @Model.TransactionTypeId,
+                    BranchId: @(Model.BranchId > 0 ? Model.BranchId : "null"),
+                    ClientName: "@Model.ClientName",
+                    DocDate: new Date("@Model.DocDate.ToString("yyyy-MM-dd")"),
+                    Reference: "@Model.Reference"
+                },
+                items: [
+                    {
+                        dataField: "TransactionTypeId",
+                        label: { text: "نوع العملية" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: transactionTypes,
+                            displayExpr: "name",
+                            valueExpr: "transactionTypeId",
+                            stylingMode: "filled"
+                        }
+                    },
+                    {
+                        dataField: "BranchId",
+                        label: { text: "الفرع المختص" },
+                        editorType: "dxSelectBox",
+                        editorOptions: {
+                            dataSource: branches,
+                            displayExpr: "name",
+                            valueExpr: "branchId",
+                            stylingMode: "filled"
+                        }
+                    },
+                    {
+                        dataField: "DocDate",
+                        label: { text: "تاريخ الطلب" },
+                        editorType: "dxDateBox",
+                        editorOptions: { stylingMode: "filled" }
+                    },
+                    {
+                        dataField: "ClientName",
+                        label: { text: "اسم العميل" },
+                        editorType: "dxAutocomplete",
+                        editorOptions: {
+                            dataSource: new DevExpress.data.DataSource({
+                                load: (opts) => $.getJSON("@Url.Action("GetClientName")", { term: opts.searchValue }),
+                                key: "id"
+                            }),
+                            valueExpr: "name",
+                            stylingMode: "filled",
+                            onItemClick: function(e) {
+                                headerForm.option("formData").ClientId = e.itemData.id;
+                            }
+                        }
+                    },
+                    {
+                        dataField: "Reference",
+                        label: { text: "المرجع / رقم الفاتورة" },
+                        editorType: "dxTextBox",
+                        editorOptions: { stylingMode: "filled" }
+                    }
+                ]
+            }).dxForm("instance");
+
+            const itemsGrid = $("#itemsGrid").dxDataGrid({
+                dataSource: initialDetails || [],
+                rtlEnabled: true,
+                editing: { mode: "batch", allowUpdating: true, allowDeleting: true },
+                showBorders: false,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                columns: [
+                    { dataField: "itemName", caption: "الصنف", allowEditing: false, cssClass: "fw-bold text-dark" },
+                    { dataField: "packageName", caption: "الوحدة", allowEditing: false, width: 90 },
+                    { dataField: "stockOutQuantity", caption: "متاح", allowEditing: false, width: 80, cssClass: "text-muted" },
+                    { 
+                        dataField: "quantity", 
+                        caption: "المرتجع", 
+                        dataType: "number", 
+                        width: 100,
+                        validationRules: [{ type: "required" }]
+                    },
+                    { dataField: "price", caption: "السعر", dataType: "number", format: "#,##0.00", width: 100 },
+                    { 
+                        dataField: "discountPercent", 
+                        caption: "خ %", 
+                        width: 70 
+                    },
+                    { 
+                        dataField: "netValue", 
+                        caption: "الصافي", 
+                        allowEditing: false, 
+                        format: "#,##0.00", 
+                        cssClass: "fw-bold text-indigo",
+                        calculateCellValue: function(data) {
+                            const val = (data.quantity || 0) * (data.price || 0);
+                            const disc = val * ((data.discountPercent || 0) / 100);
+                            return val - disc;
+                        }
+                    },
+                    { dataField: "batchNumber", caption: "الوجبة", width: 100 },
+                    { dataField: "expireDate", caption: "الصلاحية", dataType: "date", width: 110 }
+                ],
+                onContentReady: () => calculateTotals()
+            }).dxDataGrid("instance");
+
+            $("#remarksForm").dxForm({
+                rtlEnabled: true,
+                formData: { Remarks: "@Model.Remarks" },
+                items: [{
+                    dataField: "Remarks",
+                    label: { text: "ملاحظات إضافية" },
+                    editorType: "dxTextArea",
+                    editorOptions: { height: 110, stylingMode: "filled" }
+                }]
+            });
+
+            function calculateTotals() {
+                const data = itemsGrid.option("dataSource") || [];
+                let total = 0;
+                data.forEach(item => {
+                    const lineVal = (item.quantity || 0) * (item.price || 0);
+                    const disc = lineVal * ((item.discountPercent || 0) / 100);
+                    total += (lineVal - disc);
+                });
+                
+                const vat = total * 0.14; 
+                const net = total + vat;
+
+                $("#txtTotal").animateNumber(total);
+                $("#txtVat").animateNumber(vat);
+                $("#txtNet").animateNumber(net);
+            }
+
+            // Simple helper for animated numbers
+            $.fn.animateNumber = function(val) {
+                const target = this;
+                $({ n: parseFloat(target.text().replace(/,/g, '')) || 0 }).animate({ n: val }, {
+                    duration: 600,
+                    step: function(now) {
+                        target.text(now.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    }
+                });
+            };
+
+            $("#btnLoadSO").click(function() {
+                const formData = headerForm.option("formData");
+                if (!formData.BranchId) {
+                    DevExpress.ui.notify("يجب اختيار الفرع أولاً", "warning", 2000);
+                    return;
+                }
+                popup.show();
+            });
+
+            const popup = $("#soPopup").dxPopup({
+                title: "البحث في أوامر البيع",
+                width: 900,
+                height: 600,
+                contentTemplate: function(contentElement) {
+                    const grid = $("<div>").appendTo(contentElement).dxDataGrid({
+                        dataSource: {
+                            load: () => $.getJSON("@Url.Action("ReadCo")", { 
+                                clientId: headerForm.option("formData").ClientId || 0,
+                                branchId: headerForm.option("formData").BranchId 
+                            })
+                        },
+                        rtlEnabled: true,
+                        searchPanel: { visible: true },
+                        headerFilter: { visible: true },
+                        columns: [
+                            { dataField: "orderCode", caption: "رقم الأملر", cssClass: "fw-bold" },
+                            { dataField: "orderDate", caption: "التاريخ", dataType: "date" },
+                            {
+                                type: "buttons",
+                                buttons: [{
+                                    text: "اختيار",
+                                    icon: "check",
+                                    onClick: function(e) {
+                                        loadSODetails(e.row.data.orderId);
+                                        popup.hide();
+                                    }
+                                }]
+                            }
+                        ]
+                    }).dxDataGrid("instance");
+                }
+            }).dxPopup("instance");
+
+            function loadSODetails(orderId) {
+                $.getJSON("@Url.Action("ReadSoDetail")", { orderId: orderId }, function(res) {
+                    itemsGrid.option("dataSource", res.data);
+                });
+            }
+
+            $("#sorForm").on("submit", function(e) {
+                e.preventDefault();
+                const gridData = itemsGrid.option("dataSource");
+                if (!gridData || gridData.length === 0) {
+                    DevExpress.ui.notify("الرجاء إضافة صنف واحد على الأقل", "error", 3000);
+                    return;
+                }
+
+                DevExpress.ui.notify("جاري الحفظ...", "info", 1000);
+
+                const postData = {
+                    ...headerForm.option("formData"),
+                    RequestId: $("#RequestId").val(),
+                    Remarks: $("#remarksForm").dxForm("instance").option("formData").Remarks,
+                    StockOutReturnDetails: gridData
+                };
+
+                $.post("@Url.Action("Save")", postData, function(res) {
+                    if (res.success) {
+                        DevExpress.ui.notify(res.message, "success", 2000);
+                        setTimeout(() => window.location.href = "@Url.Action("Index")", 1000);
+                    } else {
+                        DevExpress.ui.notify(res.message, "error", 4000);
+                    }
+                });
+            });
+        });
+    </script>
+}

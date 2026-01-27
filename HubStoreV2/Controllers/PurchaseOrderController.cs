@@ -281,6 +281,27 @@ namespace HubStoreV2.Controllers
             }
         }
 
+        // POST: PurchaseOrder/Reject/{id}
+        [HttpPost]
+        public async Task<IActionResult> Reject(int id, string reason)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                await _purchaseOrderService.RejectPurchaseOrder(id, user?.UserName ?? "System", reason);
+
+                TempData["Success"] = "تم رفض طلب الشراء";
+
+                return RedirectToAction("Details", new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rejecting purchase order");
+                TempData["Error"] = "حدث خطأ: " + ex.Message;
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
         // Helper method to load form data
         private async Task LoadFormData(PurchaseOrderRequestDto dto)
         {
